@@ -1,0 +1,9 @@
+{
+"public": "build", // 在 build 目录而不是项目根目录启动网站
+"rewrites": [
+    {
+    "source": "**",
+    "destination": "/index.html"
+    } // 将所有不存在的文件的请求重定向到 index.html（适用大部分单页面应用）
+]
+}

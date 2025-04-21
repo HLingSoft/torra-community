@@ -1,0 +1,28 @@
+{
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "lib": ["DOM", "ESNext"],
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./*"],
+      "@/*": ["./*"],
+      "#components/*": ["components/*"],
+      "@components/*": ["components/*"],
+      "@/components/*": ["components/*"],
+      "@store/*": ["store/*"],
+      "@utils/*": ["utils/*"],
+      "@worker/*": ["worker/*"],
+      "@identifier/*": ["identifier/*"],
+      "@models/*": ["models/*"],
+      "@entities/*": ["entities/*"],
+      "@composables/*": ["composables/*"],
+      "@/lib/*": ["lib/*"]
+    },
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["node", "nuxt"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "noImplicitAny": false,
+    "preserveConstEnums": true
+  }
+}

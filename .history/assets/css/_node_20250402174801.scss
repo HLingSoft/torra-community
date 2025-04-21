@@ -1,0 +1,51 @@
+$U_WIDTH: 384px;
+$U_HEADER_HEIGHT: 65px;
+
+$C_WIDTH: 0px;
+$C_HEIGHT: 25px;
+$C_OFFSET: -20px;
+
+.u-node {
+  // background-color: #2b2a2a;
+  border-radius: 4px;
+  width: $U_WIDTH;
+  padding: 5px 0px;
+  color:white;
+
+  &-connector {
+    &-input,
+    &-output {
+      height: $C_HEIGHT;
+      padding: 0px;
+      display: flex;
+      font-size: 0.7em !important;
+      align-items: center;
+      justify-content: center;
+      width: $C_WIDTH !important;
+      background-color: transparent !important;
+      border-color: transparent !important;
+
+      & > .vue-flow__handle {
+        width: 10px;
+        height: 10px;
+        outline: 2px solid var(--vf-node-color);
+        outline-offset: 4px;
+        border: none;
+      }
+    }
+
+    &-input {
+      justify-content: flex-start;
+      & > .vue-flow__handle {
+        left: $C_OFFSET;
+      }
+    }
+
+    &-output {
+      justify-content: flex-end;
+      & > .vue-flow__handle {
+        right: $C_OFFSET;
+      }
+    }  
+  }
+}

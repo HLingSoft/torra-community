@@ -1,0 +1,93 @@
+import type { InputPortVariable } from '~/types/workflow'
+// import { load } from '@langchain/core/load';
+ 
+// import { StringPromptValue } from '@langchain/core/prompt_values'
+ 
+
+  
+ 
+export async function resolveInputVariables(
+  context: Record<string, any>,
+  variables: InputPortVariable[],
+  needToString=false
+): Promise<Record<string, any>> {
+  const inputValues: Record<string, string> = {}
+
+  for (const variable of variables) {
+ 
+    let resolved: any = ''
+
+ 
+
+    if (variable.connected) {
+      const potentialValue= context.resolvedInput[variable.id]
+     
+     
+      if(potentialValue){
+        if(needToString){
+          resolved = normalizeToString(potentialValue)
+        }else{
+          resolved = potentialValue
+        }
+       
+        
+      }
+     
+    }
+    else {
+      resolved = (variable.value !== undefined && variable.value !== null && variable.value !== '')
+        ? variable.value
+        : (variable.defaultValue || '')
+      
+    }
+
+    
+    inputValues[variable.name] = resolved
+     
+    
+  }
+
+  return inputValues
+}
+ 
+
+ 
+export function normalizeToString(value: any): string {
+  if (value?.content && typeof value.content === 'string') return value.content
+  if (typeof value === 'string') return value
+  return JSON.stringify(value)
+}
+ 
+// export async function normalizeOutput(value: unknown): Promise<any> {
+//   if (!value) return ''
+
+//   // ✅ 直接字符串
+//   // if (typeof value === 'string') return value
+
+//   // ✅ 可运行对象：直接用
+//   // if (value && typeof (value as any).invoke === 'function') {
+//   //   // console.log('langchain message 2:', value)
+//   //   // return (value as any).invoke({})
+//   //   return value
+//   // }
+
+//   // if (value?.content && typeof value.content === 'string') return value.content
+   
+
+//   // ✅ LangChain Serialized 对象（你遇到的）
+ 
+//   // if (value && typeof value === 'object' && 'lc_serializable' in value) {
+//   //   // console.log('langchain message 3:', value)
+//   //   try {
+//   //     const serialized = JSON.stringify(value) // 👈 先转成 string
+//   //     const real = await load(serialized)      // ✅ 再传入
+//   //     return real
+//   //   } catch (e) {
+//   //     console.error('⚠️ 反序列化失败:', e)
+//   //     return value
+//   //   }
+//   // }
+//   // console.log('langchain message 1:', value)
+  
+//   return value
+// }
