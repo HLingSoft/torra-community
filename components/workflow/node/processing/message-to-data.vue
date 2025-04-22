@@ -19,7 +19,7 @@ const { onNodeClick } = useVueFlow()
 const inputRef = ref<HTMLElement | null>(null)
 
 onMounted(async () => {
-  console.log('')
+
   const node = nodes.value.find(node => node.id === props.id)
   if (!node) {
     return

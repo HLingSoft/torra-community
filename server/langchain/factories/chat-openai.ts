@@ -1,10 +1,10 @@
 import type { ChatOpenAIData } from '@/types/node-data/chat-openai'
 import type { BuildContext, FlowNode, InputPortVariable } from '~/types/workflow'
-import { RunnableLambda } from '@langchain/core/runnables'
+// import { RunnableLambda } from '@langchain/core/runnables'
 import { ChatPromptTemplate } from '@langchain/core/prompts'
 import { ChatOpenAI } from '@langchain/openai'
-import { AIMessage } from '@langchain/core/messages'
-import { resolveInputVariables } from '../../langchain/resolveInput'
+// import { AIMessage } from '@langchain/core/messages'
+import { resolveInputVariables, wrapRunnable } from '../../langchain/resolveInput'
  
 
 export async function chatOpenAIFactory(node: FlowNode, context: BuildContext) {
@@ -44,17 +44,19 @@ export async function chatOpenAIFactory(node: FlowNode, context: BuildContext) {
  
 
   const chain = prompt.pipe(model)
- 
+
+
+
   const messagePortId = messageOutputVariable.id
   const lmPortId = languageModelOutputVariable.id
-  
-  const result = await chain.invoke({})
+
  
   return {
     
-    [messagePortId]:  new AIMessage(result),
+    // [messagePortId]: chain,
+    [messagePortId]: wrapRunnable(chain),
 
  
-    [lmPortId]: model
+    [lmPortId]: chain
   }
 }

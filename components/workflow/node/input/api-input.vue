@@ -71,21 +71,21 @@ onNodeClick((event) => {
 
 
 
-const inputDataIsOpen = ref(false)
-const inputDataClonedData = ref<KeyValueSchema>({})
+const inputValueIsOpen = ref(false)
+const inputValueClonedData = ref<KeyValueSchema>({})
 const saveInputData = () => {
     if (!currentNode.value) {
         return
     }
-    console.log('inputDataClonedData.value', inputDataClonedData.value)
-    currentNode.value.data!.inputData= inputDataClonedData.value
-    inputDataIsOpen.value = false
+    console.log('inputValueClonedData.value', inputValueClonedData.value)
+    currentNode.value.data!.inputValue= inputValueClonedData.value
+    inputValueIsOpen.value = false
 }
-watch(inputDataIsOpen, (val) => {
+watch(inputValueIsOpen, (val) => {
     if (val) {
-        inputDataClonedData.value = currentNode.value?.data?.inputData || {}
+        inputValueClonedData.value = currentNode.value?.data?.inputValue || {}
     } else {
-        inputDataClonedData.value = {}
+        inputValueClonedData.value = {}
     }
 }, { immediate: true })
 
@@ -113,7 +113,7 @@ watch(inputDataIsOpen, (val) => {
                         <NuxtIcon name="clarity:info-line" size="20" />
                     </div>
                     <div class="w-full  mt-5">
-                        <Button   variant="outline" class="w-full" @click.stop="inputDataIsOpen = true">
+                        <Button   variant="outline" class="w-full" @click.stop="inputValueIsOpen = true">
                             <NuxtIcon name="mdi-light:table" size="20" />
                             Open Table
                         </Button>
@@ -137,7 +137,7 @@ watch(inputDataIsOpen, (val) => {
           
         </Card>
 
-        <Dialog v-model:open="inputDataIsOpen">
+        <Dialog v-model:open="inputValueIsOpen">
             <DialogContent class="dark  flex flex-col text-white w-full !max-w-7xl h-[80vh]">
                 <DialogHeader class="shrink-0">
                     <DialogTitle>
@@ -151,7 +151,7 @@ watch(inputDataIsOpen, (val) => {
                     </DialogDescription>
                 </DialogHeader>
                 <div class="flex-1 overflow-auto">
-                    <FunctionCallSchemaEditor v-model="inputDataClonedData" />
+                    <FunctionCallSchemaEditor v-model="inputValueClonedData" />
 
                 </div>
 

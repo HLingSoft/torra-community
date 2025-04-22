@@ -14,7 +14,7 @@ const handleCancel = () => {
 
 <template>
   <Dialog  v-model:open="confirmState.show">
-    <DialogContent class="w-full max-w-sm dark">
+    <DialogContent class="w-full max-w-sm dark  z-[9999]">
       <DialogHeader class="text-white">
         <DialogTitle class="text-sm">{{ confirmState.title }}</DialogTitle>
         <DialogDescription class="mt-1">{{ confirmState.description }}</DialogDescription>

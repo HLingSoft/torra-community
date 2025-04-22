@@ -81,27 +81,33 @@ const isEditDetailsDialogOpen = ref(false)
 const newWorkflow = ref<Workflow>(new Workflow())
 const saveNewWorkflow = async () => {
 
-  if (uploadedFile.value) {
-    const reader = new FileReader()
-    reader.onload = async () => {
-      try {
-        const parsed = JSON.parse(reader.result as string)
-        if (!parsed.nodes || !parsed.edges) {
-          useToast('不是合法的工作流文件')
-          return
-        }
-        newWorkflow.value.nodes = parsed.nodes
-        newWorkflow.value.edges = parsed.edges
-        newWorkflow.value.name = `${parsed.name} (副本)`
-        newWorkflow.value.description = `${parsed.description} (副本)`
-      } catch (err) {
-        console.error('❌ JSON 解析失败:', err)
-        useToast('文件格式不正确，请确认是导出的工作流文件')
-        return
-      }
-    }
-    reader.readAsText(uploadedFile.value)
-  }
+  // if (uploadedFile.value) {
+  //   const reader = new FileReader()
+  //   reader.onload = async () => {
+  //     try {
+  //       const parsed = JSON.parse(reader.result as string)
+  //       if (!parsed.nodes || !parsed.edges) {
+  //         useToast('不是合法的工作流文件')
+  //         return
+  //       }
+  //       newWorkflow.value.nodes = parsed.nodes
+  //       newWorkflow.value.edges = parsed.edges
+  //       if (_.isEmpty(newWorkflow.value.name)) {
+  //         newWorkflow.value.name = `${parsed.name} (副本)`
+  //       }
+  //       if (_.isEmpty(newWorkflow.value.description)) {
+  //         newWorkflow.value.description = `${parsed.description} (副本)`
+  //       }
+  //       // newWorkflow.value.name = `${parsed.name} (副本)`
+  //       // newWorkflow.value.description = `${parsed.description} (副本)`
+  //     } catch (err) {
+  //       console.error('❌ JSON 解析失败:', err)
+  //       useToast('文件格式不正确，请确认是导出的工作流文件')
+  //       return
+  //     }
+  //   }
+  //   reader.readAsText(uploadedFile.value)
+  // }
 
   if (!newWorkflow.value.name) {
     useToast('工作流名称不能为空')
@@ -228,6 +234,30 @@ async function handleFileChange(event: Event) {
   const file = input.files?.[0]
   if (!file) return
   uploadedFile.value = file
+  const reader = new FileReader()
+  reader.onload = async () => {
+    try {
+      const parsed = JSON.parse(reader.result as string)
+      if (!parsed.nodes || !parsed.edges) {
+        useToast('不是合法的工作流文件')
+        return
+      }
+      newWorkflow.value.nodes = parsed.nodes
+      newWorkflow.value.edges = parsed.edges
+      // if (_.isEmpty(newWorkflow.value.name)) {
+      newWorkflow.value.name = `${parsed.name} (副本)`
+      // }
+      // if (_.isEmpty(newWorkflow.value.description)) {
+      newWorkflow.value.description = `${parsed.description} (副本)`
+      // }
+
+    } catch (err) {
+      console.error('❌ JSON 解析失败:', err)
+      useToast('文件格式不正确，请确认是导出的工作流文件')
+      return
+    }
+  }
+  reader.readAsText(uploadedFile.value)
 
 
 }
@@ -296,13 +326,13 @@ const showAPIDialog = ref(false)
                           <Label for="name" class="text-right">
                             Name
                           </Label>
-                          <Input id="name" v-model="newWorkflow.name" class="col-span-3" />
+                          <Input id="name" v-model="newWorkflow.name" class="col-span-3 !text-sm" />
                         </div>
                         <div class="grid grid-cols-4 items-center gap-4">
                           <Label for="description" class="text-right">
                             Description
                           </Label>
-                          <Input id="description" v-model="newWorkflow.description" class="col-span-3" />
+                          <Textarea id="description" v-model="newWorkflow.description" class="col-span-3 !text-sm" />
                         </div>
 
                         <Separator class="my-2" />
@@ -492,9 +522,20 @@ const showAPIDialog = ref(false)
             </main>
           </div>
 
-          <Dialog :open="playgroundOpen" @update:open="playgroundOpen = $event">
-            <DialogContent class="dark flex flex-col text-white w-full !max-w-5xl text-sm h-[90vh]  ">
-              <WorkflowPlayground v-if="currentWorkflow" :workflow="currentWorkflow" />
+          <Dialog v-if="currentWorkflow" :open="playgroundOpen" @update:open="playgroundOpen = $event">
+
+            <DialogContent class="dark   text-white w-full !max-w-7xl text-sm !h-[90vh]  grid grid-rows-[auto_1fr_auto] ">
+              <DialogHeader>
+                <DialogTitle>{{ currentWorkflow.name }}</DialogTitle>
+                <DialogDescription>
+                  {{ currentWorkflow.description }}
+                </DialogDescription>
+              </DialogHeader>
+              <!-- <Separator /> -->
+
+              <WorkflowPlayground :workflow="currentWorkflow" class="overflow-hidden" />
+
+
             </DialogContent>
           </Dialog>
 
@@ -516,13 +557,13 @@ const showAPIDialog = ref(false)
                   <Label for="name" class="text-right">
                     Name
                   </Label>
-                  <Input id="name" v-model="currentWorkflow.name" class="col-span-3" />
+                  <Input id="name" v-model="currentWorkflow.name" class="col-span-3 !text-sm" />
                 </div>
                 <div class="grid grid-cols-4 items-center gap-4">
                   <Label for="description" class="text-right">
                     Description
                   </Label>
-                  <Input id="description" v-model="currentWorkflow.description" class="col-span-3" />
+                  <Textarea id="description" v-model="currentWorkflow.description" class="col-span-3 !text-sm" />
                 </div>
               </div>
               <DialogFooter>

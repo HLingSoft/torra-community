@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Toaster, toast } from 'vue-sonner'
-// import 'vue-sonner/vue.css' 
+import { Toaster  } from 'vue-sonner'
+ 
 const nuxtApp = useNuxtApp()
 const { user } = storeToRefs(useUserStore())
 nuxtApp.hook('page:finish', () => {

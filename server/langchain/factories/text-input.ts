@@ -15,6 +15,7 @@ export const textInputFactory: NodeFactory = async (node: FlowNode, context: Bui
 
  
   const outputPortId = outputVar.id
+  // console.log('outputPortId', inputValues[variableNames[0]])
   
   return {
   

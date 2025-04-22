@@ -19,7 +19,7 @@ const searchKeyword = defineModel<string>()
           id="search"
            v-model="searchKeyword"
           placeholder="Search ..."
-          class="pl-8 text-white"
+          class="pl-8  dark"
         />
         <Search class="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-100" />
       </SidebarGroupContent>

@@ -1,8 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from '@tailwindcss/vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
-// import fs from 'node:fs'
-// import path from 'node:path'
+import fs from 'node:fs'
+import path from 'node:path'
 // import { fileURLToPath } from 'node:url'
 export default defineNuxtConfig({
   compatibilityDate: '2025-04-14',
@@ -109,7 +109,29 @@ export default defineNuxtConfig({
   //     }
   //   }
   // },
- 
+  hooks: {
+    'nitro:build:public-assets': (_nitro: any) => {
+      const sourceDir = path.resolve(__dirname, 'node_modules/@zilliz/milvus2-sdk-node/dist/proto')
+      const destDir = path.resolve(__dirname, '.output/server/node_modules/@zilliz/milvus2-sdk-node/dist/proto')
+      const copyDir = (src: string, dest: string): void => {
+        if (!fs.existsSync(dest)) {
+          fs.mkdirSync(dest, { recursive: true })
+        }
+        fs.readdirSync(src).forEach((file) => {
+          const srcFile = path.resolve(src, file)
+          const destFile = path.resolve(dest, file)
+          if (fs.lstatSync(srcFile).isDirectory()) {
+            copyDir(srcFile, destFile)
+          }
+          else {
+            fs.copyFileSync(srcFile, destFile)
+          }
+        })
+      }
+      copyDir(sourceDir, destDir)
+      console.log('Proto files copied successfully!')
+    },
+  },
   vite: {
     
     plugins: [

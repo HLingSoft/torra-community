@@ -95,13 +95,15 @@ const embedding = inputValues[embeddingVariable.name]
     const parsed = JSON.parse(ingestData)
     await vectorStore.addDocuments(parsed)
   } 
+
+  console.log('partitionValue', partitionValue)
   let filter;
   if(partitionValue && partitionKey){
     
     filter= `projectId == "${partitionValue}"`
   }
   
-  const results = await vectorStore.similaritySearch(query, 5,filter)
+  const results = await vectorStore.similaritySearch(query, 50, filter)
   const uniqueDocuments = Array.from(new Set(results.map((doc: Document) => doc.pageContent)))
   .map(pageContent => results.find((doc: Document) => doc.pageContent === pageContent)) as Document[]
 

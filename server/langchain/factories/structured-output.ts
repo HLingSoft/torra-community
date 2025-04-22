@@ -16,16 +16,16 @@ import { resolveInputVariables } from '../../langchain/resolveInput'
 export async function structuredOutputFactory(node: FlowNode, context: BuildContext) {
  
     const { inputMessageVariable, languageModelVariable, outputSchema, structuredOutputVariable, dataFrameOutputVariable } = node.data as StructuredOutputData
-    // console.log('structuredOutputFactory', inputMessageVariable)
+
     const variableDefs = [inputMessageVariable, languageModelVariable] as InputPortVariable[]
-    console.log('Object.keys(outputSchema.value)', Object.keys(outputSchema.value), outputSchema.value)
+    // console.log('Object.keys(outputSchema.value)', Object.keys(outputSchema.value), outputSchema.value)
 
     const inputValues = await resolveInputVariables(context, variableDefs)
     // console.log('structuredOutputFactory inputValues', inputValues)
     const inputMessage = inputValues[inputMessageVariable.name]
     const languageModel = inputValues[languageModelVariable.name] as ChatOpenAI
     // console.log('structuredOutputFactory languageModel', languageModel)
-
+    // console.log('structuredOutputFactory', inputMessageVariable)
 
     const outputFunctionSchema = {
         name: outputSchema.name,
@@ -56,6 +56,7 @@ export async function structuredOutputFactory(node: FlowNode, context: BuildCont
         llmWithFunction,
         new JsonOutputFunctionsParser(), // 将返回 JSON 结构化
     ])
+    console.log('structuredOutputFactory inputMessage', inputMessage)
     const result = await runnablePrompt.invoke(inputMessage)
     console.log('structuredOutputFactory result', result)
     return {

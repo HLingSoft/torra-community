@@ -6,7 +6,7 @@ export interface APIInputData {
     description: string
     icon?: string
     
-    inputData: Record<string, any>
+    inputValue: Record<string, any>
     structuredOutputVariable: OutputPortVariable
     extraDataVariable: OutputPortVariable
     show?: boolean
@@ -20,7 +20,7 @@ export const apiInputMeta: APIInputData = {
     title: 'API Input',
     description: 'Workflow entry via API, parsing data and triggering AI processes.',
     icon: '🧠',
-    inputData: {
+    inputValue: {
     },
     structuredOutputVariable: {
         name: 'structuredOutput',

@@ -6,16 +6,16 @@ import type {
 
 } from '~/types/workflow'
  
-import { HumanMessage } from '@langchain/core/messages'
+// import { HumanMessage } from '@langchain/core/messages'
 
 export async function apiInputFactory(node: FlowNode, context: BuildContext) {
  
-    const {  inputData, structuredOutputVariable,extraDataVariable} = node.data as APIInputData
-    console.log('apiInputFactory',JSON.stringify(inputData) )
+    const { inputValue, structuredOutputVariable, extraDataVariable } = node.data as APIInputData
+    console.log('apiInputFactory', JSON.stringify(inputValue))
     
      
     return {
-        [structuredOutputVariable.id]:inputData
+        [structuredOutputVariable.id]: inputValue
         // [extraDataVariable.id]:new  HumanMessage(extraDataVariable.value),
       
         

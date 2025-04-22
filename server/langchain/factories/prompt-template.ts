@@ -20,7 +20,7 @@ export async function promptTemplateFactory(node: FlowNode, context: BuildContex
 
   const inputValues = await resolveInputVariables(context, variableDefs)
 
-  // console.log('✅ PromptTemplate 输入变量:', inputValues)
+  // console.log('✅ PromptTemplate 输入变量:', data.template)
 
   const runnablePrompt = await new PromptTemplate({
     template: data.template,

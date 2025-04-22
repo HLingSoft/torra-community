@@ -20,7 +20,7 @@ const editMode = ref(false)
           <Input
             v-if="editMode"
             v-model="nodeData.title"
-            class="w-60 nodrag nopan"
+            class="w-60 nodrag nopan  dark"
             type="text"
           />
           <div v-else>

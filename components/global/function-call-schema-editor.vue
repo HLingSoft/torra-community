@@ -123,8 +123,8 @@ const typeList = [
             <TableCell>
               <Checkbox v-model="row.selected" />
             </TableCell>
-            <TableCell><Input v-model="row.name" placeholder="Field name" /></TableCell>
-            <TableCell><Input v-model="row.description" placeholder="Describe this field..." /></TableCell>
+            <TableCell><Input v-model="row.name" placeholder="Field name" class=" dark" /></TableCell>
+            <TableCell><Input v-model="row.description" placeholder="Describe this field..." class=" dark" /></TableCell>
             <TableCell>
               <Select v-model="row.type" placeholder="Type">
                 <SelectTrigger class="w-full">

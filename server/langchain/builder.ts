@@ -34,6 +34,8 @@ export async function executeDAG(
   let pending = [...initialSorted]
   const executed = new Set<string>()
 
+
+
   while (pending.length > 0) {
     const nextIdx = pending.findIndex(id => {
       const inputs = inputConnections[id]
@@ -55,7 +57,9 @@ export async function executeDAG(
     console.log(`🔗 执行节点 [${executed.size + 1}/${initialSorted.length}] ${nodeId} ${node.data.type}`)
 
     if (isStartNode(json, node.id, runType)) {
+
       node.data.inputValue = inputMessage
+      console.log(`当前是开始节点  ${nodeId} ${node.data.type}`, runType, node.data.inputValue)
     }
 
     const resolvedInput: Record<string, any> = {}
@@ -69,7 +73,13 @@ export async function executeDAG(
       const values = conns
         .map(conn => results[conn.fromNodeId]?.[conn.fromPortId])
         .filter(v => v !== undefined)
-
+      // const values = conns
+      //   .filter(conn => executed.has(conn.fromNodeId)) // ✅ 只保留执行过的节点
+      //   .map(conn => results[conn.fromNodeId]?.[conn.fromPortId])
+      //   .filter(v => v !== undefined)
+      // if (node.data.type == 'MilvusRetriever') {
+      //   console.log('values', values)
+      // }
       resolvedInput[inputPortId] = values.length === 1 ? values[0] : values
     }
 

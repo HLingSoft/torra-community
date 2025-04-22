@@ -1,0 +1,16 @@
+https://cloud.zilliz.com.cn
+db_admin
+Ta4>fyAKX%D7-8e=
+
+
+da2c5cc9d258113ab01cee849a4979812db1795b0c7df4a489a5bfbbea422c9f92eb167d4a604aa74c9cfa402a51139266f938cc
+
+
+npx nuxi build
+ ssh-copy-id root@139.224.249.117
+
+ssh root@139.224.249.117
+ HengLing123!
+
+ rsync -avz .output/ root@139.224.249.117:/root/ai/website/
+  pm2 start server/index.mjs --name "nuxt-app"

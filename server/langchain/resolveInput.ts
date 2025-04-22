@@ -3,8 +3,40 @@ import type { InputPortVariable } from '~/types/workflow'
  
 // import { StringPromptValue } from '@langchain/core/prompt_values'
  
+export function wrapRunnable(runnable: any) {
+  return {
+    original: runnable,
+    invokeIfAvailable: async (input?: any) => {
+      if (typeof runnable?.invoke === 'function') {
+        return await runnable.invoke(input ?? {})
+      } else {
+        console.warn('invoke() 不可用');
+        return null
+      }
+    }
+  }
+}
+function isForceStringifyMessageType(variable: InputPortVariable): boolean {
+  return (
+    variable.forceStringify &&
+    (variable.allowedTypes?.includes('Message') || variable.allowedTypes?.includes('Prompt Message'))
+  ) || false
+}
 
-  
+async function resolveStringified(value: any): Promise<string> {
+  if (typeof value?.invokeIfAvailable === 'function') {
+    const result = await value.invokeIfAvailable()
+    return normalizeToString(result ?? value)
+  }
+  return normalizeToString(value)
+}
+async function resolveStringifiedArray(values: any[]): Promise<string> {
+  const parts: string[] = []
+  for (const v of values) {
+    parts.push(await resolveStringified(v))
+  }
+  return parts.join('\n')
+}
 export async function resolveInputVariables(
   context: Record<string, any>,
   variables: InputPortVariable[],
@@ -12,45 +44,29 @@ export async function resolveInputVariables(
   const inputValues: Record<string, any> = {}
 
   for (const variable of variables) {
-    let resolved: any = ''
-
     const potentialValue = context.resolvedInput[variable.id]
+    const useDefault = variable.value ?? variable.defaultValue ?? ''
+    let resolved: any = ''
 
     if (variable.connected) {
       if (Array.isArray(potentialValue)) {
-        // 多个输入连接：过滤掉 undefined
         const filtered = potentialValue.filter(v => v !== undefined)
-
         if (filtered.length > 0) {
-          if (
-            variable.forceStringify &&
-            (variable.allowedTypes?.includes('Message') || variable.allowedTypes?.includes('Prompt Message'))
-          ) {
-            resolved = filtered.map(v => normalizeToString(v)).join('\n')
-          } else {
-            resolved = filtered.length === 1 ? filtered[0] : filtered
-          }
+          resolved = isForceStringifyMessageType(variable)
+            ? await resolveStringifiedArray(filtered)
+            : (filtered.length === 1 ? filtered[0] : filtered)
         } else {
-          // 所有连接都 undefined，走 defaultValue
-          resolved = variable.value ?? variable.defaultValue ?? ''
+          resolved = useDefault
         }
       } else if (potentialValue !== undefined) {
-        // 单连接并且有值
-        if (
-          variable.forceStringify &&
-          (variable.allowedTypes?.includes('Message') || variable.allowedTypes?.includes('Prompt Message'))
-        ) {
-          resolved = normalizeToString(potentialValue)
-        } else {
-          resolved = potentialValue
-        }
+        resolved = isForceStringifyMessageType(variable)
+          ? await resolveStringified(potentialValue)
+          : potentialValue
       } else {
-        // 单连接但是 undefined
-        resolved = variable.value ?? variable.defaultValue ?? ''
+        resolved = useDefault
       }
     } else {
-      // 没有连接
-      resolved = variable.value ?? variable.defaultValue ?? ''
+      resolved = useDefault
     }
 
     inputValues[variable.name] = resolved
@@ -61,8 +77,8 @@ export async function resolveInputVariables(
 
 
 export function normalizeToString(value: any): string {
+
   if (value?.content && typeof value.content === 'string') return value.content
-  if (typeof value === 'string') return value
   if (typeof value === 'object' && value !== null) {
     return JSON.stringify(value, null, 2)
   }
