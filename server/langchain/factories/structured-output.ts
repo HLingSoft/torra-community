@@ -18,7 +18,7 @@ export async function structuredOutputFactory(node: FlowNode, context: BuildCont
     const { inputMessageVariable, languageModelVariable, outputSchema, structuredOutputVariable, dataFrameOutputVariable } = node.data as StructuredOutputData
     // console.log('structuredOutputFactory', inputMessageVariable)
     const variableDefs = [inputMessageVariable, languageModelVariable] as InputPortVariable[]
-
+    console.log('Object.keys(outputSchema.value)', Object.keys(outputSchema.value), outputSchema.value)
 
     const inputValues = await resolveInputVariables(context, variableDefs)
     // console.log('structuredOutputFactory inputValues', inputValues)

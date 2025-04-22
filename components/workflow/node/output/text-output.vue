@@ -48,44 +48,44 @@ onMounted(async () => {
 
 const { onNodeClick } = useVueFlow()
 onNodeClick((event) => {
-  console.log('nodeId:', event.node.id)
-  console.log('完整事件对象:', event)
+
+
 })
 const footer = ref<HTMLElement | null>(null)
 
 // const editMode = ref(false)
- 
+
 watch(edges, () => {
-  
+
   if (!currentNode.value?.data) {
     return
   }
 
   currentNode.value.data.inputVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.inputVariable.id)
-  
+
 }, { deep: true, immediate: true })
 
 </script>
 
 <template>
 
-  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-[#18181B]  rounded-lg group flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-[#000000]  focus:border focus:border-[#27272A]">
-    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id"/>
-     
+  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background  rounded-lg group flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card  focus:border focus: border-card">
+    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
+
 
     <CardContent class="text-white space-y-8 -mt-8 flex-1 ">
       <Separator class="my-5" />
       <div>
-        <div  ref="inputRef" class="flex flex-row items-center space-x-2">
+        <div ref="inputRef" class="flex flex-row items-center space-x-2">
           <p>Message<span class="text-red-500">*</span></p>
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
-     
+
       </div>
 
     </CardContent>
 
-    <div ref="footer" class="bg-[#27272A]  rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="footer" class="bg-card  rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.outputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.outputVariable.show = false" />
 

@@ -19,7 +19,7 @@ const { onNodeClick } = useVueFlow()
 const inputRef = ref<HTMLElement | null>(null)
 
 onMounted(async () => {
-  console.log('message-to-data mounted')
+  console.log('')
   const node = nodes.value.find(node => node.id === props.id)
   if (!node) {
     return
@@ -46,8 +46,8 @@ onMounted(async () => {
 })
 
 onNodeClick((event) => {
-  console.log('nodeId:', event.node.id)
-  console.log('完整事件对象:', event)
+
+
 })
 
 watch(edges, () => {
@@ -63,56 +63,32 @@ watch(edges, () => {
 
 <template>
   <div>
-  <Card
-    v-if="currentNode && currentNode.data"
-    class="!pb-0 w-96 text-white bg-[#18181B] rounded-lg group flex flex-col focus:outline-none focus:shadow-lg focus:shadow-[#000000]  focus:border focus:border-[#27272A]"
-  >
-    
-    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id"/>
+    <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background rounded-lg group flex flex-col focus:outline-none focus:shadow-lg focus:shadow-card  focus:border focus: border-card">
 
-    <CardContent class="text-white space-y-8 -mt-8 flex-1">
-      <Separator class="my-5" />
-      <div ref="inputRef">
-        <div class="flex flex-row items-center space-x-2">
-          <p>Message</p>
-          <NuxtIcon name="clarity:info-line" size="20" />
+      <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
+
+      <CardContent class="text-white space-y-8 -mt-8 flex-1">
+        <Separator class="my-5" />
+        <div ref="inputRef">
+          <div class="flex flex-row items-center space-x-2">
+            <p>Message</p>
+            <NuxtIcon name="clarity:info-line" size="20" />
+          </div>
+          <div class="w-full mt-5">
+            <EditTextDialog class="w-full" :disabled="currentNode.data.inputVariable.connected" :model-value="currentNode.data.inputVariable.value || ''" placeholder="请输入文本" @save="(val) => currentNode!.data!.inputVariable.value = val" />
+          </div>
         </div>
-        <div class="w-full mt-5">
-          <EditTextDialog
-            class="w-full"
-            :disabled="currentNode.data.inputVariable.connected"
-            :model-value="currentNode.data.inputVariable.value || ''"
-            placeholder="请输入文本"
-            @save="(val) => currentNode!.data!.inputVariable.value = val"
-          />
+      </CardContent>
+
+      <div ref="footer" class="bg-card rounded-b-lg py-2 pl-5 pr-10 flex items-center justify-center">
+        <div class="w-full h-full flex items-center justify-between">
+          <NuxtIcon v-if="currentNode.data.outputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.outputVariable.show = false" />
+          <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.outputVariable.show = true" />
+          <div class="">
+            Data
+          </div>
         </div>
       </div>
-    </CardContent>
-
-    <div
-      ref="footer"
-      class="bg-[#27272A] rounded-b-lg py-2 pl-5 pr-10 flex items-center justify-center"
-    >
-      <div class="w-full h-full flex items-center justify-between">
-        <NuxtIcon
-          v-if="currentNode.data.outputVariable.show"
-          name="lets-icons:view-duotone"
-          size="24"
-          class="cursor-pointer"
-          @click="currentNode.data.outputVariable.show = false"
-        />
-        <NuxtIcon
-          v-else
-          name="lets-icons:view-hide-duotone"
-          size="24"
-          class="cursor-pointer"
-          @click="currentNode.data.outputVariable.show = true"
-        />
-        <div class="">
-          Data
-        </div>
-      </div>
-    </div>
-  </Card>
-</div>
+    </Card>
+  </div>
 </template>

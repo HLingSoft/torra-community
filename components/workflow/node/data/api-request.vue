@@ -80,8 +80,8 @@ watch(edges, () => {
 
 const { onNodeClick } = useVueFlow()
 onNodeClick((event) => {
-    console.log('nodeId:', event.node.id)
-    console.log('完整事件对象:', event)
+
+
 })
 
 
@@ -162,7 +162,7 @@ watch(() => currentNode.value?.data?.methodType, async (val, oldVal) => {
 </script>
 
 <template>
-    <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-[#18181B]  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-[#000000]   focus:border focus:border-[#27272A]">
+    <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card   focus:border focus: border-card">
 
         <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
         <CardContent class="text-white space-y-8 -mt-8  flex-1 nodrag nopan cursor-auto ">
@@ -222,7 +222,7 @@ watch(() => currentNode.value?.data?.methodType, async (val, oldVal) => {
 
         </CardContent>
 
-        <div ref="dataOutputVariableRef" class="bg-[#27272A]   py-2 pl-5 pr-10  flex items-center justify-center">
+        <div ref="dataOutputVariableRef" class="bg-card   py-2 pl-5 pr-10  flex items-center justify-center">
             <div class="w-full h-full   flex items-center  justify-between">
                 <NuxtIcon v-if="currentNode.data.dataOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataOutputVariable.show = false" />
 
@@ -233,7 +233,7 @@ watch(() => currentNode.value?.data?.methodType, async (val, oldVal) => {
                 </div>
             </div>
         </div>
-        <div ref="dataFrameOutputVariableRef" class="bg-[#27272A]  -mt-5 py-2 pl-5 pr-10  flex items-center justify-center">
+        <div ref="dataFrameOutputVariableRef" class="bg-card  -mt-5 py-2 pl-5 pr-10  flex items-center justify-center">
             <div class="w-full h-full   flex items-center  justify-between">
                 <NuxtIcon v-if="currentNode.data.dataFrameOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataFrameOutputVariable.show = false" />
 

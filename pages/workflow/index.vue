@@ -1,24 +1,25 @@
 <script lang="ts" setup>
-import type { ConnectionLineProps, GraphNode ,VueFlowStore} from '@vue-flow/core'
+import type { ConnectionLineProps, GraphNode, VueFlowStore } from '@vue-flow/core'
 // import { Controls } from '@vue-flow/controls'
 import { useVueFlow, VueFlow } from '@vue-flow/core'
- import { promiseTimeout } from '@vueuse/core'
+import { Background } from '@vue-flow/background'
 import "~/assets/css/_node.scss";
+const history = useWorkflowHistoryStore()
 definePageMeta({
   layout: 'workflow',
 })
 useHead({
-  title: 'AI 工作流',
+  title: '企业级AI工作流',
   meta: [
-    {
-      name: 'description',
-      content: ' AI 工作流',
-    },
+    // 基本描述
+    { name: 'description', content: '企业级AI工作流，助力企业智能自动化，提升效率，降低成本。' },
+    { name: 'keywords', content: 'AI工作流, 企业自动化, 智能工作流, 企业级AI, 业务流程自动化' },
+
   ],
 })
-const { project  } = useVueFlow()
-const { nodes, edges,triggerNodeComponentName } = storeToRefs(useWorkflowStore())
- 
+const { project } = useVueFlow()
+const { nodes, edges, triggerNodeComponentName } = storeToRefs(useWorkflowStore())
+
 const {
   onConnect,
   findNode,
@@ -31,31 +32,20 @@ const {
   onEdgesChange,
   removeEdges,
   removeNodes,
-  // onPaneReady,
-  setViewport,
- 
-  
 
-  // connectionLineOptions,
 } = useVueFlow({
   nodes: nodes.value,
   edges: edges.value,
-  // create links automatically
-  // not what we want really
   autoConnect: false,
-  // disable connecting by clicking
   connectOnClick: false,
 })
 
- 
-const onFlowInit = async(_instance: VueFlowStore) => {
-  
-  await nextTick()
-  await promiseTimeout(1000)
-  adjustZoom(nodes.value.length)
-   
+
+const onFlowInit = async (_instance: VueFlowStore) => {
+
+
 }
- 
+
 
 
 
@@ -93,8 +83,8 @@ onConnect((connection) => {
   const sourcePortType = sourceNode.type
   const targetPortType = targetNode.type
 
-  console.log('sourcePortType', sourcePortType)
-  console.log('targetPortType', targetPortType)
+  // console.log('sourcePortType', sourcePortType)
+  // console.log('targetPortType', targetPortType)
 
   // 如果是 `output` 连接到 `input`，允许连接
   if (targetPortType === 'input' && (sourcePortType === 'input' || sourcePortType === 'output')) {
@@ -111,16 +101,6 @@ onConnect((connection) => {
     const sourceParent = sourceNode.parentNode
     const targetParent = targetNode.parentNode
 
-    // addEdges([
-    //   {
-    //     id,
-    //     type: 'custom',
-    //     source: sourceNodeId,
-    //     target: targetNodeId,
-    //     data: { targetColor, sourceColor, sourceParent, targetParent },
-    //     style: { 'stroke-width': '2px' },
-    //   },
-    // ])
     edges.value.push(
       {
         id,
@@ -131,6 +111,7 @@ onConnect((connection) => {
         style: { 'stroke-width': '2px' },
       },
     )
+    // history.snapshot('记录连接后的状态') // 记录连接后的状态
   }
   else {
     console.log('Invalid connection: Only output can connect to input.')
@@ -152,6 +133,7 @@ onNodesChange((changes) => {
       const node = nodes.value.find(n => n.id === change.id)
       if (node) {
         node.position = change.position // ✅ 同步拖动后的位置
+        // fitView() // ✅ 拖动后自动适应视图
       }
     }
 
@@ -162,8 +144,7 @@ onNodesChange((changes) => {
       const toDelete = [change.id, ...allDescendants]
       removeNodes(toDelete)
       removeEdges(toDelete.map(id => `from-${id}-to-`)) // 删除所有与该节点相关的边
-      // ✅ 告诉 vueFlow 也删掉
-      // vueFlow.removeNodes(toDelete)
+
 
       // ✅ 再更新响应式 store
       nodes.value = nodes.value.filter(n => !toDelete.includes(n.id))
@@ -171,16 +152,19 @@ onNodesChange((changes) => {
         e => !toDelete.includes(e.source) && !toDelete.includes(e.target),
       )
 
-      // console.log('all nodes:', nodes.value.map(n => ({ id: n.id, parentNode: n.parentNode, type: n.type })))
+
     }
   })
+
+  // history.snapshot('删除节点') // 记录删除后的状态
 })
 
 onEdgesChange((changes) => {
   changes.forEach((change) => {
     if (change.type === 'remove') {
-      // edges.value = edges.value.filter(edge => edge.id !== change.id)
+
       edges.value = edges.value.filter(edge => edge.id !== change.id)
+      // history.snapshot('删除边') // 记录删除后的状态
     }
   })
 })
@@ -202,22 +186,23 @@ const selectedNodeId = ref<string | null>(null)
 onNodeClick(({ node }) => {
   selectedNodeId.value = node.id
 })
- 
 
-// 单独封装 zoom 调整逻辑
-const adjustZoom = (count: number) => {
-  const baseZoom = 1
-  const maxNodes = 20
-  const zoom = Math.max(0.35, baseZoom - count / maxNodes)
 
-  
+// // 单独封装 zoom 调整逻辑
+// const adjustZoom = (count: number) => {
+//   const baseZoom = 1
+//   const maxNodes = 20
+//   const zoom = Math.max(0.35, baseZoom - count / maxNodes)
 
-  // setViewport?.({ zoom, x: 400, y: 400 }, { duration: 500 })
-}
+
+
+//   // setViewport?.({ zoom, x: 400, y: 400 }, { duration: 500 })
+// }
 
 watch(triggerNodeComponentName, () => {
-  console.log('triggerNodeComponentName', triggerNodeComponentName.value)
+  // console.log('triggerNodeComponentName', triggerNodeComponentName.value)
   if (triggerNodeComponentName.value && !_.isEmpty(triggerNodeComponentName.value)) {
+    history.snapshot('添加触发器节点')
     const position = project({ x: 140, y: 140 }) // 👈 关键位置
     nodes.value.push({
       id: nanoid(),
@@ -227,30 +212,27 @@ watch(triggerNodeComponentName, () => {
         component: triggerNodeComponentName.value,
       },
     })
+
     triggerNodeComponentName.value = ''
   }
 })
+// watch(() => history.flowKey, () => {
+//   nextTick(() => {
+//     onNodesChange([{ type: 'reset' }])
+//   })
+// })
 </script>
 
 <template>
   <div class="">
     <ClientOnly>
-      <div  
-        class="w-screen h-screen  " style="background-image: radial-gradient(circle, rgb(249 250 251 / 0.1)  2px, transparent 2px);
-background-size: 50px 50px; background-color: #1e1e1e;"
-      >
-        <VueFlow @init="onFlowInit"   fit-view-on-init  :nodes="nodes" :edges="edges"   :default-viewport="{ zoom: 0.8 }"   :max-zoom="4" :min-zoom="0.1">
-      
+      <div class="w-screen h-screen  ">
+        <VueFlow @init="onFlowInit" fit-view-on-init :nodes="nodes" :edges="edges" :default-viewport="{ zoom: 0.8 }" :max-zoom="2" :min-zoom="0.1">
+          <Background />
           <template #node-custom="props">
             <!-- 业务节点 -->
-            <component
+            <component :is="nodeComponentMap[props.data.component]" :id="props.id" :data="props.data" :class="{ 'shadow-[rgba(219,219,219,0.66)] shadow-lg': props.id === selectedNodeId }" />
 
-              :is="nodeComponentMap[props.data.component]"
-              :id="props.id"
-              :data="props.data"
-              :class="{ 'shadow-[rgba(219,219,219,0.66)] shadow-lg': props.id === selectedNodeId }"
-            />
-            
           </template>
           <template #edge-custom="props">
             <WorkflowEdge v-bind="props" :segments="target.segments" :update-on-drag="target.updateOnDrag" />

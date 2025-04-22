@@ -8,7 +8,7 @@ interface KeyValueRow {
 }
 
 type KeyValueTable = KeyValueRow[]
-type KeyValueObject = Record<string, { description: string; type: string }>
+type KeyValueObject = Record<string, { name: string, description: string; type: string }>
 
 const props = defineProps<{
   modelValue: KeyValueObject
@@ -43,6 +43,7 @@ const getBodyObject = (inputRows: KeyValueTable): KeyValueObject => {
   for (const row of inputRows) {
     if (row.name && row.type) {
       obj[row.name] = {
+        name: row.name,
         description: row.description || '',
         type: row.type
       }
@@ -52,6 +53,7 @@ const getBodyObject = (inputRows: KeyValueTable): KeyValueObject => {
 }
 
 const rows = ref<KeyValueTable>(objectToRows(props.modelValue))
+
 
 watch(rows, (newRows) => {
   emit('update:modelValue', getBodyObject(newRows))
@@ -100,63 +102,65 @@ const typeList = [
 </script>
 
 <template>
-    <div v-bind="$attrs" class="h-full flex flex-col rounded-md border border-muted p-4">
-      <!-- <div class="mb-2 text-sm text-muted-foreground shrink-0">
-        Define the structure and description of each output field.
-      </div> -->
-  
-      <div class="flex-1 overflow-auto">
-        <Table class="min-w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead class="w-[40px]"><Checkbox /></TableHead>
-              <TableHead class="w-40">Name</TableHead>
-              <TableHead class="w-96">Description</TableHead>
-              <TableHead class="w-40">Type</TableHead>
-            </TableRow>
-          </TableHeader>
-  
-          <TableBody>
-            <TableRow v-for="(row, index) in rows" :key="row.id">
-              <TableCell><Checkbox v-model="row.selected" /></TableCell>
-              <TableCell><Input v-model="row.name" placeholder="Field name" /></TableCell>
-              <TableCell><Input v-model="row.description" placeholder="Describe this field..." /></TableCell>
-              <TableCell>
-                <Select v-model="row.type" placeholder="Type">
-                  <SelectTrigger class="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent class="dark">
-                    <SelectItem v-for="type in typeList" :key="type.id" :value="type.id">
-                      {{ type.name }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+  <div v-bind="$attrs" class="h-full   flex flex-col rounded-md border border-muted p-4">
+
+
+    <div class="flex-1 overflow-auto">
+      <Table class="min-w-full">
+        <TableHeader>
+          <TableRow>
+            <TableHead class="w-[40px]">
+              <Checkbox />
+            </TableHead>
+            <TableHead class="w-40">Name</TableHead>
+            <TableHead class="w-96">Description</TableHead>
+            <TableHead class="w-40">Type</TableHead>
+          </TableRow>
+        </TableHeader>
+
+        <TableBody>
+          <TableRow v-for="(row, index) in rows" :key="row.id">
+            <TableCell>
+              <Checkbox v-model="row.selected" />
+            </TableCell>
+            <TableCell><Input v-model="row.name" placeholder="Field name" /></TableCell>
+            <TableCell><Input v-model="row.description" placeholder="Describe this field..." /></TableCell>
+            <TableCell>
+              <Select v-model="row.type" placeholder="Type">
+                <SelectTrigger class="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent class="dark">
+                  <SelectItem v-for="type in typeList" :key="type.id" :value="type.id">
+                    {{ type.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+
+    <div class="mt-4 shrink-0 flex items-center justify-between border-t pt-4">
+      <div class="flex items-center space-x-2">
+        <Button variant="ghost" size="icon" @click="addRow">
+          <NuxtIcon name="ic:round-add" class="text-xl" />
+        </Button>
+        <Button variant="ghost" size="icon" @click="cloneSelected" :disabled="!hasSelected">
+          <NuxtIcon name="mdi:content-copy" class="text-xl" />
+        </Button>
+        <Button variant="ghost" size="icon" @click="deleteSelected" :disabled="!hasSelected">
+          <NuxtIcon name="material-symbols:delete-outline" class="text-xl" />
+        </Button>
+        <Button variant="ghost" size="icon" @click="resetRows" :disabled="!hasSelected">
+          <NuxtIcon name="mdi:restart" class="text-xl" />
+        </Button>
       </div>
-  
-      <div class="mt-4 shrink-0 flex items-center justify-between border-t pt-4">
-        <div class="flex items-center space-x-2">
-          <Button variant="ghost" size="icon" @click="addRow">
-            <NuxtIcon name="ic:round-add" class="text-xl" />
-          </Button>
-          <Button variant="ghost" size="icon" @click="cloneSelected" :disabled="!hasSelected">
-            <NuxtIcon name="mdi:content-copy" class="text-xl" />
-          </Button>
-          <Button variant="ghost" size="icon" @click="deleteSelected" :disabled="!hasSelected">
-            <NuxtIcon name="material-symbols:delete-outline" class="text-xl" />
-          </Button>
-          <Button variant="ghost" size="icon" @click="resetRows" :disabled="!hasSelected">
-            <NuxtIcon name="mdi:restart" class="text-xl" />
-          </Button>
-        </div>
-        <div class="text-sm text-muted-foreground">
-          {{ rows.length }} row{{ rows.length !== 1 ? 's' : '' }}
-        </div>
+      <div class="text-sm text-muted-foreground">
+        {{ rows.length }} row{{ rows.length !== 1 ? 's' : '' }}
       </div>
     </div>
-  </template>
+  </div>
+</template>
   

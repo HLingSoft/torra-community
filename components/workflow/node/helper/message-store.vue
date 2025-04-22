@@ -65,52 +65,52 @@ onMounted(async () => {
 
 const { onNodeClick } = useVueFlow()
 onNodeClick((event) => {
-  console.log('nodeId:', event.node.id)
-  console.log('完整事件对象:', event)
+
+
 })
- 
- 
+
+
 watch(edges, () => {
-  
+
   if (!currentNode.value?.data) {
     return
   }
 
   currentNode.value.data.memoryInputVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.memoryInputVariable.id)
   currentNode.value.data.messageInputVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.messageInputVariable.id)
-  
+
 }, { deep: true, immediate: true })
 
 
-const roles=[
+const roles = [
   {
-    id:'AI',
-    name:'AI',
+    id: 'AI',
+    name: 'AI',
   },
   {
-    id:'Human',
-    name:'Human',
+    id: 'Human',
+    name: 'Human',
   }
 ]
 </script>
 
 <template>
 
-  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-[#18181B]  rounded-lg group flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-[#000000]  focus:border focus:border-[#27272A]">
-    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id"/>
-    
+  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background  rounded-lg group flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card  focus:border focus: border-card">
+    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
+
 
     <CardContent class="text-white flex flex-col space-y-8 -mt-8 flex-1 ">
       <Separator class="my-5" />
-      
+
       <div ref="messageInputVariableRef">
         <div class="flex flex-row items-center space-x-2">
           <p>Message</p>
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <div class="w-full  mt-5">
-            <EditTextDialog class="w-full" :disabled="currentNode.data.messageInputVariable.connected" :model-value="currentNode.data.messageInputVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.messageInputVariable.value = val" />
-        
+          <EditTextDialog class="w-full" :disabled="currentNode.data.messageInputVariable.connected" :model-value="currentNode.data.messageInputVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.messageInputVariable.value = val" />
+
         </div>
       </div>
 
@@ -135,20 +135,20 @@ const roles=[
         </div>
       </div>
 
-        
+
       <div ref="memoryInputVariableRef">
-        <div  class="  flex w-full flex-row items-center space-x-2">
+        <div class="  flex w-full flex-row items-center space-x-2">
           <p>Memory</p>
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <p class="text-[#D1D5DB] text-sm">Connect an upstream memory module (e.g., Redis Chat Memory) to retrieve conversation history.</p>
-       
-     
+
+
       </div>
 
     </CardContent>
 
-    <div ref="storedMessagesOutputVariableRef" class="bg-[#27272A]  rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="storedMessagesOutputVariableRef" class="bg-card  rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.storedMessagesOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.storedMessagesOutputVariable.show = false" />
 
@@ -159,7 +159,7 @@ const roles=[
         </div>
       </div>
     </div>
-  
+
   </Card>
 
 

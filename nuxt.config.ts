@@ -20,7 +20,7 @@ export default defineNuxtConfig({
       //   lang: 'zh_cn',
       // },
 
-      title: 'AskPro- AI 问必答',
+      title: 'AskPro- 智能体与工作流',
       meta: [
         { charset: 'utf-8' },
         { name: 'description', content: 'AskPro 是恒领软件提出的，企业级AI 智能体和工作流。脱胎于ChatGPT的慢思考模型。安全、高效、稳定。' },
@@ -36,6 +36,7 @@ export default defineNuxtConfig({
 
     },
   },
+
   nitro: {
   
     'externals': {
@@ -45,6 +46,7 @@ export default defineNuxtConfig({
 
     'experimental': {
       websocket: true,
+
     },
   
     
@@ -60,7 +62,7 @@ export default defineNuxtConfig({
     'dayjs-nuxt',
     '@pinia/nuxt',
     '@vueuse/nuxt',
-    'motion-v/nuxt',
+    'motion-v/nuxt'
   ],
 
   dayjs: {
@@ -90,6 +92,23 @@ export default defineNuxtConfig({
     global: true, // 确保在全局注册 NuxtIcon
     componentName: 'NuxtIcon',
   },
+  // content: {
+  //   build: {
+  //     markdown: {
+  //       highlight: {
+
+  //         theme: {
+  //           // Default theme (same as single string)
+  //           default: 'github-light',
+  //           // Theme used if `html.dark`
+  //           dark: 'github-dark',
+  //           // Theme used if `html.sepia`
+  //           sepia: 'monokai'
+  //         }
+  //       }
+  //     }
+  //   }
+  // },
  
   vite: {
     

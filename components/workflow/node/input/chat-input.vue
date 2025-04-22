@@ -26,7 +26,7 @@ onMounted(async () => {
   } as ChatInputData
 
   currentNode.value = node
-  console.log('currentNode.value', currentNode.value)
+
 
   await nextTick()
   if (footer.value && !node.data.saved) {
@@ -38,19 +38,16 @@ onMounted(async () => {
 })
 
 onNodeClick((event) => {
-  console.log('nodeId:', event.node.id)
-  console.log('完整事件对象:', event)
+
+
 })
 </script>
 
 <template>
   <!-- flex flex-col gap-6  border  pt-6 shadow-sm rounded-xl   text-card-foreground hover:shadow-lg transition-shadow duration-300 hover:shadow-[rgba(219,219,219,0.66)] -->
-  <Card
-    v-if="currentNode && currentNode.data"
-    class="!pb-0 w-96 text-white bg-[#18181B] rounded-lg group flex flex-col focus:outline-none focus:shadow-lg focus:shadow-[#000000]  focus:border focus:border-[#27272A]"
-  >
-     <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id"/>
-    
+  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background rounded-lg group flex flex-col focus:outline-none focus:shadow-lg focus:shadow-black  focus:border focus:border-card">
+    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
+
 
     <CardContent class="text-white flex flex-col space-y-8 -mt-8 flex-1">
       <Separator class="my-5" />
@@ -60,9 +57,9 @@ onNodeClick((event) => {
           <p>Dynamic Text</p>
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
-        <Switch v-model="currentNode.data.dynamicValue"   />
-      
-     
+        <Switch v-model="currentNode.data.dynamicValue" />
+
+
       </div>
       <div>
         <div class="flex flex-row items-center space-x-2">
@@ -70,43 +67,22 @@ onNodeClick((event) => {
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <div class="w-full mt-5">
-          <EditTextDialog
-            class="w-full"
-            :disabled="currentNode.data.dynamicValue"
-            :model-value="currentNode.data.inputValue || ''"
-            placeholder="请输入文本"
-            @save="(val) => currentNode!.data!.inputValue = val"
-          />
+          <EditTextDialog class="w-full" :disabled="currentNode.data.dynamicValue" :model-value="currentNode.data.inputValue || ''" placeholder="请输入文本" @save="(val) => currentNode!.data!.inputValue = val" />
         </div>
       </div>
     </CardContent>
-   
-      <div
-      ref="footer"
-      class="bg-[#27272A] rounded-b-lg py-2 pl-5 pr-10 flex items-center justify-center w-full"
-    >
+
+    <div ref="footer" class="bg-card rounded-b-lg py-2 pl-5 pr-10 flex items-center justify-center w-full">
       <div class="w-full h-full flex items-center justify-between">
-        <NuxtIcon
-          v-if="currentNode.data.outputVariable.show"
-          name="lets-icons:view-duotone"
-          size="24"
-          class="cursor-pointer"
-          @click="currentNode.data.outputVariable.show = false"
-        />
-        <NuxtIcon
-          v-else
-          name="lets-icons:view-hide-duotone"
-          size="24"
-          class="cursor-pointer"
-          @click="currentNode.data.outputVariable.show = true"
-        />
+        <NuxtIcon v-if="currentNode.data.outputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.outputVariable.show = false" />
+        <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.outputVariable.show = true" />
         <div class="">
           Message
         </div>
       </div>
     </div>
-    
 
-    
+
+
   </Card>
 </template>

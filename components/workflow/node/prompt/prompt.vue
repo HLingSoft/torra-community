@@ -64,7 +64,7 @@ watch(edges, () => {
   }
   currentNode.value.data.inputVariables.forEach((v: InputPortVariable) => {
     v.connected = edges.value.some(edge => edge.target === v.id)
-    console.log('v.connected', v.name, v.connected)
+    
   })
 }, { deep: true, immediate: true })
 
@@ -150,7 +150,7 @@ const saveEditVariableTextValue = () => {
 <template>
   <Card
     v-if="currentNode && currentNode.data"
-    class="!pb-0 w-96 text-white bg-[#18181B] rounded-lg group flex flex-col focus:outline-none focus:shadow-lg focus:shadow-[#000000]  focus:border focus:border-[#27272A]"
+    class="!pb-0 w-96 text-white bg-background rounded-lg group flex flex-col focus:outline-none focus:shadow-lg focus:shadow-card  focus:border focus: border-card"
   >
       <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id"/>
    
@@ -241,7 +241,7 @@ const saveEditVariableTextValue = () => {
 
     <div
       ref="footer"
-      class="bg-[#27272A] rounded-b-lg py-2 pl-5 pr-10 flex items-center justify-center"
+      class="bg-card rounded-b-lg py-2 pl-5 pr-10 flex items-center justify-center"
     >
       <div class="w-full h-full flex items-center justify-between">
         <NuxtIcon

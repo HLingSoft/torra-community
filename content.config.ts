@@ -4,6 +4,7 @@ export default defineContentConfig({
   // @ts-expect-error: not yet in exported types
   documentDriven: true,
   highlight: {
-    theme: 'github-dark'
+    theme: 'github-dark',
+    preload: ['bash', 'json', 'javascript', 'typescript'],
   }
 })

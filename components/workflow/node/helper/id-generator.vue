@@ -29,7 +29,7 @@ onMounted(async () => {
   } as IDGeneratorData
 
   currentNode.value = node
-  console.log('currentNode.value', currentNode.value)
+
   if(!currentNode.value.data?.inputValue){
     currentNode.value.data!.inputValue = `${nanoid(6)}-${nanoid(6)}-${nanoid(6)}-${nanoid(6)}`
   }
@@ -44,22 +44,19 @@ onMounted(async () => {
 })
 
 onNodeClick((event) => {
-  console.log('nodeId:', event.node.id)
-  console.log('完整事件对象:', event)
+
+
 })
 </script>
 
 <template>
   <!-- flex flex-col gap-6  border  pt-6 shadow-sm rounded-xl   text-card-foreground hover:shadow-lg transition-shadow duration-300 hover:shadow-[rgba(219,219,219,0.66)] -->
-  <Card
-    v-if="currentNode && currentNode.data"
-    class="!pb-0 w-96 text-white bg-[#18181B] rounded-lg group flex flex-col focus:outline-none focus:shadow-lg focus:shadow-[#000000]  focus:border focus:border-[#27272A]"
-  >
-  <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id"/>
+  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background rounded-lg group flex flex-col focus:outline-none focus:shadow-lg focus:shadow-card  focus:border focus: border-card">
+    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
     <!-- <CardHeader>
       <CardTitle class="text-white flex flex-row items-center justify-between">
         <div class="flex flex-row space-x-2 items-center">
-          <div class="bg-[#27272A] rounded-lg p-1">
+          <div class="bg-card rounded-lg p-1">
             <NuxtIcon name="bx:chat" size="20" class="text-white" />
           </div>
           <div class="">
@@ -76,7 +73,7 @@ onNodeClick((event) => {
         </div>
 
         <div
-          class="bg-[#27272A] cursor-pointer transition-all duration-200 rounded-lg p-1"
+          class="bg-card cursor-pointer transition-all duration-200 rounded-lg p-1"
           :class="editMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
         >
           <NuxtIcon
@@ -114,47 +111,26 @@ onNodeClick((event) => {
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <div class="w-full mt-5">
-     
 
-          <GlobalVariablePopover
-          class="w-full"
-           
-          :model-value="currentNode.data.inputValue || ''"
-          
-          placeholder="Typing something"
-          @save="(val) => currentNode!.data!.inputValue = val" >
+
+          <GlobalVariablePopover class="w-full" :model-value="currentNode.data.inputValue || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.inputValue = val">
           </GlobalVariablePopover>
-         
+
         </div>
       </div>
     </CardContent>
-   
-      <div
-      ref="footer"
-      class="bg-[#27272A] rounded-b-lg py-2 pl-5 pr-10 flex items-center justify-center w-full"
-    >
+
+    <div ref="footer" class="bg-card rounded-b-lg py-2 pl-5 pr-10 flex items-center justify-center w-full">
       <div class="w-full h-full flex items-center justify-between">
-        <NuxtIcon
-          v-if="currentNode.data.outputVariable.show"
-          name="lets-icons:view-duotone"
-          size="24"
-          class="cursor-pointer"
-          @click="currentNode.data.outputVariable.show = false"
-        />
-        <NuxtIcon
-          v-else
-          name="lets-icons:view-hide-duotone"
-          size="24"
-          class="cursor-pointer"
-          @click="currentNode.data.outputVariable.show = true"
-        />
+        <NuxtIcon v-if="currentNode.data.outputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.outputVariable.show = false" />
+        <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.outputVariable.show = true" />
         <div class="">
           Message
         </div>
       </div>
     </div>
-    
 
-    
+
+
   </Card>
 </template>

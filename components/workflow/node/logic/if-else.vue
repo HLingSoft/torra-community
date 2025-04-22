@@ -47,10 +47,10 @@ onMounted(async () => {
     addInputPort(props.id!, currentNode.value.data!.messageVariable.id, 'aquamarine', messageRef.value.offsetTop + messageRef.value.clientHeight / 2 - 10)
   }
 
-  if (matchTextRef.value && !node.data.saved && currentNode.value!.data!.matchType === 'String') {
-    currentNode.value.data!.matchTextVariable.id = nanoLowercaseAlphanumericId(10)
-    addInputPort(props.id!, currentNode.value.data!.matchTextVariable.id, 'aquamarine', matchTextRef.value.offsetTop + matchTextRef.value.clientHeight / 2 - 10)
-  }
+  // if (matchTextRef.value && !node.data.saved && currentNode.value!.data!.matchType === 'String') {
+  //   currentNode.value.data!.matchTextVariable.id = nanoLowercaseAlphanumericId(10)
+  //   addInputPort(props.id!, currentNode.value.data!.matchTextVariable.id, 'aquamarine', matchTextRef.value.offsetTop + matchTextRef.value.clientHeight / 2 - 10)
+  // }
 
   // ✅ 添加输出端口，通常靠底部（Message 区域）
   if (trueRef.value && !node.data.saved) {
@@ -66,8 +66,8 @@ onMounted(async () => {
 
 const { onNodeClick } = useVueFlow()
 onNodeClick((event) => {
-  console.log('nodeId:', event.node.id)
-  console.log('完整事件对象:', event)
+
+
 })
 
 
@@ -121,7 +121,7 @@ watch(
       addInputPort(props.id!, id, 'aquamarine', y)
     }
 
-    if (newType !== 'String' && matchTextRef.value) {
+    if (newType !== 'String') {
       // 删除 port（如果存在）
       if (data.matchTextVariable?.id) {
         removePort(data.matchTextVariable.id)
@@ -156,7 +156,7 @@ watch(
       const y = falseRef.value.offsetTop + falseRef.value.clientHeight / 2
       updateNodePosition(data.falseOutputVariable.id, y) // 更新节点整体位置（如有需要）
     }
-   
+
     // useVueFlow().fitView({ nodes: nodes.value.map(node => node.id) }) // 适配视图
   }
 )
@@ -168,7 +168,7 @@ const filteredOperators = computed(() => {
 </script>
 
 <template>
-  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-[#18181B]   rounded-lg group flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-[#000000]   focus:border focus:border-[#27272A]">
+  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background   rounded-lg group flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card   focus:border focus: border-card">
     <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
 
     <CardContent class="text-white space-y-8 -mt-8  flex-1 nodrag nopan cursor-auto ">
@@ -194,9 +194,9 @@ const filteredOperators = computed(() => {
         </div>
         <div class="w-full  mt-5">
           <div class="filter dark">
-            <input class="btn  btn-sm btn-outline filter-reset" type="radio" v-model="currentNode.data.matchType" value="All" name="matchType" aria-label="All" />
-            <input class="btn btn-sm btn-outline" type="radio" value="String" v-model="currentNode.data.matchType" name="matchType" aria-label="String" />
-            <input class="btn  btn-sm  btn-outline " type="radio" value="Boolean" v-model="currentNode.data.matchType" name="matchType" aria-label="Boolean" />
+            <input class="btn  btn-sm btn-outline filter-reset bg-card text-white" type="radio" v-model="currentNode.data.matchType" value="All" name="matchType" aria-label="All" />
+            <input class="btn btn-sm btn-outline  bg-card text-white" type="radio" value="String" v-model="currentNode.data.matchType" name="matchType" aria-label="String" />
+            <input class="btn  btn-sm  btn-outline bg-card text-white" type="radio" value="Boolean" v-model="currentNode.data.matchType" name="matchType" aria-label="Boolean" />
 
           </div>
 
@@ -260,14 +260,6 @@ const filteredOperators = computed(() => {
         <div class="w-full  mt-5">
           <EditTextDialog class="w-full" :disabled="currentNode.data.messageVariable.connected" :model-value="currentNode.data.messageVariable.value || ''" placeholder="请输入文本" @save="(val) => currentNode!.data!.messageVariable.value = val" />
 
-          <!-- <GlobalVariablePopover
-          class="w-full"
-          :disabled="currentNode.data.messageVariable.connected"
-          :model-value="currentNode.data.messageVariable.value || ''"
-          
-          placeholder="Typing something"
-          @save="(val) => currentNode!.data!.messageVariable.value = val" >
-          </GlobalVariablePopover> -->
 
 
 
@@ -276,7 +268,7 @@ const filteredOperators = computed(() => {
       </div>
     </CardContent>
 
-    <div ref="trueRef" class="bg-[#27272A]    py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="trueRef" class="bg-card    py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.trueOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.trueOutputVariable.show = false" />
 
@@ -287,7 +279,7 @@ const filteredOperators = computed(() => {
         </div>
       </div>
     </div>
-    <div ref="falseRef" class="bg-[#27272A]  -mt-5  rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="falseRef" class="bg-card  -mt-5  rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.falseOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.falseOutputVariable.show = false" />
 

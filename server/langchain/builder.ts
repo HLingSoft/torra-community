@@ -18,6 +18,7 @@ type OutputConnection = {
 export async function executeDAG(
   json: LangFlowJson,
   inputMessage: string,
+  runType = 'chat',// chat or api
   options?: ExecuteDAGOptions,
 ) {
   const context: DAGContext = {}
@@ -53,7 +54,7 @@ export async function executeDAG(
 
     console.log(`🔗 执行节点 [${executed.size + 1}/${initialSorted.length}] ${nodeId} ${node.data.type}`)
 
-    if (isStartNode(json, node.id)) {
+    if (isStartNode(json, node.id, runType)) {
       node.data.inputValue = inputMessage
     }
 
@@ -290,9 +291,15 @@ function topoSortSafe(
   return result
 }
 
-function isStartNode(json: LangFlowJson, nodeId: string): boolean {
+function isStartNode(json: LangFlowJson, nodeId: string, runType: string): boolean {
   const node = json.nodes[nodeId]
+  if (runType === 'api') {
+    return ['APIInput'].includes(node?.data?.type)
+  }
+  if (runType === 'chat') {
   return ['ChatInput'].includes(node?.data?.type)
+  }
+  return false
 }
 
 function formatElapsed(ms: number): string {
@@ -300,4 +307,17 @@ function formatElapsed(ms: number): string {
   const sec = Math.floor(ms / 1000)
   const rem = ms % 1000
   return rem > 0 ? `${sec}s ${rem}ms` : `${sec}s`
+}
+
+
+
+function collectDownstreamFromMany(
+  startIds: string[],
+  outputConnections: ReturnType<typeof buildOutputConnections>
+): Set<string> {
+  const visited = new Set<string>()
+  for (const id of startIds) {
+    collectDownstream(id, outputConnections).forEach(n => visited.add(n))
+  }
+  return visited
 }

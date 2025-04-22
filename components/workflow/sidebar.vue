@@ -1,36 +1,25 @@
 <script setup lang="ts">
- 
+
 const props = defineProps<{ [key: string]: unknown }>()
 const searchKeyword = ref('')
-const { triggerNodeComponentName,nodes } =storeToRefs( useWorkflowStore())
-watch(nodes,()=>{
-  //如果 nodes 里面有  node.data.component 为input/chat-input 的话
+const { triggerNodeComponentName, nodes } = storeToRefs(useWorkflowStore())
+interface NavItem {
+  title: string
+  url: string
+  description?: string
+  component?: string
+  isActive?: boolean
+  isDisabled?: boolean
+}
 
-  const hasChatInput = nodes.value.some(node => node.data.component === 'input/chat-input')
-    //就不能再添加input/chat-input组件了
-  if (hasChatInput) {
-    //把 navMain 里面的 input/chat-input 组件设置为不可用
+interface NavGroup {
+  title: string
+  url: string
+  icon?: string
+  items: NavItem[]
+}
+const data = ref<{ navMain: NavGroup[] }>({
 
-   //先在 data.value.navMain全部找到 input/chat-input 组件
-    //再把它的 isDisabled 设置为 true
-
-    data.value.navMain.forEach(group => {
-      group.items.forEach(item => {
-        if (item.component === 'input/chat-input') {
-          item.isDisabled = true
-        }
-      })
-    })
-   
-
-
-
-
-    // nodes.value = nodes.value.filter(node => node.data.component !== 'input/chat-input')
-  }
-})
-const data =ref( {
-  
   navMain: [
     {
       title: '输入',
@@ -41,7 +30,7 @@ const data =ref( {
           title: 'Chat Input',
           url: '#',
           component: 'input/chat-input',
-         
+
           description: `
   ChatInput
 
@@ -58,7 +47,7 @@ const data =ref( {
   - 需要模拟对话交互的输入端
 
 `,
-          isActive: false,  
+          isActive: false,
           isDisabled: false,
         },
         {
@@ -80,23 +69,20 @@ const data =ref( {
           isActive: false, isDisabled: false,
         },
         {
-          title: 'Question',
+          title: 'API Input',
           url: '#',
-          description: `Question
-
-- **组件名称**："Question"
+          component: 'input/api-input',
+          description: `APIInput
+- **组件名称**："APIInput"
 - **描述**：
-   通用对用户进行提问，并等待用户回答。
+  当前工作流发布为 API 时，接收外部请求的输入组件。适用于需要将工作流作为 API 接口调用的场景。
 - **功能特点**：
-  - 提问组件
-  - 可设置问题类型（单选、多选、文本输入等）
-  - 可绑定至 "Agent" 节点进行实时交互
-- **使用场景**：
-  - 用于收集用户信息
-  - 需要用户输入的场景
-  - 需要用户确认的场景
+  - 支持 POST 请求
+  - 可配置请求参数、头部信息、请求体等
+  - 自动生成 API 文档
 `,
-          isActive: false, isDisabled: false,
+          isActive: false,
+          isDisabled: false,
         },
       ],
     },
@@ -245,7 +231,7 @@ const data =ref( {
         {
           title: 'Ollama',
           url: '#',
-        
+
           isActive: false, isDisabled: false,
           description: '',
         },
@@ -377,7 +363,7 @@ const data =ref( {
       title: '工具',
       url: '#',
       items: [
-       
+
         {
           title: '百度搜索',
           url: '#',
@@ -413,10 +399,10 @@ const data =ref( {
       ],
     },
     {
-      title:'Helpers',
+      title: 'Helpers',
       url: '#',
-      items:[
-      {
+      items: [
+        {
           title: 'ID 生成器',
           url: '#',
           component: 'helper/id-generator',
@@ -445,9 +431,9 @@ const data =ref( {
           isActive: false, isDisabled: false,
           description: '',
         },
-        
 
-       
+
+
       ]
     },
     {
@@ -468,11 +454,11 @@ const data =ref( {
 
       ],
     },
-     
+
 
   ],
 })
- 
+
 const filteredNav = computed(() => {
   const keyword = searchKeyword.value.trim().toLowerCase()
   if (!keyword) return data.value.navMain
@@ -503,12 +489,29 @@ const filteredNav = computed(() => {
     .filter(Boolean)
 })
 
+const exclusiveInputs = ['input/chat-input', 'input/api-input']
+
+watch(nodes, () => {
+  const existingComponents = nodes.value.map(node => node.data.component)
+
+  data.value.navMain
+    .flatMap(group => group.items ?? [])
+    .filter(item => !!item.component) // 👈 加这行解决报错
+    .forEach(item => {
+      if (exclusiveInputs.includes(item.component!)) {
+        item.isDisabled = existingComponents.includes(item.component!)
+      } else {
+        item.isDisabled = false
+      }
+    })
+}, { deep: true })
+
 </script>
 
 <template>
-  <Sidebar v-bind="props" class="dark   bg-[#18181B] text-white border-[hsl(var(--border))] ">
+  <Sidebar v-bind="props" class="dark   bg-background text-white border-[hsl(var(--border))] ">
     <SidebarHeader>
-      <WorkflowWorkspaceSwitcher   />
+      <WorkflowWorkspaceSwitcher />
       <WorkflowSearch class="mt-5" v-model="searchKeyword" />
     </SidebarHeader>
     <SidebarContent>
@@ -521,23 +524,23 @@ const filteredNav = computed(() => {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem v-for="childItem in item!.items" :key="childItem.title" class="bg-[#27272A]/75 cursor-default p-2 rounded-lg">
+              <SidebarMenuItem v-for="childItem in item!.items" :key="childItem.title" class="bg-card/75 cursor-default p-2 rounded-lg">
                 <SidebarMenuButton as-child :is-active="childItem.isActive">
                   <div class="relative  flex   items-center justify-between ">
-                    <div :href="childItem.url" :class="{'cursor-not-allowed  opacity-30':!childItem.component || childItem.isDisabled }" class="peer  w-full">{{ childItem.title }}</div>
-                    <div v-if="childItem.component &&  !childItem.isDisabled" class="absolute z-10 w-full pr-4 transition-all duration-150 hover:opacity-100 opacity-0 flex justify-end">
+                    <div :href="childItem.url" :class="{ 'cursor-not-allowed  opacity-30': !childItem.component || childItem.isDisabled }" class="peer  w-full">{{ childItem.title }}</div>
+                    <div v-if="childItem.component && !childItem.isDisabled" class="absolute z-10 w-full pr-4 transition-all duration-150 hover:opacity-100 opacity-0 flex justify-end">
                       <div class="  flex  items-center gap-x-2    cursor-pointer">
-                        <div class="  bg-[#27272A]   rounded-lg p-1 flex items-center justify-center" @click="triggerNodeComponentName=childItem.component">
+                        <div class="  bg-card   rounded-lg p-1 flex items-center justify-center" @click="triggerNodeComponentName = childItem.component">
                           <NuxtIcon name="si:add-line" size="20" class="text-white" />
                         </div>
                         <HoverCard>
                           <HoverCardTrigger as-child>
-                            <div class="  bg-[#27272A]  text-white cursor-pointer rounded-lg p-1 flex items-center justify-center">
+                            <div class="  bg-card  text-white cursor-pointer rounded-lg p-1 flex items-center justify-center">
                               <NuxtIcon name="clarity:info-line" size="20" class="text-white" />
                             </div>
                           </HoverCardTrigger>
                           <HoverCardContent class="dark w-80 prose prose-neutral prose-sm text-sm">
-                            <MDC :value="childItem.description" tag="article" />
+                            <MDC :value="childItem.description || ''" tag="article" />
                           </HoverCardContent>
                         </HoverCard>
                       </div>

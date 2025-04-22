@@ -25,6 +25,8 @@ export enum EnumWorkflow {
   USER = 'user',
   EDGES = 'edges',
   WORKSPACE = 'workspace',
+  TOKEN = "token",
+  APISCHEMA = "apiSchema"
 }
 
 class Workflow extends AV.Object {
@@ -165,6 +167,22 @@ class Workflow extends AV.Object {
 
   set workspace(value: UserWorkspace | undefined) {
     this.set('workspace', value)
+  }
+
+
+  get token(): string {
+    return this.get('token')
+  }
+  set token(value: string | undefined) {
+    this.set('token', value)
+  }
+
+  get apiSchema(): any {
+    return this.get('apiSchema')
+  }
+
+  set apiSchema(value: any | undefined) {
+    this.set('apiSchema', value)
   }
 
   [key: `temp_${string}`]: any

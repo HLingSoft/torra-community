@@ -51,8 +51,8 @@ onMounted(async () => {
 
 const { onNodeClick } = useVueFlow()
 onNodeClick((event) => {
-  console.log('nodeId:', event.node.id)
-  console.log('完整事件对象:', event)
+
+
 })
 
 const editMode = ref(false)
@@ -73,11 +73,11 @@ const handleStreamChange = (value: boolean) => {
 </script>
 
 <template>
-  <Card v-if=" currentNode" class=" w-96 text-white bg-[#18181B] text-sm rounded-lg group flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-[#000000]   focus:border focus:border-[#27272A]">
+  <Card v-if="currentNode" class=" w-96 text-white bg-background text-sm rounded-lg group flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card   focus:border focus: border-card">
     <CardHeader class="">
       <CardTitle class="text-white flex flex-row  items-center justify-between">
         <div class="flex drag-header flex-row space-x-2 items-center">
-          <div class="bg-[#27272A] rounded-lg p-1  ">
+          <div class="bg-card rounded-lg p-1  ">
             <NuxtIcon name="bx:chat" size="20" class="text-white" />
           </div>
           <div class="ml-10">
@@ -87,11 +87,9 @@ const handleStreamChange = (value: boolean) => {
             </div>
           </div>
         </div>
-        <div
-          class="bg-[#27272A] cursor-pointer transition-all duration-200 rounded-lg p-1" :class="[
-            editMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
-          ]"
-        >
+        <div class="bg-card cursor-pointer transition-all duration-200 rounded-lg p-1" :class="[
+          editMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+        ]">
           <NuxtIcon name="iconamoon:edit-light" size="20" class="text-white" @click.stop="editMode = !editMode" />
         </div>
       </CardTitle>
@@ -138,7 +136,7 @@ const handleStreamChange = (value: boolean) => {
               </SelectGroup>
             </SelectContent>
           </Select>
-          <div class="bg-[#27272A] rounded-lg p-1 ml-4 flex items-center justify-center">
+          <div class="bg-card rounded-lg p-1 ml-4 flex items-center justify-center">
             <NuxtIcon name="solar:refresh-bold-duotone" size="20" class=" cursor-pointer" />
           </div>
         </div>
@@ -155,13 +153,7 @@ const handleStreamChange = (value: boolean) => {
           </div>
         </div>
         <div class="w-full  mt-5">
-          <Slider
-            v-model="temperature"
-            :max="1"
-            :min="0"
-            :step="0.1"
-            :class="cn('w-full', $attrs.class ?? '')"
-          />
+          <Slider v-model="temperature" :max="1" :min="0" :step="0.1" :class="cn('w-full', $attrs.class ?? '')" />
           <div class="flex text-muted-foreground text-xs mt-3 justify-between">
             <span>Precise</span>
             <span>Creative</span>
@@ -175,10 +167,7 @@ const handleStreamChange = (value: boolean) => {
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
 
-        <Switch
-          :model-value="toolEnabled"
-          @update:model-value="handleToolEnabledChange"
-        />
+        <Switch :model-value="toolEnabled" @update:model-value="handleToolEnabledChange" />
       </div>
 
       <div ref="inputRef">
@@ -213,53 +202,26 @@ const handleStreamChange = (value: boolean) => {
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
 
-        <Switch
-          :model-value="stream"
-          @update:model-value="handleStreamChange"
-        />
+        <Switch :model-value="stream" @update:model-value="handleStreamChange" />
       </div>
     </CardContent>
 
-    <div ref="messageRef" class="bg-[#27272A]    py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="messageRef" class="bg-card    py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
-        <NuxtIcon
-          v-if="currentNode.data.show"
-          name="lets-icons:view-duotone"
-          size="24"
-          class="cursor-pointer"
-          @click="currentNode.data.show = false"
-        />
+        <NuxtIcon v-if="currentNode.data.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.show = false" />
 
-        <NuxtIcon
-          v-else
-          name="lets-icons:view-hide-duotone"
-          size="24"
-          class="cursor-pointer"
-          @click="currentNode.data.show = true"
-        />
+        <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.show = true" />
 
         <div class="text-sm  ">
           Message
         </div>
       </div>
     </div>
-    <div ref="languageModelRef" class="bg-[#27272A]   mt-2 rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="languageModelRef" class="bg-card   mt-2 rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
-        <NuxtIcon
-          v-if="currentNode.data.show"
-          name="lets-icons:view-duotone"
-          size="24"
-          class="cursor-pointer"
-          @click="currentNode.data.show = false"
-        />
+        <NuxtIcon v-if="currentNode.data.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.show = false" />
 
-        <NuxtIcon
-          v-else
-          name="lets-icons:view-hide-duotone"
-          size="24"
-          class="cursor-pointer"
-          @click="currentNode.data.show = true"
-        />
+        <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.show = true" />
 
         <div class="text-sm">
           Language Model

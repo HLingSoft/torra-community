@@ -251,7 +251,7 @@
   "less.validate": false,
   "editor.formatOnSave": true,
   "[vue]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "Vue.volar"
   },
   "html.format.wrapAttributes": "auto",
   "html.format.sortAttributes": true,

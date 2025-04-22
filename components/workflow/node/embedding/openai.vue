@@ -73,32 +73,32 @@ watch(edges, () => {
 
 const { onNodeClick } = useVueFlow()
 onNodeClick((event) => {
-  console.log('nodeId:', event.node.id)
-  console.log('完整事件对象:', event)
+
+
 })
 
- 
- 
+
+
 const models = ref([
 
   { id: 'text-embedding-3-small', name: 'text-embedding-3-small' },
   { id: 'text-embedding-3-large', name: 'text-embedding-3-large' },
   { id: 'text-embedding-ada-002', name: 'text-embedding-ada-002' },
- 
+
 ])
 </script>
 
 <template>
-  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-[#18181B]  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-[#000000]   focus:border focus:border-[#27272A]">
-     
-    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id"/>
+  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card   focus:border focus: border-card">
+
+    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
     <CardContent class="text-white space-y-8 -mt-8  flex-1 nodrag nopan cursor-auto ">
       <Separator class="my-5" />
 
-   
-   
 
-     
+
+
+
 
       <div class="w-full">
         <div class="flex flex-row items-center space-x-2 w-full">
@@ -126,13 +126,7 @@ const models = ref([
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <div class="w-full  mt-5">
-          <GlobalVariablePopover
-          class="w-full"
-          :disabled="currentNode.data.apiKeyVariable.connected"
-          :model-value="currentNode.data.apiKeyVariable.value || ''"
-          
-          placeholder="Typing something"
-          @save="(val) => currentNode!.data!.apiKeyVariable.value = val" >
+          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.apiKeyVariable.connected" :model-value="currentNode.data.apiKeyVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.apiKeyVariable.value = val">
           </GlobalVariablePopover>
         </div>
       </div>
@@ -143,21 +137,15 @@ const models = ref([
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <div class="w-full  mt-5">
-          <GlobalVariablePopover
-          class="w-full"
-          :disabled="currentNode.data.baseURLVariable.connected"
-          :model-value="currentNode.data.baseURLVariable.value || ''"
-          
-          placeholder="Typing something"
-          @save="(val) => currentNode!.data!.baseURLVariable.value = val" >
+          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.baseURLVariable.connected" :model-value="currentNode.data.baseURLVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.baseURLVariable.value = val">
           </GlobalVariablePopover>
         </div>
       </div>
 
-      
+
     </CardContent>
 
-    <div ref="outputVariableRef" class="bg-[#27272A]   py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="outputVariableRef" class="bg-card   py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.outputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.outputVariable.show = false" />
 
@@ -168,6 +156,6 @@ const models = ref([
         </div>
       </div>
     </div>
-    
+
   </Card>
 </template>

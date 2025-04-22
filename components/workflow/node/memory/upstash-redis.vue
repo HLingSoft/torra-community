@@ -36,14 +36,14 @@ onMounted(async () => {
   } as UpstashRedisChatMemoryData
 
   currentNode.value = node
-// console.log('redis.vue currentNode', currentNode.value)
+
   await nextTick() // 等待 DOM 渲染完毕
   // ✅ 给每个字段位置添加 Input Port
-// console.log('currentWorkflow.value.objectId',currentWorkflow.value!.objectId)
+
   if (currentWorkflow.value) {
     node.data.sessionId = currentWorkflow.value.objectId
   }
-  console.log('currentWorkflow.value.objectId', node.data.sessionId)
+
   if (tokenVariableRef.value && !node.data.saved) {
     currentNode.value.data!.tokenVariable.id = nanoLowercaseAlphanumericId(10)
     addInputPort(props.id!, currentNode.value.data!.tokenVariable.id, 'aquamarine', tokenVariableRef.value.offsetTop + tokenVariableRef.value.clientHeight / 2)
@@ -66,7 +66,7 @@ onMounted(async () => {
 })
 
 watch(edges, () => {
- 
+
   if (!currentNode.value?.data) {
     return
   }
@@ -78,8 +78,8 @@ watch(edges, () => {
 
 const { onNodeClick } = useVueFlow()
 onNodeClick((event) => {
-  console.log('nodeId:', event.node.id)
-  console.log('完整事件对象:', event)
+
+
 })
 
 
@@ -87,7 +87,7 @@ onNodeClick((event) => {
 </script>
 
 <template>
-  <Card v-if="currentNode && currentNode.data " class="!pb-0 w-96 text-white bg-[#18181B]  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-[#000000]   focus:border focus:border-[#27272A]">
+  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card   focus:border focus: border-card">
 
     <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
     <CardContent class="text-white space-y-8 -mt-8  flex-1 nodrag nopan cursor-auto ">
@@ -123,7 +123,7 @@ onNodeClick((event) => {
 
     </CardContent>
 
-    <div ref="memoryOutputVariableRef" class="bg-[#27272A]   py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="memoryOutputVariableRef" class="bg-card   py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.memoryOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.memoryOutputVariable.show = false" />
 

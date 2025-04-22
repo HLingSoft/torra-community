@@ -13,7 +13,7 @@ const editMode = ref(false)
   <CardHeader v-bind="$attrs">
     <CardTitle class="text-white flex flex-row items-center justify-between">
       <div class="flex drag-header flex-row space-x-2 items-center">
-        <div class="bg-[#27272A] rounded-lg p-1">
+        <div class="bg-card rounded-lg p-1">
           <NuxtIcon name="bx:chat" size="20" class="text-white" />
         </div>
         <div class="ml-2">
@@ -30,7 +30,7 @@ const editMode = ref(false)
       </div>
 
       <div
-        class="bg-[#27272A] cursor-pointer transition-all duration-200 rounded-lg p-1"
+        class="bg-card cursor-pointer transition-all duration-200 rounded-lg p-1"
         :class="editMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
       >
         <NuxtIcon

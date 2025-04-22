@@ -30,7 +30,7 @@ export default defineNitroPlugin(() => {
           const runMsg = msg as WSExecuteRunMessage
           const langflowJson = generateLangFlowJSONFromVueFlow(runMsg.workflow)
 
-          const res = await executeDAG(langflowJson, runMsg.input.message, {
+          const res = await executeDAG(langflowJson, runMsg.input.message, 'chat', {
             onStep: (step: DAGStepInfo) => {
               const progressMsg: WSExecuteProgressMessage = {
                 namespace: 'execute',

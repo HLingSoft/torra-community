@@ -87,11 +87,11 @@ watch(edges, () => {
 
 const { onNodeClick } = useVueFlow()
 onNodeClick((event) => {
-  console.log('nodeId:', event.node.id)
-  console.log('完整事件对象:', event)
+
+
 })
 
- 
+
 
 const temperatureArray = computed<number[]>({
   get: () => [currentNode.value?.data?.temperature ?? 0.2],
@@ -111,9 +111,9 @@ const llms = ref([
 </script>
 
 <template>
-  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-[#18181B]  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-[#000000]   focus:border focus:border-[#27272A]">
-     
-    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id"/>
+  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card   focus:border focus: border-card">
+
+    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
     <CardContent class="text-white space-y-8 -mt-8  flex-1 nodrag nopan cursor-auto ">
       <Separator class="my-5" />
 
@@ -124,7 +124,7 @@ const llms = ref([
         </div>
         <div class="w-full  mt-5">
           <EditTextDialog class="w-full" :disabled="currentNode.data.inputTextVariable.connected" :model-value="currentNode.data.inputTextVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.inputTextVariable.value = val" />
-         
+
         </div>
       </div>
 
@@ -173,14 +173,8 @@ const llms = ref([
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <div class="w-full  mt-5">
-       
-          <GlobalVariablePopover
-          class="w-full"
-          :disabled="currentNode.data.apiKeyVariable.connected"
-          :model-value="currentNode.data.apiKeyVariable.value || ''"
-          
-          placeholder="Typing something"
-          @save="(val) => currentNode!.data!.apiKeyVariable.value = val" >
+
+          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.apiKeyVariable.connected" :model-value="currentNode.data.apiKeyVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.apiKeyVariable.value = val">
           </GlobalVariablePopover>
         </div>
       </div>
@@ -190,17 +184,11 @@ const llms = ref([
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <div class="w-full  mt-5">
-          <GlobalVariablePopover
-          class="w-full"
-          :disabled="currentNode.data.baseURLVariable.connected"
-          :model-value="currentNode.data.baseURLVariable.value || ''"
-          
-          placeholder="https://api.openai.com/v1"
-          @save="(val) => currentNode!.data!.baseURLVariable.value = val" >
+          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.baseURLVariable.connected" :model-value="currentNode.data.baseURLVariable.value || ''" placeholder="https://api.openai.com/v1" @save="(val) => currentNode!.data!.baseURLVariable.value = val">
           </GlobalVariablePopover>
           <!-- <EditTextDialog class="w-full" :model-value="currentNode.data.baseURLVariable.value || ''" placeholder="https://api.openai.com/v1/chat/completions" @save="(val) => currentNode!.data!.baseURLVariable.value = val" /> -->
         </div>
-       
+
       </div>
       <div>
         <div class="flex flex-row items-center justify-between space-x-2">
@@ -222,7 +210,7 @@ const llms = ref([
       </div>
     </CardContent>
 
-    <div ref="messageRef" class="bg-[#27272A]   py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="messageRef" class="bg-card   py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.messageOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.messageOutputVariable.show = false" />
 
@@ -233,7 +221,7 @@ const llms = ref([
         </div>
       </div>
     </div>
-    <div ref="languageModelRef" class="bg-[#27272A]   -mt-5 rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="languageModelRef" class="bg-card   -mt-5 rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.languageModelOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.languageModelOutputVariable.show = false" />
 

@@ -1,4 +1,4 @@
- <script setup lang="ts">
+<script setup lang="ts">
 
 const navigation = {
   solutions: [
@@ -23,11 +23,11 @@ const navigation = {
   ],
 
 }
- </script>
+</script>
 
 <template>
-  <section   class="flex flex-col w-screen ">
-   
+  <section class="flex flex-col w-screen ">
+
     <section class="w-screen h-full  ">
       <slot />
     </section>
@@ -43,56 +43,56 @@ const navigation = {
       </NuxtLink>
     </div>
     <footer class="bg-black  " aria-labelledby="footer-heading">
-    <h2 id="footer-heading" class="sr-only">
-      Footer
-    </h2>
-    <div class="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-20 lg:px-8  ">
-      <div class="xl:grid xl:grid-cols-3 xl:gap-8">
-        <img class="w-auto max-h-14" src="~/assets/logo_white.png" alt="Company name" >
-        <div class="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
-          <div class="md:grid md:grid-cols-2 md:gap-8">
-            <div>
-              <h3 class="     leading-6 text-white">
-                解决方案
-              </h3>
-              <ul role="list" class="mt-6 space-y-4">
-                <li v-for="item in navigation.solutions" :key="item.name">
-                  <a :href="item.href" class="text-sm leading-6 text-white/80 hover:text-white">{{ item.name }}</a>
-                </li>
-              </ul>
+      <h2 id="footer-heading" class="sr-only">
+        Footer
+      </h2>
+      <div class="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-20 lg:px-8  ">
+        <div class="xl:grid xl:grid-cols-3 xl:gap-8">
+          <img class="w-auto max-h-14" src="~/assets/logo_white.png" alt="Company name">
+          <div class="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
+            <div class="md:grid md:grid-cols-2 md:gap-8">
+              <div>
+                <h3 class="     leading-6 text-white">
+                  解决方案
+                </h3>
+                <ul role="list" class="mt-6 space-y-4">
+                  <li v-for="item in navigation.solutions" :key="item.name">
+                    <a :href="item.href" class="text-sm leading-6 text-white/80 hover:text-white">{{ item.name }}</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="mt-10 md:mt-0">
+                <h3 class="     leading-6 text-white">
+                  技术支持
+                </h3>
+                <ul role="list" class="mt-6 space-y-4">
+                  <li v-for="item in navigation.support" :key="item.name">
+                    <a :href="item.href" class="text-sm leading-6 text-white/80 hover:text-white">{{ item.name }}</a>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div class="mt-10 md:mt-0">
-              <h3 class="     leading-6 text-white">
-                技术支持
-              </h3>
-              <ul role="list" class="mt-6 space-y-4">
-                <li v-for="item in navigation.support" :key="item.name">
-                  <a :href="item.href" class="text-sm leading-6 text-white/80 hover:text-white">{{ item.name }}</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="md:grid md:grid-cols-2 md:gap-8">
-            <div>
-              <h3 class="   leading-6 text-white">
-                关于我们
-              </h3>
-              <ul role="list" class="mt-6 space-y-4">
-                <li v-for="item in navigation.company" :key="item.name">
-                  <a :href="item.href" class="text-sm leading-6 text-white/80 hover:text-white">{{ item.name }}</a>
-                </li>
-              </ul>
+            <div class="md:grid md:grid-cols-2 md:gap-8">
+              <div>
+                <h3 class="   leading-6 text-white">
+                  关于我们
+                </h3>
+                <ul role="list" class="mt-6 space-y-4">
+                  <li v-for="item in navigation.company" :key="item.name">
+                    <a :href="item.href" class="text-sm leading-6 text-white/80 hover:text-white">{{ item.name }}</a>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="mt-8 border-t border-gray-900/10 pt-8 md:flex md:items-center md:justify-between">
-        <p class="mt-8 text-sm leading-5 text-white/80 md:order-1 md:mt-0">
-          2025 Copyright@ HLingSoft (Shanghai) Co., Ltd.<a href="https://beian.miit.gov.cn" target="_blank" class=" ml-10">沪ICP备2021004837号</a>
-        </p>
+        <div class="mt-8 border-t border-gray-900/10 pt-8 md:flex md:items-center md:justify-between">
+          <p class="mt-8 text-sm leading-5 text-white/80 md:order-1 md:mt-0">
+            2025 Copyright@ HLingSoft (Shanghai) Co., Ltd.<a href="https://beian.miit.gov.cn" target="_blank" class=" ml-10">沪ICP备2021004837号</a>
+          </p>
+        </div>
       </div>
-    </div>
-  </footer>
+    </footer>
   </section>
 </template>

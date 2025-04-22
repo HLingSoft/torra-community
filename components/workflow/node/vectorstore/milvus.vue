@@ -83,7 +83,7 @@ onMounted(async () => {
 })
 
 onNodeClick(event => {
-  console.log('Clicked node:', event.node.id)
+
 })
 watch(edges, () => {
   if (!currentNode.value?.data) return
@@ -97,16 +97,16 @@ watch(edges, () => {
   //这里要判断这个联系的 source 的 type 是不是 embedding
   data.embeddingVariable.connected = edges.value.some(edge => edge.target === data.embeddingVariable.id)
   data.ingestDataVariable.connected = edges.value.some(edge => edge.target === data.ingestDataVariable.id)
-   
+
 }, { deep: true, immediate: true })
 </script>
 
 <template>
-  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-[#18181B]  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-[#000000]   focus:border focus:border-[#27272A]">
+  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card   focus:border focus: border-card">
     <NodeCardHeader :nodeData="currentNode.data" :id="props.id" />
     <CardContent class="text-white space-y-8 -mt-8  flex-1 nodrag nopan cursor-auto ">
       <Separator class="my-5" />
-     
+
       <div ref="collectionNameRef">
         <div class="flex flex-row items-center space-x-2">
           <p>Collection Name</p>
@@ -122,13 +122,7 @@ watch(edges, () => {
           </div> -->
 
 
-          <GlobalVariablePopover
-          class="w-full"
-          :disabled="currentNode.data.collectionNameVariable.connected"
-          :model-value="currentNode.data.collectionNameVariable.value || ''"
-          
-          placeholder="Typing something"
-          @save="(val) => currentNode!.data!.collectionNameVariable.value = val" >
+          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.collectionNameVariable.connected" :model-value="currentNode.data.collectionNameVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.collectionNameVariable.value = val">
           </GlobalVariablePopover>
 
 
@@ -152,13 +146,7 @@ watch(edges, () => {
           </div> -->
 
 
-          <GlobalVariablePopover
-          class="w-full"
-          :disabled="currentNode.data.connectionURIVariable.connected"
-          :model-value="currentNode.data.connectionURIVariable.value || ''"
-          
-          placeholder="Typing something"
-          @save="(val) => currentNode!.data!.connectionURIVariable.value = val" >
+          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.connectionURIVariable.connected" :model-value="currentNode.data.connectionURIVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.connectionURIVariable.value = val">
           </GlobalVariablePopover>
 
 
@@ -182,14 +170,8 @@ watch(edges, () => {
             <Input disabled class="w-full" type="text" placeholder="Receiving input" />
           </div> -->
 
-         
-          <GlobalVariablePopover
-          class="w-full"
-          :disabled="currentNode.data.tokenVariable.connected"
-          :model-value="currentNode.data.tokenVariable.value || ''"
-          
-          placeholder="Typing something"
-          @save="(val) => currentNode!.data!.tokenVariable.value = val" >
+
+          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.tokenVariable.connected" :model-value="currentNode.data.tokenVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.tokenVariable.value = val">
           </GlobalVariablePopover>
 
 
@@ -213,13 +195,7 @@ watch(edges, () => {
             <Input disabled class="w-full" type="text" placeholder="Receiving input" />
           </div> -->
 
-          <GlobalVariablePopover
-          class="w-full"
-          :disabled="currentNode.data.vectorFieldVariable.connected"
-          :model-value="currentNode.data.vectorFieldVariable.value || ''"
-          
-          placeholder="Typing something"
-          @save="(val) => currentNode!.data!.vectorFieldVariable.value = val" >
+          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.vectorFieldVariable.connected" :model-value="currentNode.data.vectorFieldVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.vectorFieldVariable.value = val">
           </GlobalVariablePopover>
 
 
@@ -235,15 +211,9 @@ watch(edges, () => {
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <div class="w-full  mt-5">
-         
 
-          <GlobalVariablePopover
-          class="w-full"
-          :disabled="currentNode.data.primaryFieldVariable.connected"
-          :model-value="currentNode.data.primaryFieldVariable.value || ''"
-          
-          placeholder="Typing something"
-          @save="(val) => currentNode!.data!.primaryFieldVariable.value = val" >
+
+          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.primaryFieldVariable.connected" :model-value="currentNode.data.primaryFieldVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.primaryFieldVariable.value = val">
           </GlobalVariablePopover>
 
 
@@ -259,14 +229,8 @@ watch(edges, () => {
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <div class="w-full  mt-5">
-        
-          <GlobalVariablePopover
-          class="w-full"
-          :disabled="currentNode.data.partitionKeyVariable.connected"
-          :model-value="currentNode.data.partitionKeyVariable.value || ''"
-          
-          placeholder="Typing something"
-          @save="(val) => currentNode!.data!.partitionKeyVariable.value = val" >
+
+          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.partitionKeyVariable.connected" :model-value="currentNode.data.partitionKeyVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.partitionKeyVariable.value = val">
           </GlobalVariablePopover>
         </div>
       </div>
@@ -296,13 +260,7 @@ watch(edges, () => {
             <Input disabled class="w-full" type="text" placeholder="Receiving input" />
           </div> -->
 
-          <GlobalVariablePopover
-          class="w-full"
-          :disabled="currentNode.data.textFieldVariable.connected"
-          :model-value="currentNode.data.textFieldVariable.value || ''"
-          
-          placeholder="Typing something"
-          @save="(val) => currentNode!.data!.textFieldVariable.value = val" >
+          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.textFieldVariable.connected" :model-value="currentNode.data.textFieldVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.textFieldVariable.value = val">
           </GlobalVariablePopover>
 
 
@@ -323,32 +281,32 @@ watch(edges, () => {
         </div>
       </div>
 
-    
+
       <div ref="embeddingRef">
-        <div  class="  flex w-full flex-row items-center space-x-2">
+        <div class="  flex w-full flex-row items-center space-x-2">
           <p>Embedding</p>
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <p class="text-[#D1D5DB] text-sm">Connect an upstream embedding model to enable vector-based operations.</p>
-       
-     
+
+
       </div>
-        
-        <div ref="ingestDataRef">
-        <div    class="  flex flex-row w-full  items-center space-x-2">
+
+      <div ref="ingestDataRef">
+        <div class="  flex flex-row w-full  items-center space-x-2">
           <p>Ingest Data </p>
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <p class="text-[#D1D5DB] text-sm">Ingest data into the vector database</p>
-       
-      
-      </div>
-         
 
-       
-       
+
+      </div>
+
+
+
+
     </CardContent>
-    <div ref="resultOutputRef" class="bg-[#27272A]   py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="resultOutputRef" class="bg-card   py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.resultOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.resultOutputVariable.show = false" />
 
@@ -359,7 +317,7 @@ watch(edges, () => {
         </div>
       </div>
     </div>
-    <div ref="dataframeOutputRef" class="bg-[#27272A]   -mt-2 rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="dataframeOutputRef" class="bg-card   -mt-2 rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.dataframeOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataframeOutputVariable.show = false" />
 
@@ -370,6 +328,6 @@ watch(edges, () => {
         </div>
       </div>
     </div>
-    
+
   </Card>
 </template>

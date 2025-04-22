@@ -63,47 +63,47 @@ onMounted(async () => {
 
 const { onNodeClick } = useVueFlow()
 onNodeClick((event) => {
-  console.log('nodeId:', event.node.id)
-  console.log('完整事件对象:', event)
+
+
 })
- 
- 
+
+
 watch(edges, () => {
-  
+
   if (!currentNode.value?.data) {
     return
   }
 
   currentNode.value.data.memoryInputVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.memoryInputVariable.id)
-  
+
 }, { deep: true, immediate: true })
 
 </script>
 
 <template>
 
-  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-[#18181B]  rounded-lg group flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-[#000000]  focus:border focus:border-[#27272A]">
-    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id"/>
-    
+  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background  rounded-lg group flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card  focus:border focus: border-card">
+    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
+
 
     <CardContent class="text-white flex flex-col space-y-8 -mt-8 flex-1 ">
       <Separator class="my-5" />
-      
 
-        
+
+
       <div ref="memoryInputVariableRef">
-        <div  class="  flex w-full flex-row items-center space-x-2">
+        <div class="  flex w-full flex-row items-center space-x-2">
           <p>Memory</p>
           <NuxtIcon name="clarity:info-line" size="20" />
         </div>
         <p class="text-[#D1D5DB] text-sm">Connect an upstream memory module (e.g., Redis Chat Memory) to retrieve conversation history.</p>
-       
-     
+
+
       </div>
 
     </CardContent>
 
-    <div ref="messageOutputVariableRef" class="bg-[#27272A]  rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="messageOutputVariableRef" class="bg-card  rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.messageOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.messageOutputVariable.show = false" />
 
@@ -114,7 +114,7 @@ watch(edges, () => {
         </div>
       </div>
     </div>
-    <div ref="dataOutputVariableRef" class="bg-[#27272A]  -mt-5 rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="dataOutputVariableRef" class="bg-card  -mt-5 rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.dataOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataOutputVariable.show = false" />
 
@@ -127,7 +127,7 @@ watch(edges, () => {
     </div>
 
 
-    <div ref="dataframeOutputVariableRef" class="bg-[#27272A]   -mt-5 rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
+    <div ref="dataframeOutputVariableRef" class="bg-card   -mt-5 rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
       <div class="w-full h-full   flex items-center  justify-between">
         <NuxtIcon v-if="currentNode.data.dataframeOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataframeOutputVariable.show = false" />
 

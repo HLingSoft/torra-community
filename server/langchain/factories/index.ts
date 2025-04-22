@@ -45,6 +45,9 @@ import { textOutputMeta } from '~/types/node-data/text-output'
 import { filterDataFactory } from './filter-data'
 import { filterDataMeta } from '~/types/node-data/filter-data'
 
+import { apiInputFactory } from './api-input'
+import { apiInputMeta } from '~/types/node-data/api-input'
+
 export const nodeFactoryMap: Record<string, NodeFactory> = {}
 
 export const initFactories = () => {
@@ -70,6 +73,8 @@ export const initFactories = () => {
   nodeFactoryMap[textOutputMeta.type] = textOutputFactory
 
   nodeFactoryMap[filterDataMeta.type] = filterDataFactory
+
+  nodeFactoryMap[apiInputMeta.type] = apiInputFactory
 
   
   
