@@ -46,10 +46,10 @@ onMounted(async () => {
   userVariables.value = await new LC.Query(UserWorkflowVariable)
     .equalTo(EnumUserWorkflowVariable.USER, user.value)
     .first() as UserWorkflowVariable
-   
+
   if (!userVariables.value) {
     userVariables.value = new UserWorkflowVariable()
-    userVariables.value.user= user.value as User
+    userVariables.value.user = user.value as User
     userVariables.value.variables = {}
   }
   variables.value = Object.entries(userVariables.value.variables).map(([key, value]) => {
@@ -58,8 +58,8 @@ onMounted(async () => {
       value,
     }
   })
- 
-  
+
+
 })
 
 
@@ -80,7 +80,7 @@ const saveVariable = () => {
     return
   }
   if (variables.value.some(v => v.name === currentVariable.value.name)) {
-   
+
     useToast('Variable name already exists')
     return
   }
@@ -105,103 +105,92 @@ const inputWidth = ref(0)
 
 watch(openPopover, (val) => {
   if (val && anchorEl.value) {
-    inputWidth.value = anchorEl.value.offsetWidth* scale.value
+    inputWidth.value = anchorEl.value.offsetWidth * scale.value
   }
 })
 
 </script>
 
 <template>
-  <div v-bind="$attrs" v-if="!props.disabled" class="w-full relative" ref="anchorEl">
+  <div v-bind="$attrs">
+    <div v-if="!props.disabled" class="w-full relative" ref="anchorEl">
 
-    <Input
-      v-model="localValue"
-      type="text"
-      :placeholder="placeholder || 'Typing something...'"
-      class="w-full pr-10"
-    />
- 
-    <Popover class="w-full " v-model:open="openPopover" >
-      <PopoverTrigger  >
-        <div
-      class="absolute z-10 right-2 bottom-8 cursor-pointer flex items-center justify-center"
-   
-    >
-      <NuxtIcon name="solar:global-line-duotone" size="18" />
-    </div> 
-       
-      </PopoverTrigger>
+      <Input v-model="localValue" type="text" :placeholder="placeholder || 'Typing something...'" class="w-full pr-10" />
 
-      <PopoverContent   
-      side="bottom"
-      align="start"
-       :style="{ width: inputWidth + 'px' }"
-          class="  !p-0 dark -mt-4 "
-  >
-        <Command class="max-h-52">
-          <CommandInput placeholder="Search Global variables..." class="text-sm placeholder:text-xs  " />
-          <CommandList>
-            <CommandEmpty class="text-sm text-muted-foreground font-light">No variables found.</CommandEmpty>
-            <CommandGroup heading="Suggestions">
-              <CommandItem class="!py-1.5"  v-for="variable in variables" :key="variable.name" :value="variable.value" @select="selectVariable(variable)">
-                <div class="flex flex-col   pr-5 ">
-                  <div class="font-medium text-xs">{{ variable.name }}</div>
-                  <div class="text-xs text-muted-foreground  mt-1.5  truncate  max-w-[250px]">{{ variable.value }}</div>
-                </div>
-              </CommandItem>
-            </CommandGroup>
-
-          </CommandList>
-
-
-
-        </Command>
-
-        <div class="border-t px-1 py-1 w-full">
-
-          <Button @click.stop="dialogOpen = true" variant="ghost" size="sm" class="w-full text-xs flex flex-row items-center gap-x-2">
-            <NuxtIcon name="si:add-fill" />
-            <p>Add New Variable</p>
-          </Button>
-
-        </div>
-      </PopoverContent>
-    </Popover>
-  </div>
-
-  <div v-else class="relative">
-    <Input disabled class="w-full" type="text" :placeholder="placeholder || 'Receiving input'" />
-    <NuxtIcon name="lets-icons:lock-duotone" size="20" class="absolute z-10 right-2 bottom-2.5 " />
-  </div>
-  <Dialog :open="dialogOpen" @update:open="dialogOpen = $event">
-    <DialogContent class="dark text-white w-full text-sm ">
-      <DialogHeader>
-        <DialogTitle>
-          <div class="flex flex-row items-center gap-x-2">
-            <NuxtIcon name="solar:global-line-duotone" size="18" />Create Variable
+      <Popover class="w-full " v-model:open="openPopover">
+        <PopoverTrigger>
+          <div class="absolute z-10 right-2 bottom-8 cursor-pointer flex items-center justify-center">
+            <NuxtIcon name="solar:global-line-duotone" size="18" />
           </div>
-        </DialogTitle>
-        <DialogDescription>This variable will be available for use across your flows.</DialogDescription>
-      </DialogHeader>
-      <Separator class="my-2" />
 
-      <div class="flex flex-col space-y-10">
-        <div class="grid w-full   items-center gap-5">
-          <Label for="name">Name<span>*</span></Label>
-          <Input id="name" type="text" placeholder="Enter a name for the variable..." v-model="currentVariable.name" />
-        </div>
-        <div class="grid w-full items-center gap-5">
-          <Label for="name">Value<span>*</span></Label>
-          <Input id="name" type="text" placeholder="Enter a value for the variable..." v-model="currentVariable.value" />
-        </div>
-      </div>
-      <Separator class="my-2" />
-      <DialogFooter class="w-full flex flex-row items-center justify-between">
+        </PopoverTrigger>
 
-        <Button :disabled="currentVariable.name === '' || currentVariable.value === ''" @click="saveVariable">
-          Save Variable
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+        <PopoverContent side="bottom" align="start" :style="{ width: inputWidth + 'px' }" class="  !p-0 dark -mt-4 ">
+          <Command class="max-h-52">
+            <CommandInput placeholder="Search Global variables..." class="text-sm placeholder:text-xs  " />
+            <CommandList>
+              <CommandEmpty class="text-sm text-muted-foreground font-light">No variables found.</CommandEmpty>
+              <CommandGroup heading="Suggestions">
+                <CommandItem class="!py-1.5" v-for="variable in variables" :key="variable.name" :value="variable.value" @select="selectVariable(variable)">
+                  <div class="flex flex-col   pr-5 ">
+                    <div class="font-medium text-xs">{{ variable.name }}</div>
+                    <div class="text-xs text-muted-foreground  mt-1.5  truncate  max-w-[250px]">{{ variable.value }}</div>
+                  </div>
+                </CommandItem>
+              </CommandGroup>
+
+            </CommandList>
+
+
+
+          </Command>
+
+          <div class="border-t px-1 py-1 w-full">
+
+            <Button @click.stop="dialogOpen = true" variant="ghost" size="sm" class="w-full text-xs flex flex-row items-center gap-x-2">
+              <NuxtIcon name="si:add-fill" />
+              <p>Add New Variable</p>
+            </Button>
+
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+
+    <div v-else class="relative">
+      <Input disabled class="w-full" type="text" :placeholder="placeholder || 'Receiving input'" />
+      <NuxtIcon name="lets-icons:lock-duotone" size="20" class="absolute z-10 right-2 bottom-2.5 " />
+    </div>
+    <Dialog :open="dialogOpen" @update:open="dialogOpen = $event">
+      <DialogContent class="dark text-white w-full text-sm ">
+        <DialogHeader>
+          <DialogTitle>
+            <div class="flex flex-row items-center gap-x-2">
+              <NuxtIcon name="solar:global-line-duotone" size="18" />Create Variable
+            </div>
+          </DialogTitle>
+          <DialogDescription>This variable will be available for use across your flows.</DialogDescription>
+        </DialogHeader>
+        <Separator class="my-2" />
+
+        <div class="flex flex-col space-y-10">
+          <div class="grid w-full   items-center gap-5">
+            <Label for="name">Name<span>*</span></Label>
+            <Input id="name" type="text" placeholder="Enter a name for the variable..." v-model="currentVariable.name" />
+          </div>
+          <div class="grid w-full items-center gap-5">
+            <Label for="name">Value<span>*</span></Label>
+            <Input id="name" type="text" placeholder="Enter a value for the variable..." v-model="currentVariable.value" />
+          </div>
+        </div>
+        <Separator class="my-2" />
+        <DialogFooter class="w-full flex flex-row items-center justify-between">
+
+          <Button :disabled="currentVariable.name === '' || currentVariable.value === ''" @click="saveVariable">
+            Save Variable
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </div>
 </template>

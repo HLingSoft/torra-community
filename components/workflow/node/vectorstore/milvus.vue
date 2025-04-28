@@ -15,7 +15,7 @@ const { onNodeClick } = useVueFlow()
 
 const collectionNameRef = ref<HTMLElement | null>(null)
 const connectionURIRef = ref<HTMLElement | null>(null)
-const partitionKeyRef = ref<HTMLElement | null>(null)
+// const partitionKeyRef = ref<HTMLElement | null>(null)
 const partitionValueRef = ref<HTMLElement | null>(null)
 const tokenRef = ref<HTMLElement | null>(null)
 const searchQueryRef = ref<HTMLElement | null>(null)

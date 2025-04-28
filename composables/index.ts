@@ -1,9 +1,7 @@
-
- 
 import LC from 'leancloud-storage'
 import * as _ from 'lodash-es'
-import { customAlphabet, nanoid } from 'nanoid'
- 
+import { customAlphabet } from 'nanoid'
+
 import { toast } from 'vue-sonner'
 const LCError = LC.Error
 let isInit = false
@@ -28,20 +26,20 @@ function nanoLowercaseAlphanumericId(length = 4) {
   const generateId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', length)
   return generateId()
 }
-  
-const useToast=(title:string)=>{
+
+const useToast = (title: string) => {
   toast(title)
 }
 export {
- 
+
 
   LC,
   LCError,
   _,
+
   useToast,
-  nanoid,
   nanoLowercaseAlphanumericId,
- 
- 
+
+
 
 }

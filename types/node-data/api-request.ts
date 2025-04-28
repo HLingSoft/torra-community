@@ -7,6 +7,7 @@ export interface APIRequestData {
     icon?: string
     methodType: string
     urlInputVariable: InputPortVariable
+    tokenVariable: InputPortVariable
     bodyVariable: InputPortVariable
     dataOutputVariable: OutputPortVariable
     dataFrameOutputVariable: OutputPortVariable
@@ -26,10 +27,18 @@ export const apiRequestMeta: APIRequestData = {
         name: 'urlInput',
         allowedTypes: ['Message'],
         value: '',
+        forceStringify: true,
+    } as InputPortVariable,
+    tokenVariable: {
+        name: 'tokenInput',
+        allowedTypes: ['Message'],
+        value: '',
+        forceStringify: true,
     } as InputPortVariable,
     bodyVariable: {
         name: 'body',
         allowedTypes: ['Data'],
+        forceStringify: true,
         value: {
         } as Record<string, any>,
     } as InputPortVariable,

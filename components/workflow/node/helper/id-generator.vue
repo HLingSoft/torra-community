@@ -3,7 +3,7 @@ import type { IDGeneratorData } from '@/types/node-data/id-generator'
 import { createPortManager } from '@/components/workflow/useNodePorts'
 import { iDGeneratorMeta } from '@/types/node-data/id-generator'
 import { useVueFlow } from '@vue-flow/core'
-
+import { nanoid } from 'nanoid'
 const props = defineProps<{
   id: string
 }>()
@@ -30,7 +30,7 @@ onMounted(async () => {
 
   currentNode.value = node
 
-  if(!currentNode.value.data?.inputValue){
+  if (!currentNode.value.data?.inputValue) {
     currentNode.value.data!.inputValue = `${nanoid(6)}-${nanoid(6)}-${nanoid(6)}-${nanoid(6)}`
   }
 
@@ -43,6 +43,19 @@ onMounted(async () => {
   }
 })
 
+const refreshID = async () => {
+  const confirmed = await useConfirm({
+    title: '提示',
+    description: '刷新 ID 会导致当前 ID 失效，是否继续？',
+    confirmText: '刷新',
+    cancelText: '取消',
+  })
+
+  if (confirmed) {
+    currentNode.value!.data!.inputValue = `${nanoid(6)}-${nanoid(6)}-${nanoid(6)}-${nanoid(6)}`
+  }
+}
+
 onNodeClick((event) => {
 
 
@@ -53,62 +66,18 @@ onNodeClick((event) => {
   <!-- flex flex-col gap-6  border  pt-6 shadow-sm rounded-xl   text-card-foreground hover:shadow-lg transition-shadow duration-300 hover:shadow-[rgba(219,219,219,0.66)] -->
   <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background rounded-lg group flex flex-col focus:outline-none focus:shadow-lg focus:shadow-card  focus:border focus: border-card">
     <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
-    <!-- <CardHeader>
-      <CardTitle class="text-white flex flex-row items-center justify-between">
-        <div class="flex flex-row space-x-2 items-center">
-          <div class="bg-card rounded-lg p-1">
-            <NuxtIcon name="bx:chat" size="20" class="text-white" />
-          </div>
-          <div class="">
-            <Input
-              v-if="editMode"
-              v-model="currentNode.data.title"
-              class="w-60 nodrag nopan"
-              type="text"
-            />
-            <div v-else>
-              {{ currentNode.data.title }}
-            </div>
-          </div>
-        </div>
-
-        <div
-          class="bg-card cursor-pointer transition-all duration-200 rounded-lg p-1"
-          :class="editMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
-        >
-          <NuxtIcon
-            name="iconamoon:edit-light"
-            size="20"
-            class="text-white"
-            @click.stop="editMode = !editMode"
-          />
-        </div>
-      </CardTitle>
-
-      <CardDescription class=" p-2 rounded-lg">
-        <Input
-          v-if="editMode"
-          v-model="currentNode.data. description"
-          class="w-full nodrag nopan text-white"
-          type="text"
-        />
-        <div v-else class="text-[#D1D5DB]">
-          {{ currentNode.data.description }}
-        </div>
-        <div class="h-5 flex items-center">
-          <div v-if="props.id && nodeExecutionTimes[props.id]" class="  text-green-300 font-mono">
-            ⏱️ 耗时：{{ nodeExecutionTimes[props.id] }}
-          </div>
-        </div>
-      </CardDescription>
-    </CardHeader> -->
 
     <CardContent class="text-white flex flex-col space-y-8 -mt-8 flex-1">
       <Separator class="my-5" />
       <div>
-        <div class="flex flex-row items-center space-x-2">
-          <p>Value</p>
-          <NuxtIcon name="clarity:info-line" size="20" />
+        <div class="flex flex-row items-center justify-between">
+          <div class="flex flex-row items-center space-x-2">
+            <p>Value</p>
+            <NuxtIcon name="clarity:info-line" size="20" />
+          </div>
+          <Button variant="outline" size="sm" class="text-sm" @click="refreshID">
+            <NuxtIcon name="solar:refresh-line-duotone" size="18" />
+          </Button>
         </div>
         <div class="w-full mt-5">
 

@@ -21,8 +21,8 @@ export async function ifElseFactory(node: FlowNode, context: BuildContext) {
   const inputValues = await resolveInputVariables(context, variableDefs)
 
   const textInput = inputValues[textInputVariable.name] ?? ''
- 
-   
+
+
   const matchText = inputValues[matchTextVariable.name] ?? ''
   const message = inputValues[messageVariable.name] ?? ''
   // console.log('ifElseFactory:', textInput, matchText, message,matchType)
@@ -34,7 +34,7 @@ export async function ifElseFactory(node: FlowNode, context: BuildContext) {
   function applyStringOperator(text: string, match: string) {
     const t = caseSensitive ? text : text.toLowerCase()
     const m = caseSensitive ? match : match.toLowerCase()
-  
+
     switch (operator) {
       case 'equals': return t === m
       case 'contains': return t.includes(m)
@@ -67,11 +67,11 @@ export async function ifElseFactory(node: FlowNode, context: BuildContext) {
 
   // const result = applyOperator(textInput, matchText)
   // // const result=true
-  console.log('ifElseFactory:', result)
+  // console.log('ifElseFactory:', result)
 
   return {
-    [trueOutputVariable.id]:  result ? message : undefined,
+    [trueOutputVariable.id]: result ? message : undefined,
     [falseOutputVariable.id]: !result ? message : undefined,
-    default:result
+    default: result
   }
 }

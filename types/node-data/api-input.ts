@@ -1,11 +1,11 @@
-import type { InputPortVariable, OutputPortVariable } from '~/types/workflow'
+import type { OutputPortVariable } from '~/types/workflow'
 
 export interface APIInputData {
     type: string
     title: string
     description: string
     icon?: string
-    
+
     inputValue: Record<string, any>
     structuredOutputVariable: OutputPortVariable
     extraDataVariable: OutputPortVariable

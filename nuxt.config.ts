@@ -7,7 +7,7 @@ import path from 'node:path'
 export default defineNuxtConfig({
   compatibilityDate: '2025-04-14',
   devtools: { enabled: false },
-  css: [ '~/assets/css/tailwind.css','~/assets/css/main.css' ],
+  css: ['~/assets/css/tailwind.css', '~/assets/css/main.css'],
   plugins: ['~/plugins'],
   app: {
     baseURL: '/',
@@ -32,24 +32,24 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico?v=2' },
       ],
-      
+
 
     },
   },
 
   nitro: {
-  
-    'externals': {
-      inline: [],
-    },
-    'plugins': ['~/server/io.ts'],
 
+    // 'externals': {
+    //   inline: [],
+    // },
+    // 'plugins': ['~/server/io.ts'],
+    preset: 'node-server', // ✅ 必须是 node-server
     'experimental': {
       websocket: true,
 
     },
-  
-    
+
+
   },
   modules: [
     '@nuxt/content',
@@ -133,7 +133,7 @@ export default defineNuxtConfig({
     },
   },
   vite: {
-    
+
     plugins: [
       tsconfigPaths(),
       tailwindcss(),

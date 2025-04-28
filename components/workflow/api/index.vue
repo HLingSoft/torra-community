@@ -90,7 +90,7 @@ const refreshToken = async () => {
   })
 
   if (confirmed) {
-  // 执行退出逻辑
+    // 执行退出逻辑
     currentWorkflow.value!.token = `askpro-${nanoid(32)}`
     await currentWorkflow.value!.save()
     useToast('Token Refreshed')
@@ -320,11 +320,11 @@ const run = async () => {
 
 
           </div>
+          <ScrollArea class="flex-1 overflow-auto">
+            <MDC :value="runResult" class=" prose min-h-0 mt-3 p-4 text-sm flex-1 bg-[#1e1e1e]  rounded-md">
 
-          <MDC :value="runResult" class=" prose min-h-0 mt-3 p-4 text-sm flex-1 bg-[#1e1e1e]  rounded-md">
-
-          </MDC>
-
+            </MDC>
+          </ScrollArea>
 
         </div>
       </div>

@@ -17,10 +17,11 @@ const currentNode = ref<{ id: string, data?: UpstashRedisChatMemoryData }>()
 
 const tokenVariableRef = ref<HTMLElement | null>(null)
 const urlRef = ref<HTMLElement | null>(null)
+const sessionIDVariableRef = ref<HTMLElement | null>(null)
 const memoryOutputVariableRef = ref<HTMLElement | null>(null)
 
 
-const { addInputPort, addOutputPort } = createPortManager()
+const { addInputPort, addOutputPort, updateNodePosition } = createPortManager()
 const { nodes, edges, currentWorkflow } = storeToRefs(useWorkflowStore())
 onMounted(async () => {
   await until(currentWorkflow).toBeTruthy()
@@ -40,26 +41,50 @@ onMounted(async () => {
   await nextTick() // 等待 DOM 渲染完毕
   // ✅ 给每个字段位置添加 Input Port
 
-  if (currentWorkflow.value) {
-    node.data.sessionId = currentWorkflow.value.objectId
+  // if (currentWorkflow.value) {
+  //   node.data.sessionId = currentWorkflow.value.objectId
+  // }
+  if (sessionIDVariableRef.value) {
+    if (!currentNode.value.data?.sessionIdVariable.id) {
+      currentNode.value.data!.sessionIdVariable.id = nanoLowercaseAlphanumericId(10)
+      addInputPort(props.id!, currentNode.value.data!.sessionIdVariable.id, 'aquamarine', sessionIDVariableRef.value.offsetTop + sessionIDVariableRef.value.clientHeight / 2)
+    } else {
+      updateNodePosition(currentNode.value.data!.sessionIdVariable.id, sessionIDVariableRef.value.offsetTop + sessionIDVariableRef.value.clientHeight / 2)
+    }
+
+  }
+  if (tokenVariableRef.value) {
+    if (!node.data.saved) {
+      currentNode.value.data!.tokenVariable.id = nanoLowercaseAlphanumericId(10)
+      addInputPort(props.id!, currentNode.value.data!.tokenVariable.id, 'aquamarine', tokenVariableRef.value.offsetTop + tokenVariableRef.value.clientHeight / 2)
+    } else {
+      updateNodePosition(currentNode.value.data!.tokenVariable.id, tokenVariableRef.value.offsetTop + tokenVariableRef.value.clientHeight / 2)
+    }
+
   }
 
-  if (tokenVariableRef.value && !node.data.saved) {
-    currentNode.value.data!.tokenVariable.id = nanoLowercaseAlphanumericId(10)
-    addInputPort(props.id!, currentNode.value.data!.tokenVariable.id, 'aquamarine', tokenVariableRef.value.offsetTop + tokenVariableRef.value.clientHeight / 2)
-  }
 
 
-  if (urlRef.value && !node.data.saved) {
-    currentNode.value.data!.urlVariable.id = nanoLowercaseAlphanumericId(10)
-    addInputPort(props.id!, currentNode.value.data!.urlVariable.id, 'aquamarine', urlRef.value.offsetTop + urlRef.value.clientHeight / 2)
+  if (urlRef.value) {
+    if (!node.data.saved) {
+      currentNode.value.data!.urlVariable.id = nanoLowercaseAlphanumericId(10)
+      addInputPort(props.id!, currentNode.value.data!.urlVariable.id, 'aquamarine', urlRef.value.offsetTop + urlRef.value.clientHeight / 2)
+    } else {
+      updateNodePosition(currentNode.value.data!.urlVariable.id, urlRef.value.offsetTop + urlRef.value.clientHeight / 2)
+    }
+
   }
 
 
   // ✅ 添加输出端口，通常靠底部（Message 区域）
-  if (memoryOutputVariableRef.value && !node.data.saved) {
-    currentNode.value.data!.memoryOutputVariable.id = nanoLowercaseAlphanumericId(10)
-    addOutputPort(props.id!, currentNode.value.data!.memoryOutputVariable.id, 'pink', memoryOutputVariableRef.value.offsetTop + memoryOutputVariableRef.value.clientHeight / 2)
+  if (memoryOutputVariableRef.value) {
+    if (!node.data.saved) {
+      currentNode.value.data!.memoryOutputVariable.id = nanoLowercaseAlphanumericId(10)
+      addOutputPort(props.id!, currentNode.value.data!.memoryOutputVariable.id, 'pink', memoryOutputVariableRef.value.offsetTop + memoryOutputVariableRef.value.clientHeight / 2)
+    } else {
+      updateNodePosition(currentNode.value.data!.memoryOutputVariable.id, memoryOutputVariableRef.value.offsetTop + memoryOutputVariableRef.value.clientHeight / 2)
+    }
+
   }
 
 
@@ -71,7 +96,7 @@ watch(edges, () => {
     return
   }
 
-
+  currentNode.value.data.sessionIdVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.sessionIdVariable.id)
   currentNode.value.data.tokenVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.tokenVariable.id)
   currentNode.value.data.urlVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.urlVariable.id)
 }, { deep: true, immediate: true })
@@ -96,6 +121,16 @@ onNodeClick((event) => {
 
 
 
+      <div ref="sessionIDVariableRef">
+        <div class="flex flex-row items-center space-x-2">
+          <p>Session ID<span class="text-red-500">*</span></p>
+          <NuxtIcon name="clarity:info-line" size="20" />
+        </div>
+        <div class="w-full  mt-5">
+          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.sessionIdVariable.connected" :model-value="currentNode.data.sessionIdVariable.value || ''" @save="(val) => currentNode!.data!.sessionIdVariable.value = val">
+          </GlobalVariablePopover>
+        </div>
+      </div>
 
 
       <div ref="tokenVariableRef">

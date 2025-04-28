@@ -14,7 +14,7 @@ import { ChatOpenAI } from '@langchain/openai'
 import { resolveInputVariables } from '../../langchain/resolveInput'
 
 export async function structuredOutputFactory(node: FlowNode, context: BuildContext) {
- 
+
     const { inputMessageVariable, languageModelVariable, outputSchema, structuredOutputVariable, dataFrameOutputVariable } = node.data as StructuredOutputData
 
     const variableDefs = [inputMessageVariable, languageModelVariable] as InputPortVariable[]
@@ -24,12 +24,13 @@ export async function structuredOutputFactory(node: FlowNode, context: BuildCont
     // console.log('structuredOutputFactory inputValues', inputValues)
     const inputMessage = inputValues[inputMessageVariable.name]
     const languageModel = inputValues[languageModelVariable.name] as ChatOpenAI
+    // console.log(inputMessage)
     // console.log('structuredOutputFactory languageModel', languageModel)
     // console.log('structuredOutputFactory', inputMessageVariable)
-
+    // console.log('structuredOutputFactory outputSchema.value', outputSchema.value)
     const outputFunctionSchema = {
         name: outputSchema.name,
-        description:`   "You are an AI system designed to extract structured information from unstructured text. "
+        description: `   "You are an AI system designed to extract structured information from unstructured text. "
                 "Given the input_text, return a JSON object with predefined keys based on the expected structure. "
                 "Extract values accurately and format them according to the specified type "
                 "(e.g., string, integer, float, date). "
@@ -45,7 +46,7 @@ export async function structuredOutputFactory(node: FlowNode, context: BuildCont
             required: Object.keys(outputSchema.value),
         },
     }
-
+    // console.log('structuredOutputFactory outputFunctionSchema', outputFunctionSchema)
     const llmWithFunction = languageModel.bind({
         functions: [outputFunctionSchema],
         function_call: { name: outputSchema.name },
@@ -56,11 +57,11 @@ export async function structuredOutputFactory(node: FlowNode, context: BuildCont
         llmWithFunction,
         new JsonOutputFunctionsParser(), // 将返回 JSON 结构化
     ])
-    console.log('structuredOutputFactory inputMessage', inputMessage)
+    // console.log('structuredOutputFactory inputMessage', inputMessage)
     const result = await runnablePrompt.invoke(inputMessage)
     console.log('structuredOutputFactory result', result)
     return {
-        [structuredOutputVariable.id]:result,
+        [structuredOutputVariable.id]: result,
         [dataFrameOutputVariable.id]: result,
         default: result,
     }

@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import type { APIRequestData } from '@/types/node-data/api-request'
+import type { APIToolData } from '@/types/node-data/api-tool'
 
 
-import { apiRequestMeta } from '@/types/node-data/api-request'
+import { apiToolMeta } from '@/types/node-data/api-tool'
 
 import { createPortManager } from '~/components/workflow/useNodePorts'
 import { useVueFlow } from '@vue-flow/core'
@@ -12,15 +12,15 @@ const props = defineProps({
 
 })
 
-const currentNode = ref<{ id: string, data?: APIRequestData }>()
+const currentNode = ref<{ id: string, data?: APIToolData }>()
 
-
+const toolNameInputVariableRef = ref<HTMLElement | null>(null)
+const toolDescriptionInputVariableRef = ref<HTMLElement | null>(null)
 const urlInputVariableRef = ref<HTMLElement | null>(null)
 const bodyVariableRef = ref<HTMLElement | null>(null)
 const tokenVariableRef = ref<HTMLElement | null>(null)
 
-const dataOutputVariableRef = ref<HTMLElement | null>(null)
-const dataFrameOutputVariableRef = ref<HTMLElement | null>(null)
+
 const toolOutputVariableRef = ref<HTMLElement | null>(null)
 
 const { addInputPort, addOutputPort, removePort, updateNodePosition } = createPortManager()
@@ -33,15 +33,29 @@ onMounted(async () => {
 
     // 初始化 data
     node.data = {
-        ..._.cloneDeep(apiRequestMeta),
+        ..._.cloneDeep(apiToolMeta),
         ..._.cloneDeep(node.data), // ✅ 已有字段优先级更高，会覆盖默认值
-    } as APIRequestData
+    } as APIToolData
 
     currentNode.value = node
 
     await nextTick() // 等待 DOM 渲染完毕
     // ✅ 给每个字段位置添加 Input Port
 
+    if (toolNameInputVariableRef.value && !node.data.saved) {
+        currentNode.value.data!.toolNameVariable.id = nanoLowercaseAlphanumericId(10)
+        addInputPort(props.id!, currentNode.value!.data!.toolNameVariable.id, 'aquamarine', toolNameInputVariableRef.value.offsetTop + toolNameInputVariableRef.value.clientHeight / 2)
+    }
+
+    if (toolDescriptionInputVariableRef.value && !node.data.saved) {
+        currentNode.value.data!.toolDescriptionVariable.id = nanoLowercaseAlphanumericId(10)
+        addInputPort(props.id!, currentNode.value!.data!.toolDescriptionVariable.id, 'aquamarine', toolDescriptionInputVariableRef.value.offsetTop + toolDescriptionInputVariableRef.value.clientHeight / 2)
+    }
+
+    if (tokenVariableRef.value && !node.data.saved) {
+        currentNode.value.data!.tokenVariable.id = nanoLowercaseAlphanumericId(10)
+        addInputPort(props.id!, currentNode.value.data!.tokenVariable.id, 'aquamarine', tokenVariableRef.value.offsetTop + tokenVariableRef.value.clientHeight / 2)
+    }
 
     if (urlInputVariableRef.value && !node.data.saved) {
         currentNode.value.data!.urlInputVariable.id = nanoLowercaseAlphanumericId(10)
@@ -51,23 +65,13 @@ onMounted(async () => {
         currentNode.value.data!.bodyVariable.id = nanoLowercaseAlphanumericId(10)
         addInputPort(props.id!, currentNode.value.data!.bodyVariable.id, 'aquamarine', bodyVariableRef.value.offsetTop + bodyVariableRef.value.clientHeight / 2)
     }
-    if (tokenVariableRef.value) {
-        const id = nanoLowercaseAlphanumericId(10)
-        currentNode.value.data!.tokenVariable.id = id
-        addInputPort(props.id!, id, 'aquamarine', tokenVariableRef.value.offsetTop + tokenVariableRef.value.clientHeight / 2)
+
+
+
+    if (toolOutputVariableRef.value && !node.data.saved) {
+        currentNode.value.data!.toolOutputVariable.id = nanoLowercaseAlphanumericId(10)
+        addOutputPort(props.id!, currentNode.value.data!.toolOutputVariable.id, 'pink', toolOutputVariableRef.value.offsetTop + toolOutputVariableRef.value.clientHeight / 2)
     }
-
-
-    if (dataOutputVariableRef.value && !node.data.saved) {
-        currentNode.value.data!.dataOutputVariable.id = nanoLowercaseAlphanumericId(10)
-        addOutputPort(props.id!, currentNode.value.data!.dataOutputVariable.id, 'pink', dataOutputVariableRef.value.offsetTop + dataOutputVariableRef.value.clientHeight / 2)
-    }
-
-    if (dataFrameOutputVariableRef.value && !node.data.saved) {
-        currentNode.value.data!.dataFrameOutputVariable.id = nanoLowercaseAlphanumericId(10)
-        addOutputPort(props.id!, currentNode.value.data!.dataFrameOutputVariable.id, 'pink', dataFrameOutputVariableRef.value.offsetTop + dataFrameOutputVariableRef.value.clientHeight / 2)
-    }
-
 
 
 })
@@ -80,7 +84,8 @@ watch(edges, () => {
         return
     }
 
-
+    currentNode.value.data.toolNameVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.toolNameVariable.id)
+    currentNode.value.data.toolDescriptionVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.toolDescriptionVariable.id)
     currentNode.value.data.urlInputVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.urlInputVariable.id)
     currentNode.value.data.bodyVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.bodyVariable.id)
     currentNode.value.data.tokenVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.tokenVariable.id)
@@ -135,15 +140,11 @@ watch(() => currentNode.value?.data?.methodType, async (val, oldVal) => {
 
         // ✅ 更新主 output port 位置
         await nextTick()
-        if (dataOutputVariableRef.value && currentNode.value.data!.dataOutputVariable.id) {
-            const y = dataOutputVariableRef.value.offsetTop + dataOutputVariableRef.value.clientHeight / 2 + 4
-            updateNodePosition(currentNode.value.data!.dataOutputVariable.id, y)
-        }
-        if (dataFrameOutputVariableRef.value && currentNode.value.data!.dataFrameOutputVariable.id) {
-            const y = dataFrameOutputVariableRef.value.offsetTop + dataFrameOutputVariableRef.value.clientHeight / 2 + 4
-            updateNodePosition(currentNode.value.data!.dataFrameOutputVariable.id, y)
-        }
 
+        if (toolOutputVariableRef.value && currentNode.value.data!.toolOutputVariable.id) {
+            const y = toolOutputVariableRef.value.offsetTop + toolOutputVariableRef.value.clientHeight / 2 + 4
+            updateNodePosition(currentNode.value.data!.toolOutputVariable.id, y)
+        }
 
     } else {
         // ✅ 添加 body input port
@@ -154,24 +155,15 @@ watch(() => currentNode.value?.data?.methodType, async (val, oldVal) => {
             currentNode.value.data!.bodyVariable.id = id
             addInputPort(nodeId, id, 'aquamarine', bodyVariableRef.value.offsetTop + bodyVariableRef.value.clientHeight / 2)
         }
-        // ✅ 更新  token input port 位置，updateNodePosition
-
-        if (tokenVariableRef.value && currentNode.value.data!.tokenVariable.id) {
-            const y = tokenVariableRef.value.offsetTop + tokenVariableRef.value.clientHeight / 2 + 4
-            updateNodePosition(currentNode.value.data!.tokenVariable.id, y)
-        }
 
         // ✅ 更新主 output port 位置
         await nextTick()
-        if (dataOutputVariableRef.value && currentNode.value.data!.dataOutputVariable.id) {
-            const y = dataOutputVariableRef.value.offsetTop + dataOutputVariableRef.value.clientHeight / 2 + 4
-            updateNodePosition(currentNode.value.data!.dataOutputVariable.id, y)
-        }
-        if (dataFrameOutputVariableRef.value && currentNode.value.data!.dataFrameOutputVariable.id) {
-            const y = dataFrameOutputVariableRef.value.offsetTop + dataFrameOutputVariableRef.value.clientHeight / 2 + 4
-            updateNodePosition(currentNode.value.data!.dataFrameOutputVariable.id, y)
-        }
 
+
+        if (toolOutputVariableRef.value && currentNode.value.data!.toolOutputVariable.id) {
+            const y = toolOutputVariableRef.value.offsetTop + toolOutputVariableRef.value.clientHeight / 2 + 4
+            updateNodePosition(currentNode.value.data!.toolOutputVariable.id, y)
+        }
     }
 }, { immediate: true })
 
@@ -185,7 +177,29 @@ watch(() => currentNode.value?.data?.methodType, async (val, oldVal) => {
             <CardContent class="text-white space-y-8 -mt-8  flex-1 nodrag nopan cursor-auto ">
                 <Separator class="my-5" />
 
+                <div ref="toolNameInputVariableRef">
+                    <div class="flex flex-row items-center space-x-2">
+                        <p>Tool Name<span class="text-red-500">*</span></p>
+                        <NuxtIcon name="clarity:info-line" size="20" />
+                    </div>
+                    <div class="w-full  mt-5">
+                        <EditTextDialog class="w-full" :disabled="currentNode.data.toolNameVariable.connected" :model-value="currentNode.data.toolNameVariable.value || ''" placeholder="" @save="(val) => currentNode!.data!.toolNameVariable.value = val" />
 
+                    </div>
+                    <div class="mt-3 text-xs text-muted-foreground">必须是纯英文、下划线、小写字母组成的。</div>
+                </div>
+
+                <div ref="toolDescriptionInputVariableRef">
+                    <div class="flex flex-row items-center space-x-2">
+                        <p>Tool Description<span class="text-red-500">*</span></p>
+                        <NuxtIcon name="clarity:info-line" size="20" />
+                    </div>
+                    <div class="w-full  mt-5">
+                        <EditTextDialog class="w-full" :disabled="currentNode.data.toolDescriptionVariable.connected" :model-value="currentNode.data.toolDescriptionVariable.value || ''" placeholder="" @save="(val) => currentNode!.data!.toolDescriptionVariable.value = val" />
+
+                    </div>
+
+                </div>
 
                 <div ref="urlInputVariableRef">
                     <div class="flex flex-row items-center space-x-2">
@@ -197,6 +211,18 @@ watch(() => currentNode.value?.data?.methodType, async (val, oldVal) => {
 
                     </div>
                     <div class="mt-3 text-xs text-muted-foreground">以 http/https 开头。例如:https://www.baidu.com</div>
+                </div>
+
+                <div ref="tokenVariableRef">
+                    <div class="flex flex-row items-center space-x-2">
+                        <p>Token</p>
+                        <NuxtIcon name="clarity:info-line" size="20" />
+                    </div>
+                    <div class="w-full  mt-5">
+                        <EditTextDialog class="w-full" :disabled="currentNode.data.tokenVariable.connected" :model-value="currentNode.data.tokenVariable.value || ''" placeholder="请输入地址" @save="(val) => currentNode!.data!.tokenVariable.value = val" />
+
+                    </div>
+                    <div class="mt-3 text-xs text-muted-foreground"></div>
                 </div>
 
 
@@ -220,17 +246,7 @@ watch(() => currentNode.value?.data?.methodType, async (val, oldVal) => {
                         </Select>
                     </div>
                 </div>
-                <div v-if="currentNode.data.methodType !== 'get'" ref="tokenVariableRef">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>Token</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
-                        <EditTextDialog class="w-full" :disabled="currentNode.data.tokenVariable.connected" :model-value="currentNode.data.tokenVariable.value || ''" placeholder="请输入地址" @save="(val) => currentNode!.data!.tokenVariable.value = val" />
 
-                    </div>
-                    <div class="mt-3 text-xs text-muted-foreground"></div>
-                </div>
 
 
                 <div v-if="currentNode.data.methodType !== 'get'" ref="bodyVariableRef">
@@ -249,29 +265,18 @@ watch(() => currentNode.value?.data?.methodType, async (val, oldVal) => {
 
             </CardContent>
 
-            <div ref="dataOutputVariableRef" class="bg-card   py-2 pl-5 pr-10  flex items-center justify-center">
-                <div class="w-full h-full   flex items-center  justify-between">
-                    <NuxtIcon v-if="currentNode.data.dataOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataOutputVariable.show = false" />
 
-                    <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataOutputVariable.show = true" />
+            <div ref="toolOutputVariableRef" class="bg-card   py-2 pl-5 pr-10  flex items-center justify-center">
+                <div class="w-full h-full   flex items-center  justify-between">
+                    <NuxtIcon v-if="currentNode.data.toolOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.toolOutputVariable.show = false" />
+
+                    <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.toolOutputVariable.show = true" />
 
                     <div class="  ">
-                        Data
+                        Tool
                     </div>
                 </div>
             </div>
-            <div ref="dataFrameOutputVariableRef" class="bg-card  -mt-5 py-2 pl-5 pr-10  flex items-center justify-center">
-                <div class="w-full h-full   flex items-center  justify-between">
-                    <NuxtIcon v-if="currentNode.data.dataFrameOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataFrameOutputVariable.show = false" />
-
-                    <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataFrameOutputVariable.show = true" />
-
-                    <div class="  ">
-                        DataFrame
-                    </div>
-                </div>
-            </div>
-
         </Card>
 
         <Dialog v-model:open="bodyVariableIsOpen">

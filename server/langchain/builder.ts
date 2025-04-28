@@ -1,11 +1,12 @@
-import type { FlowNode, LangFlowJson } from '~/types/workflow'
+import type { FlowNode, LangFlowJson, NodeResultsMap, BuildContext } from '~/types/workflow'
 import type { DAGStepInfo } from '~/types/ws'
 import { initFactories, nodeFactoryMap } from './factories'
+import { ChatInputData } from '~/types/node-data/chat-input'
 
 initFactories()
 
-type DAGContext = Record<string, any>
-type NodeResultsMap = Record<string, Record<string, any>>
+// type BuildContext = Record<string, any>
+// type NodeResultsMap = Record<string, Record<string, any>>
 interface ExecuteDAGOptions {
   onStep?: (step: DAGStepInfo) => void
 }
@@ -21,18 +22,44 @@ export async function executeDAG(
   runType = 'chat',// chat or api
   options?: ExecuteDAGOptions,
 ) {
-  const context: DAGContext = {}
+
   const results: NodeResultsMap = {}
+  const context: Omit<BuildContext, 'resolvedInput'> = {
+    results,
+    json,
+    onRunnableElapsed,
+  }
   context.results = results
   context.json = json
 
+
+  const nodeStatus = new Map<string, 'pending' | 'completed' | 'skipped'>()
+  const stepCache = new Map<string, { index: number; total: number; type: string }>()
+
+  function onRunnableElapsed(nodeId: string, ms: number) {
+    nodeStatus.set(nodeId, 'completed')  // ✅ 这里更新状态
+
+    const cache = stepCache.get(nodeId)
+
+    options?.onStep?.({
+      index: cache?.index ?? 0,
+      total: cache?.total ?? 0,
+      nodeId,
+      type: cache?.type ?? 'unknown',
+      elapsed: ms,
+      elapsedStr: formatElapsed(ms),
+      output: results[nodeId],
+      outputPreview: '',
+    })
+  }
   let inputConnections = buildInputConnections(json)
   const outputConnections = buildOutputConnections(json)
-
+  // console.log(JSON.stringify(json, null, 2))
   const customNodeIds = Object.keys(json.nodes).filter(id => json.nodes[id].type === 'custom')
   const initialSorted = topoSortSafe(json.nodes, inputConnections, customNodeIds)
   let pending = [...initialSorted]
   const executed = new Set<string>()
+  const keepSet = new Set<string>()   // 永久保留的节点
 
 
 
@@ -58,7 +85,16 @@ export async function executeDAG(
 
     if (isStartNode(json, node.id, runType)) {
 
-      node.data.inputValue = inputMessage
+      if (node.data.type === 'ChatInput') {
+        const data = node.data as ChatInputData
+        if (data.dynamicValue) {
+          node.data.inputValue = inputMessage
+        }
+
+      } else {
+        node.data.inputValue = inputMessage
+      }
+
       console.log(`当前是开始节点  ${nodeId} ${node.data.type}`, runType, node.data.inputValue)
     }
 
@@ -73,84 +109,190 @@ export async function executeDAG(
       const values = conns
         .map(conn => results[conn.fromNodeId]?.[conn.fromPortId])
         .filter(v => v !== undefined)
-      // const values = conns
-      //   .filter(conn => executed.has(conn.fromNodeId)) // ✅ 只保留执行过的节点
-      //   .map(conn => results[conn.fromNodeId]?.[conn.fromPortId])
-      //   .filter(v => v !== undefined)
-      // if (node.data.type == 'MilvusRetriever') {
-      //   console.log('values', values)
-      // }
+
       resolvedInput[inputPortId] = values.length === 1 ? values[0] : values
     }
 
     const factory = nodeFactoryMap[node.data.type]
     if (!factory) throw new Error(`❌ 无法找到工厂: ${node.data.type}`)
 
-    const start = performance.now()
-    const factoryOutput = await factory(node, { ...context, resolvedInput })
-    const end = performance.now()
-    const elapsed = Math.round(end - start)
+
+    const t0 = performance.now()              // 开始计时（保留）
+    const ctxForNode: BuildContext = {
+      ...context,
+      resolvedInput,
+    }
+    const buildMs = performance.now() - t0    // factory 本身耗时
+    const factoryOutput = await factory(node, ctxForNode)
+
+    // const buildMs = 0.5// 统一以1ms展示build
+    // const end = performance.now()
+    // const elapsed = Math.round(end - start)
 
     results[node.id] = factoryOutput
     executed.add(node.id)
 
+
+    const hasRunnable = Object.values(factoryOutput).some(hasInvoke)
+
+    if (hasRunnable) {
+      nodeStatus.set(node.id, 'pending')
+    } else {
+      nodeStatus.set(node.id, 'completed')
+    }
+
     options?.onStep?.({
       index: executed.size,
-      total: pending.length + executed.size,
+      total: initialSorted.length,
       nodeId: node.id,
       type: node.data.type,
+      elapsed: hasRunnable ? -1 : buildMs,
+      elapsedStr: hasRunnable ? 'Pending' : formatElapsed(buildMs),
       output: factoryOutput,
       outputPreview: '',
-      elapsed,
-      elapsedStr: formatElapsed(elapsed),
+    })
+
+    /* 把 index / total / type 存进缓存，供二次 push 用 */
+    stepCache.set(node.id, {
+      index: executed.size,
+      total: initialSorted.length,
+      type: node.data.type,
     })
 
 
-// ✅ IfElse 分支控制逻辑（最终版：严格只保留选中分支路径）
-if (node.data.type === 'IfElse') {
-  const isTrueBranch = factoryOutput.default === true
-  const skipPortId = isTrueBranch
-    ? node.data.falseOutputVariable.id
-    : node.data.trueOutputVariable.id
-  const activePortId = isTrueBranch
-    ? node.data.trueOutputVariable.id
-    : node.data.falseOutputVariable.id
 
-  const skipEntryIds = outputConnections[node.id]?.[skipPortId]?.map(conn => conn.toNodeId) || []
-  const activeEntryIds = outputConnections[node.id]?.[activePortId]?.map(conn => conn.toNodeId) || []
+    // ✅ IfElse 分支控制逻辑（最终版：严格只保留选中分支路径）
+    if (node.data.type === 'IfElse') {
+      const isTrueBranch = factoryOutput.default === true
+      const skipPortId = isTrueBranch
+        ? node.data.falseOutputVariable.id
+        : node.data.trueOutputVariable.id
+      const activePortId = isTrueBranch
+        ? node.data.trueOutputVariable.id
+        : node.data.falseOutputVariable.id
 
-  // ✅ activeSet = 从 false/true 分支入口出发，向下收集整条路径
-  const activeSet = new Set<string>()
-  for (const id of activeEntryIds) {
-    collectDownstream(id, outputConnections).forEach(i => activeSet.add(i))
+      const skipEntryIds = outputConnections[node.id]?.[skipPortId]?.map(conn => conn.toNodeId) || []
+      const activeEntryIds = outputConnections[node.id]?.[activePortId]?.map(conn => conn.toNodeId) || []
+
+      // ✅ activeSet = 从 false/true 分支入口出发，向下收集整条路径
+      const activeSet = new Set<string>()
+      for (const id of activeEntryIds) {
+        collectDownstream(id, outputConnections).forEach(i => {
+          activeSet.add(i)
+          keepSet.add(i)          // ← 关键：写进全局保护集
+        })
+      }
+
+      // ✅ toRemove = 从 skip 分支入口出发，收集整条路径（不做对比，全部删）
+      const toRemove = new Set<string>()
+      for (const id of skipEntryIds) {
+        collectDownstream(id, outputConnections).forEach(i => {
+          if (!keepSet.has(i)) toRemove.add(i)
+        })
+      }
+
+      for (const id of toRemove) {
+        Object.values(results[id] ?? {}).forEach(v => {
+          if (typeof v?.invokeIfAvailable === 'function' && v.elapsed === -1) {
+            v.invokeIfAvailable = async () => null   // 永久失效
+          }
+        })
+        if (!keepSet.has(id)) {
+          nodeStatus.set(id, 'skipped')
+          options?.onStep?.({
+            index: stepCache.get(id)?.index ?? 0,
+            total: stepCache.get(id)?.total ?? 0,
+            nodeId: id,
+            type: json.nodes[id].data.type ?? 'unknown',
+            elapsed: -2, // 特殊标记 skipped
+            elapsedStr: 'Skipped',
+            output: '',
+            outputPreview: '',
+          })
+        }
+      }
+      // ❌ 把 skip 分支节点全部从待执行列表移除
+      // const prunedPending = pending.filter(id => !toRemove.has(id))
+      // const toAdd = [...activeSet].filter(id => !executed.has(id) && !prunedPending.includes(id))
+      // 更新 pending
+      pending = pending.filter(id => !toRemove.has(id))
+      const needAdd = [...activeSet].filter(id =>
+        !executed.has(id) && !pending.includes(id)
+      )
+      inputConnections = buildInputConnections(json)
+      pending.push(...topoSortSafe(json.nodes, inputConnections, needAdd))
+
+      console.log(`[IfElse] ${node.id} 分支`, isTrueBranch)
+      console.log('toRemove:', [...toRemove])
+      console.log('activeSet:', [...activeSet])
+
+      console.log('待执行节点:', pending)
+    }
+
+
+
   }
 
-  // ✅ toRemove = 从 skip 分支入口出发，收集整条路径（不做对比，全部删）
-  const toRemove = new Set<string>()
-  for (const id of skipEntryIds) {
-    collectDownstream(id, outputConnections).forEach(i => toRemove.add(i))
+  for (const [nodeId, status] of nodeStatus.entries()) {
+    if (status === 'pending' && !executed.has(nodeId)) {   // ✅ 注意必须 !executed
+      const outputs = results[nodeId]
+      const outputValues = outputs ? Object.values(outputs) : []
+
+      const stillPending = outputValues.every(val =>
+        typeof val?.invokeIfAvailable === 'function' &&
+        val.elapsed === -1
+      )
+
+      if (stillPending) {
+        nodeStatus.set(nodeId, 'skipped')
+
+        const cache = stepCache.get(nodeId)
+        console.warn(`⚠️ 节点 ${nodeId} 被跳过，可能是因为没有输入或未连接`)
+
+        options?.onStep?.({
+          index: cache?.index ?? 0,
+          total: cache?.total ?? 0,
+          nodeId,
+          type: cache?.type ?? 'unknown',
+          elapsed: -2,
+          elapsedStr: 'Skipped',
+          output: '',
+          outputPreview: '',
+        })
+
+      }
+    }
   }
 
-  // ❌ 把 skip 分支节点全部从待执行列表移除
-  const prunedPending = pending.filter(id => !toRemove.has(id))
-  const toAdd = [...activeSet].filter(id => !executed.has(id) && !prunedPending.includes(id))
+  for (const nodeId of executed) {
+    const outputs = results[nodeId]
+    if (!outputs) continue
 
-  // ✅ 只补全 activeSet 路径内节点
-  inputConnections = buildInputConnections(json)
-  const extra = topoSortSafe(json.nodes, inputConnections, toAdd)
-  pending = [...prunedPending, ...extra]
+    const outputValues = Object.values(outputs)
+    const stillPending = outputValues.some(val => typeof val?.invokeIfAvailable === 'function' && val.elapsed === -1)
 
-  console.log(`[IfElse] ${node.id} 分支`, isTrueBranch)
-  console.log('toRemove:', [...toRemove])
-  console.log('activeSet:', [...activeSet])
-  console.log('补全节点:', extra)
-  console.log('待执行节点:', pending)
-}
+    if (stillPending) {
+      nodeStatus.set(nodeId, 'skipped')
 
+      const cache = stepCache.get(nodeId)
+      console.warn(`⚠️ 节点 ${nodeId} 已执行但未完成，判定为 Skipped`)
+
+      options?.onStep?.({
+        index: cache?.index ?? 0,
+        total: cache?.total ?? 0,
+        nodeId,
+        type: cache?.type ?? 'unknown',
+        elapsed: -2,
+        elapsedStr: 'Skipped',
+        output: '',
+        outputPreview: '',
+      })
+    }
   }
 
   const lastId = [...executed].at(-1)!
   const lastNode = json.nodes[lastId]
+  // console.log('results', results)
   const lastResult = results[lastId]
   const output =
     lastResult.default ||
@@ -166,11 +308,16 @@ if (node.data.type === 'IfElse') {
   }
 }
 
-function findPortNodeIdById(json: LangFlowJson, parentNodeId: string, portId: string): string | undefined {
-  return Object.values(json.nodes).find(
-    n => n.data?.parentNode === parentNodeId && n.id === portId
-  )?.id
+
+function hasInvoke(v: unknown): v is { invokeIfAvailable: Function } {
+  return typeof (v as any)?.invokeIfAvailable === 'function'
 }
+
+// function findPortNodeIdById(json: LangFlowJson, parentNodeId: string, portId: string): string | undefined {
+//   return Object.values(json.nodes).find(
+//     n => n.data?.parentNode === parentNodeId && n.id === portId
+//   )?.id
+// }
 
 function buildInputConnections(json: LangFlowJson) {
   const connections: Record<string, Record<string, { fromNodeId: string; fromPortId: string }[]>> = {}
@@ -307,27 +454,30 @@ function isStartNode(json: LangFlowJson, nodeId: string, runType: string): boole
     return ['APIInput'].includes(node?.data?.type)
   }
   if (runType === 'chat') {
-  return ['ChatInput'].includes(node?.data?.type)
+    return ['ChatInput'].includes(node?.data?.type)
   }
   return false
 }
 
+/* ---------------------------------------------------
+   格式化耗时：<1 ms 保留 2 位小数；
+   1 ms–999 ms 取整；1 s+ 转 s + ms；60 s+ 转 m + s。
+ --------------------------------------------------- */
 function formatElapsed(ms: number): string {
-  if (ms < 1000) return `${ms}ms`
-  const sec = Math.floor(ms / 1000)
-  const rem = ms % 1000
-  return rem > 0 ? `${sec}s ${rem}ms` : `${sec}s`
+  if (ms < 0) return 'Pending'           // -1
+  if (ms === -2) return 'Skipped'         // -2 （如果你用 -2 表示 Skipped）
+
+  /* 🔽 关键：小于 0.1 ms 一律写 0.1 ms */
+  if (ms < 0.1) return '0.1 ms'
+
+  if (ms < 1) return `${ms.toFixed(2)} ms`   // 0.10 – 0.99
+  if (ms < 10) return `${ms.toFixed(1)} ms`   // 1.0 – 9.9
+  if (ms < 1000) return `${Math.round(ms)} ms`  // 10 – 999
+  const s = Math.floor(ms / 1000)
+  const rem = Math.round(ms % 1000)
+  if (s < 60) return `${s} s ${rem} ms`
+  const m = Math.floor(s / 60)
+  const sec = s % 60
+  return `${m} m ${sec}s`
 }
 
-
-
-function collectDownstreamFromMany(
-  startIds: string[],
-  outputConnections: ReturnType<typeof buildOutputConnections>
-): Set<string> {
-  const visited = new Set<string>()
-  for (const id of startIds) {
-    collectDownstream(id, outputConnections).forEach(n => visited.add(n))
-  }
-  return visited
-}

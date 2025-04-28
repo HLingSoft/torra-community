@@ -16,10 +16,11 @@ export const chatInputFactory: NodeFactory = async (node: FlowNode, _context: Bu
 
   // 如果没有定义 outputVariable.id，可以给个默认值
   const outputPortId = outputVar.id
+  console.log('chatInputFactory input:', data.inputValue)
   // console.log('chatInputFactory:', JSON.stringify(new HumanMessage(data.inputValue || '')))
 
   return {
     [outputPortId]: new HumanMessage(data.inputValue || ''),
-   
+
   }
 }

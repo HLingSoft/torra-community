@@ -8,7 +8,7 @@ import { promptTemplateMeta } from '@/types/node-data/prompt-template'
 const props = defineProps<{ id: string }>()
 
 // const editMode = ref(false)
-const template = ref('')
+// const template = ref('')
 const inputVariables = ref<InputPortVariable[]>([])
 const variableRefs = ref<Record<string, HTMLElement | undefined>>({})
 // const variablePortMap = ref<Record<string, string>>({})
@@ -31,7 +31,9 @@ onMounted(async () => {
   } as PromptTemplateData
 
   currentNode.value = node
-  template.value = _.cloneDeep(node.data.template) 
+  // template.value = _.cloneDeep(node.data.template)
+
+
 
   inputVariables.value = node.data.inputVariables.map((v) => {
     return {
@@ -39,87 +41,89 @@ onMounted(async () => {
       id: v.id || nanoLowercaseAlphanumericId(10),
       connected: v.connected || false,
       allowedTypes: v.allowedTypes || ['Message'],
-      forceStringify:true // 是否强制转成字符串
+      forceStringify: true // 是否强制转成字符串
     }
   })
-  
+
 
   await nextTick()
 
   if (footer.value) {
     if (!node.data.saved) {
-      const y = footer.value.offsetTop + footer.value.clientHeight / 2 
+      const y = footer.value.offsetTop + footer.value.clientHeight / 2
       const id = nanoLowercaseAlphanumericId(10)
 
       node.data.outputVariable.id = id
       addOutputPort(props.id, id, 'pink', y)
     }
   }
+
+  watchDebounced(() => currentNode.value!.data!.template, async () => {
+    if (!currentNode.value?.data) {
+      return
+    }
+
+    const nodeId = currentNode.value.id
+    const newNames = [...currentNode.value!.data!.template.matchAll(/\{(.*?)\}/g)].map(m => m[1])
+    const oldVars = currentNode.value.data.inputVariables
+    const oldMap = Object.fromEntries(oldVars.map(v => [v.name, v]))
+
+    // 1. 处理被移除的变量
+    const removed = oldVars.filter(v => !newNames.includes(v.name))
+    removed.forEach(v => removePort(v.id))
+
+    // 2. 生成新的 inputVariables
+    const updatedVars: InputPortVariable[] = newNames.map((name) => {
+      const old = oldMap[name]
+      return {
+        name,
+        id: old?.id || nanoLowercaseAlphanumericId(10),
+        value: old?.value ?? '',
+        connected: old?.connected ?? false,
+        allowedTypes: ['Message'],
+        forceStringify: true // 是否强制转成字符串
+      }
+    })
+
+    // 3. 更新 currentNode & local ref
+    currentNode.value.data.inputVariables = updatedVars
+    inputVariables.value = updatedVars
+
+    await nextTick()
+
+    // 4. 更新端口位置
+    updatedVars.forEach((v) => {
+      const el = variableRefs.value[v.name]
+      const y = el?.offsetTop ? el.offsetTop + el.clientHeight / 2 : 0
+
+      if (!oldMap[v.name]) {
+        addInputPort(nodeId, v.id, 'aquamarine', y)
+      }
+      else {
+        updateNodePosition(v.id, y)
+      }
+    })
+
+    // 更新 outputPort 位置
+    if (footer.value && currentNode.value.data.outputVariable.id) {
+      const y = footer.value.offsetTop + footer.value.clientHeight / 2 + 4
+      updateNodePosition(currentNode.value.data.outputVariable.id, y)
+    }
+  }, { immediate: true, debounce: 1000 })
 })
 
 watch(edges, () => {
- 
+
   if (!currentNode.value?.data) {
     return
   }
   currentNode.value.data.inputVariables.forEach((v: InputPortVariable) => {
     v.connected = edges.value.some(edge => edge.target === v.id)
-    
+
   })
 }, { deep: true, immediate: true })
 
-// watch(() => currentNode.value!.data!.template, async () => {
-//   if (!currentNode.value?.data) {
-//     return
-//   }
 
-//   const nodeId = currentNode.value.id
-//   const newNames = [...currentNode.value!.data!.template.matchAll(/\{(.*?)\}/g)].map(m => m[1])
-//   const oldVars = currentNode.value.data.inputVariables
-//   const oldMap = Object.fromEntries(oldVars.map(v => [v.name, v]))
-
-//   // 1. 处理被移除的变量
-//   const removed = oldVars.filter(v => !newNames.includes(v.name))
-//   removed.forEach(v => removePort(v.id))
-
-//   // 2. 生成新的 inputVariables
-//   const updatedVars: InputPortVariable[] = newNames.map((name) => {
-//     const old = oldMap[name]
-//     return {
-//       name,
-//       id: old?.id || nanoLowercaseAlphanumericId(10),
-//       value: old?.value ?? '',
-//       connected: old?.connected ?? false,
-//       allowedTypes: ['Message'],
-//       forceStringify: true // 是否强制转成字符串
-//     }
-//   })
-
-//   // 3. 更新 currentNode & local ref
-//   currentNode.value.data.inputVariables = updatedVars
-//   inputVariables.value = updatedVars
-
-//   await nextTick()
-
-//   // 4. 更新端口位置
-//   updatedVars.forEach((v) => {
-//     const el = variableRefs.value[v.name]
-//     const y = el?.offsetTop ? el.offsetTop + el.clientHeight / 2 : 0
-
-//     if (!oldMap[v.name]) {
-//       addInputPort(nodeId, v.id, 'aquamarine', y)
-//     }
-//     else {
-//       updateNodePosition(v.id, y)
-//     }
-//   })
-
-//   // 更新 outputPort 位置
-//   if (footer.value && currentNode.value.data.outputVariable.id) {
-//     const y = footer.value.offsetTop + footer.value.clientHeight / 2 + 4
-//     updateNodePosition(currentNode.value.data.outputVariable.id, y)
-//   }
-// })
 // const checkAndSave = async () => {
 //   if (!currentNode.value?.data) {
 //     return

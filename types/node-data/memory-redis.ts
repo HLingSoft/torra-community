@@ -6,7 +6,7 @@ export interface UpstashRedisChatMemoryData {
     description: string
     icon?: string
 
-    sessionId: string
+    sessionIdVariable: InputPortVariable
 
     urlVariable: InputPortVariable
     tokenVariable: InputPortVariable
@@ -20,7 +20,13 @@ export const upstashRedisChatMemoryMeta: UpstashRedisChatMemoryData = {
     title: 'Upstash Redis Chat Memory',
     icon: '🟥',
     description: 'Retrieves and store chat messages from Upstash Redis.',
-    sessionId: '',
+    sessionIdVariable: {
+        name: 'sessionId',
+        allowedTypes: ['Message'],
+        value: '',
+        forceStringify: true,
+    } as InputPortVariable,
+
     urlVariable: {
         name: 'url',
         allowedTypes: ['Message'],

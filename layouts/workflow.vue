@@ -4,6 +4,7 @@ import { useVueFlow } from '@vue-flow/core'
 import Workflow, { EnumWorkflow } from '~/models/Workflow'
 import UserWorkspace from '~/models/UserWorkspace'
 import { Check, ChevronsUpDown } from 'lucide-vue-next'
+import WorkflowHistory, { EnumWorkflowHistory } from '~/models/WorkflowHistory'
 const { nodes, edges, currentWorkflow } = storeToRefs(useWorkflowStore())
 
 const { user, currentWorkspace } = storeToRefs(useUserStore())
@@ -22,8 +23,8 @@ onMounted(async () => {
 
   await until(user).toBeTruthy()
   await until(currentWorkspace).toBeTruthy()
-  allWorkflows.value = await new LC.Query(Workflow).equalTo(EnumWorkflow.USER, user.value).equalTo(EnumWorkflow.WORKSPACE, currentWorkspace.value).find()
-  currentWorkflow.value = await new LC.Query(Workflow).equalTo(EnumWorkflow.USER, user.value).equalTo(EnumWorkflow.WORKSPACE, currentWorkspace.value).first()
+  allWorkflows.value = await new LC.Query(Workflow).include(EnumWorkflow.USER).include(EnumWorkflow.WORKSPACE).equalTo(EnumWorkflow.USER, user.value).equalTo(EnumWorkflow.WORKSPACE, currentWorkspace.value).descending(EnumWorkflow.UPDATEDAT).find()
+  currentWorkflow.value = allWorkflows.value.length > 0 ? allWorkflows.value[0] : undefined // await new LC.Query(Workflow).equalTo(EnumWorkflow.USER, user.value).equalTo(EnumWorkflow.WORKSPACE, currentWorkspace.value).first()
 
   if (!currentWorkflow.value) {
     currentWorkflow.value = new Workflow()
@@ -38,7 +39,7 @@ onMounted(async () => {
     nodes.value = currentWorkflow.value.nodes
 
     edges.value = currentWorkflow.value.edges
-    useVueFlow().setNodes(currentWorkflow.value.nodes)
+    // useVueFlow().setNodes(currentWorkflow.value.nodes)
 
   }
 
@@ -81,33 +82,6 @@ const isEditDetailsDialogOpen = ref(false)
 const newWorkflow = ref<Workflow>(new Workflow())
 const saveNewWorkflow = async () => {
 
-  // if (uploadedFile.value) {
-  //   const reader = new FileReader()
-  //   reader.onload = async () => {
-  //     try {
-  //       const parsed = JSON.parse(reader.result as string)
-  //       if (!parsed.nodes || !parsed.edges) {
-  //         useToast('不是合法的工作流文件')
-  //         return
-  //       }
-  //       newWorkflow.value.nodes = parsed.nodes
-  //       newWorkflow.value.edges = parsed.edges
-  //       if (_.isEmpty(newWorkflow.value.name)) {
-  //         newWorkflow.value.name = `${parsed.name} (副本)`
-  //       }
-  //       if (_.isEmpty(newWorkflow.value.description)) {
-  //         newWorkflow.value.description = `${parsed.description} (副本)`
-  //       }
-  //       // newWorkflow.value.name = `${parsed.name} (副本)`
-  //       // newWorkflow.value.description = `${parsed.description} (副本)`
-  //     } catch (err) {
-  //       console.error('❌ JSON 解析失败:', err)
-  //       useToast('文件格式不正确，请确认是导出的工作流文件')
-  //       return
-  //     }
-  //   }
-  //   reader.readAsText(uploadedFile.value)
-  // }
 
   if (!newWorkflow.value.name) {
     useToast('工作流名称不能为空')
@@ -117,7 +91,12 @@ const saveNewWorkflow = async () => {
     useToast('工作流描述不能为空')
     return
   }
-
+  if (!newWorkflow.value.nodes) {
+    newWorkflow.value.nodes = []
+  }
+  if (!newWorkflow.value.edges) {
+    newWorkflow.value.edges = []
+  }
   newWorkflow.value.user = user.value as User
   newWorkflow.value.workspace = currentWorkspace.value as UserWorkspace
   await newWorkflow.value.save()
@@ -128,7 +107,7 @@ const saveNewWorkflow = async () => {
   // newWorkflow.value = new Workflow()
   isCreateWorkflowDialogOpen.value = false
   await nextTick()
-  currentWorkflow.value = newWorkflow.value
+  currentWorkflow.value = await new LC.Query(Workflow).include(EnumWorkflow.WORKSPACE).include(EnumWorkflow.USER).get(newWorkflow.value.objectId)
 }
 const saveCureentWorkflow = async () => {
   if (!currentWorkflow.value) {
@@ -153,18 +132,7 @@ const saveCureentWorkflow = async () => {
     allWorkflows.value[index] = currentWorkflow.value as Workflow
   }
 }
-watch(
-  () => currentWorkflow.value,
-  () => {
-    if (currentWorkflow.value) {
-      nodes.value = currentWorkflow.value.nodes
-      edges.value = currentWorkflow.value.edges
-      useVueFlow().setNodes(currentWorkflow.value.nodes)
-      useVueFlow().fitView()
-    }
-  },
-  { immediate: true },
-)
+
 const saveWorkflow = async () => {
   currentWorkflow.value!.nodes = nodes.value
   currentWorkflow.value!.edges = edges.value
@@ -263,6 +231,58 @@ async function handleFileChange(event: Event) {
 }
 
 const showAPIDialog = ref(false)
+
+
+
+const isHistoryDialogOpen = ref(false)
+const currentWorkflowHistories = ref<WorkflowHistory[]>([])
+watch(isHistoryDialogOpen, async () => {
+  if (isHistoryDialogOpen.value) {
+    if (!currentWorkflow.value) {
+      return
+    }
+    currentWorkflowHistories.value = await new LC.Query(WorkflowHistory).equalTo(EnumWorkflowHistory.WORKFLOW, currentWorkflow.value).descending(EnumWorkflow.CREATEDAT).limit(1000).find()
+
+
+    currentWorkflowHistories.value.map((history: WorkflowHistory) => {
+      history.temp_createdAtStr = history.createdAt!.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    })
+  }
+})
+
+const deleteHistory = async (history: WorkflowHistory) => {
+  const confirmed = await useConfirm({
+    title: '删除历史记录',
+    description: '确定要删除历史记录吗？',
+  })
+
+  if (confirmed) {
+    await history.destroy()
+    useToast('删除历史记录成功')
+    currentWorkflowHistories.value = currentWorkflowHistories.value.filter((h: WorkflowHistory) => h.objectId !== history.objectId)
+  }
+}
+
+const rollbackHistory = async (history: WorkflowHistory) => {
+  const confirmed = await useConfirm({
+    title: '回退历史记录',
+    description: `确定要回退到${history.version}历史记录吗？`,
+  })
+
+  if (confirmed) {
+    currentWorkflow.value!.nodes = history.nodes
+    currentWorkflow.value!.edges = history.edges
+    await currentWorkflow.value?.save()
+    useToast('回退工作流成功')
+    isHistoryDialogOpen.value = false
+  }
+}
 </script>
 
 <template>
@@ -300,7 +320,7 @@ const showAPIDialog = ref(false)
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent class="w-52 dark py-2" align="start">
-                  <DropdownMenuItem v-for="workflow in allWorkflows" :key="workflow.objectId" class="w-full py-2 truncate" @select="currentWorkflow = workflow">
+                  <DropdownMenuItem v-for="workflow in allWorkflows" :key="workflow.objectId" class="w-full py-2 max-w-48 text-xs" @select="currentWorkflow = workflow">
                     {{ workflow.name }}
                     <Check v-if="workflow.objectId === currentWorkflow?.objectId" class="ml-auto" />
                   </DropdownMenuItem>
@@ -393,7 +413,12 @@ const showAPIDialog = ref(false)
                       <p>Edit Details</p>
                     </div>
                   </DropdownMenuItem>
-
+                  <DropdownMenuItem>
+                    <div @click="isHistoryDialogOpen = true" class="flex items-center space-x-2 ">
+                      <NuxtIcon name="solar:history-bold-duotone" size="19" />
+                      <p>Histories</p>
+                    </div>
+                  </DropdownMenuItem>
                   <DropdownMenuItem>
                     <div class="flex items-center space-x-2 opacity-35 cursor-not-allowed">
                       <NuxtIcon name="material-symbols-light:logo-dev-outline-rounded" size="19" />
@@ -574,6 +599,64 @@ const showAPIDialog = ref(false)
             </DialogContent>
           </Dialog>
 
+
+          <Dialog v-model:open="isHistoryDialogOpen">
+            <DialogTrigger as-child>
+
+
+            </DialogTrigger>
+            <DialogContent v-if="currentWorkflow" class="!max-w-7xl   dark text-white">
+              <DialogHeader>
+                <DialogTitle>Histories</DialogTitle>
+                <DialogDescription>
+                  Show the histories of the current workflow.
+                </DialogDescription>
+              </DialogHeader>
+
+              <ScrollArea class="h-[50vh]">
+                <div class="min-w-full overflow-x-auto">
+                  <Table class="min-w-full table-fixed">
+                    <TableCaption>
+                      {{ currentWorkflowHistories.length > 0 ? `Found ${currentWorkflowHistories.length} record(s)` : 'No records found' }}
+                    </TableCaption>
+
+
+                    <thead class="sticky top-0   z-10">
+                      <TableRow>
+                        <TableHead class="w-1/3">Version</TableHead>
+                        <TableHead>CreatedAt</TableHead>
+                        <TableHead class="flex items-center justify-end space-x-2">Operator</TableHead>
+                      </TableRow>
+                    </thead>
+
+                    <TableBody>
+                      <TableRow v-for="history in currentWorkflowHistories" :key="history.objectId">
+                        <TableCell class="font-medium w-1/3">
+                          {{ history.version }}
+                        </TableCell>
+                        <TableCell>{{ history.temp_createdAtStr }}</TableCell>
+                        <TableCell>
+                          <div class="flex items-center justify-end space-x-2">
+                            <Button size="sm" variant="destructive" @click="deleteHistory(history)">删除</Button>
+                            <Button size="sm" variant="outline" class="ml-2" @click="rollbackHistory(history)">回退</Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+
+                  </Table>
+                </div>
+              </ScrollArea>
+
+              <DialogFooter>
+                <DialogClose as-child>
+                  <Button type="button" variant="secondary">
+                    Close
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           <div v-if="showAPIDialog">
             <WorkflowApi v-model:open="showAPIDialog" />

@@ -101,10 +101,12 @@ const temperatureArray = computed<number[]>({
     }
   },
 })
+
 const llms = ref([
 
   { id: 'gpt-4o-mini', name: 'gpt-4o-mini' },
-  // { id: 'o1', name: 'o1' },
+  { id: 'gpt-4o', name: 'gpt-4o' },
+  { id: 'gpt-4', name: 'gpt-4' },
   { id: 'gpt-4.1', name: 'gpt-4.1' },
 ])
 </script>

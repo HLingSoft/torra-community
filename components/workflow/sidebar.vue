@@ -133,6 +133,14 @@ const data = ref<{ navMain: NavGroup[] }>({
           description: '',
         },
         {
+          title: 'API Tool',
+          url: '#',
+          component: 'data/api-tool',
+          isActive: false,
+          isDisabled: false,
+          description: '',
+        },
+        {
           title: 'Directory',
           url: '#',
           description: '',
@@ -309,7 +317,9 @@ const data = ref<{ navMain: NavGroup[] }>({
         {
           title: 'Agent',
           url: '#',
-          isActive: false, isDisabled: false,
+          component: 'agent/agent',
+          isActive: false,
+          isDisabled: false,
           description: '',
         },
 
@@ -441,8 +451,16 @@ const data = ref<{ navMain: NavGroup[] }>({
       url: '#',
       items: [
         {
+          title: 'MCP Tools HTTP',
+          url: '#',
+          component: 'mcp/http',
+          isActive: false, isDisabled: false,
+          description: '',
+        },
+        {
           title: 'MCP Tools SSE',
           url: '#',
+          // component: 'mcp/sse',
           isActive: false, isDisabled: false,
           description: '',
         },

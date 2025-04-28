@@ -3,7 +3,7 @@ import type { BuildContext, FlowNode, InputPortVariable, NodeFactory, OutputPort
 
 import { HumanMessage } from '@langchain/core/messages'
 import { resolveInputVariables } from '../../langchain/resolveInput'
- 
+
 export const textInputFactory: NodeFactory = async (node: FlowNode, context: BuildContext) => {
   const data = node.data as TextInputData
   const variableDefs = [data.inputVariable] as InputPortVariable[]
@@ -13,13 +13,13 @@ export const textInputFactory: NodeFactory = async (node: FlowNode, context: Bui
 
   const outputVar = data.outputVariable as OutputPortVariable
 
- 
+
   const outputPortId = outputVar.id
   // console.log('outputPortId', inputValues[variableNames[0]])
-  
+
   return {
-  
+
     [outputPortId]: new HumanMessage(inputValues[variableNames[0]]),
   }
- 
+
 }

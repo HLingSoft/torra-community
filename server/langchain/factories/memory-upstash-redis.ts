@@ -12,19 +12,28 @@ export async function upstashRedisChatMemoryFactory(node: FlowNode, context: Bui
         urlVariable,
         tokenVariable,
         memoryOutputVariable,
-        sessionId,
+        sessionIdVariable,
     } = data
 
     const variableDefs = [
         urlVariable,
-        tokenVariable
+        tokenVariable,
+        sessionIdVariable
 
     ] as InputPortVariable[]
 
     const inputValues = await resolveInputVariables(context, variableDefs)
+    // console.log("upstashRedisChatMemoryFactory", inputValues)
     const url = inputValues[urlVariable.name]
     const token = inputValues[tokenVariable.name]
- 
+    let sessionId = inputValues[sessionIdVariable.name]
+    // console.log("upstashRedisChatMemoryFactory", sessionId)
+
+    //如果没有 sessionId，则使用当前时间戳作为 sessionId
+    if (!sessionId) {
+        sessionId = Date.now().toString()
+    }
+
 
 
     const memory = new UpstashRedisChatMessageHistory({
@@ -35,7 +44,7 @@ export async function upstashRedisChatMemoryFactory(node: FlowNode, context: Bui
             token
         })
     })
-   
+
 
     return {
         [memoryOutputVariable.id]: memory,

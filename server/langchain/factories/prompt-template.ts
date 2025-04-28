@@ -16,7 +16,7 @@ export async function promptTemplateFactory(node: FlowNode, context: BuildContex
   // console.log('🔗 [PromptTemplate] 变量:',  context.resolvedInput)
   const variableDefs = data.inputVariables as InputPortVariable[] || []
   const variableNames = variableDefs.map(v => v.name)
-  
+
 
   const inputValues = await resolveInputVariables(context, variableDefs)
 

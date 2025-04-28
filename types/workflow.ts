@@ -45,7 +45,15 @@ export interface OutputPortVariable {
 
 }
 
-export type BuildContext = Record<string, any>
+// export type BuildContext = Record<string, any>
+export type NodeResultsMap = Record<string, Record<string, any>>
+export interface BuildContext {
+  resolvedInput: Record<string, any>
+  results: NodeResultsMap
+  json: LangFlowJson
+  /** 由 executeDAG 注入，用来回写真实耗时 */
+  onRunnableElapsed?: (nodeId: string, ms: number) => void
+}
 
 // 👇 工厂函数中我们明确用 LangFlowNode
 export type NodeFactory = (node: FlowNode, context: BuildContext) => Promise<any>

@@ -1,15 +1,16 @@
 <script lang="ts" setup>
 import type { ConnectionLineProps, GraphNode, VueFlowStore } from '@vue-flow/core'
 // import { Controls } from '@vue-flow/controls'
-import { useVueFlow, VueFlow } from '@vue-flow/core'
+import { useVueFlow, VueFlow, useNodesInitialized } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
+import { nanoid } from 'nanoid';
 import "~/assets/css/_node.scss";
 const history = useWorkflowHistoryStore()
 definePageMeta({
   layout: 'workflow',
 })
 useHead({
-  title: '企业级AI工作流',
+  title: '企业级AI智能体和工作流平台',
   meta: [
     // 基本描述
     { name: 'description', content: '企业级AI工作流，助力企业智能自动化，提升效率，降低成本。' },
@@ -17,14 +18,15 @@ useHead({
 
   ],
 })
-const { project } = useVueFlow()
-const { nodes, edges, triggerNodeComponentName } = storeToRefs(useWorkflowStore())
+// const { project } = useVueFlow()
+const { nodes, edges, triggerNodeComponentName, currentWorkflow } = storeToRefs(useWorkflowStore())
 
 const {
   onConnect,
   findNode,
   findEdge,
-
+  project,
+  fitView, setViewport,
   onEdgeContextMenu,
 
   onNodeClick,
@@ -33,21 +35,26 @@ const {
   removeEdges,
   removeNodes,
 
+
 } = useVueFlow({
   nodes: nodes.value,
   edges: edges.value,
-  autoConnect: false,
+  autoConnect: true,
   connectOnClick: false,
 })
-
+const nodesInitialized = useNodesInitialized()
 
 const onFlowInit = async (_instance: VueFlowStore) => {
-
+  console.log('onFlowInit', _instance)
 
 }
 
 
-
+watch(nodesInitialized, (initialized) => {
+  if (initialized) {
+    fitView({ padding: 0.1, duration: 500 })
+  }
+})
 
 const nodeComponentMap = useNodeComponentMap()
 onConnect((connection) => {
@@ -190,13 +197,15 @@ onNodeClick(({ node }) => {
 
 // // 单独封装 zoom 调整逻辑
 // const adjustZoom = (count: number) => {
-//   const baseZoom = 1
-//   const maxNodes = 20
-//   const zoom = Math.max(0.35, baseZoom - count / maxNodes)
+//   // const baseZoom = 1
+//   // const maxNodes = 100
+//   // const zoom = Math.max(0.5, baseZoom - count / maxNodes)
+//   // console.log('zoom', zoom)
 
 
+//   const position = project({ x: 200, y: 200 }) // 👈 关键位置
 
-//   // setViewport?.({ zoom, x: 400, y: 400 }, { duration: 500 })
+//   setViewport({ zoom: 0.5, x: position.x, y: position.y }, { duration: 500 })
 // }
 
 watch(triggerNodeComponentName, () => {
@@ -221,12 +230,29 @@ watch(triggerNodeComponentName, () => {
 //     onNodesChange([{ type: 'reset' }])
 //   })
 // })
+watch(
+  () => currentWorkflow.value,
+  async () => {
+    if (currentWorkflow.value) {
+      nodes.value = []
+      edges.value = []
+      await nextTick()
+      nodes.value = [...currentWorkflow.value.nodes]
+      await nextTick()
+      edges.value = [...currentWorkflow.value.edges]
+
+
+
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
   <div class="">
     <ClientOnly>
-      <div class="w-screen h-screen  ">
+      <div v-if="currentWorkflow" class="w-screen h-screen  ">
         <VueFlow @init="onFlowInit" fit-view-on-init :nodes="nodes" :edges="edges" :default-viewport="{ zoom: 0.8 }" :max-zoom="2" :min-zoom="0.1">
           <Background />
           <template #node-custom="props">

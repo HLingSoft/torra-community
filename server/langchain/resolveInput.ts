@@ -1,21 +1,34 @@
 import type { InputPortVariable } from '~/types/workflow'
-// import { load } from '@langchain/core/load';
- 
-// import { StringPromptValue } from '@langchain/core/prompt_values'
- 
-export function wrapRunnable(runnable: any) {
+export interface WrappedRunnable<T = any> {
+  /** 只有在真正需要时才调用；内部会记录耗时并上报 */
+  invokeIfAvailable: (input?: any) => Promise<T>
+  /** -1 = 未执行, 0 = <1 ms, >0 = 实际 ms */
+  readonly elapsed: number
+}
+export function wrapRunnable<T>(
+  runnable: { invoke: (input?: any) => Promise<T> },
+  nodeId: string,
+  onElapsed?: (nodeId: string, ms: number) => void,
+) {
+  let elapsed = -1
+
+  async function invokeIfAvailable(input?: any) {
+    const t0 = performance.now()
+    const out = await runnable.invoke(input ?? {})
+
+    elapsed = performance.now() - t0
+    onElapsed?.(nodeId, elapsed)
+    return out
+  }
+
   return {
-    original: runnable,
-    invokeIfAvailable: async (input?: any) => {
-      if (typeof runnable?.invoke === 'function') {
-        return await runnable.invoke(input ?? {})
-      } else {
-        console.warn('invoke() 不可用');
-        return null
-      }
-    }
+    original: runnable,  // 👈 加一行，存原始
+    invokeIfAvailable,
+    get elapsed() { return elapsed },
   }
 }
+
+
 function isForceStringifyMessageType(variable: InputPortVariable): boolean {
   return (
     variable.forceStringify &&
@@ -70,8 +83,9 @@ export async function resolveInputVariables(
     }
 
     inputValues[variable.name] = resolved
-  }
 
+  }
+  // console.log('inputValues', inputValues)
   return inputValues
 }
 
