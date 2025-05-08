@@ -20,10 +20,10 @@ export enum EnumWorkflowRunLog {
   OBJECTID = "objectId",
   CREATEDAT = "createdAt",
   WORKFLOW = "workflow",
-
+  LOGS = "logs",
   VALIDATED = "validated",
   USER = "user",
-
+  CHANNEL = "channel",
   NAME = "name",
   VERSION = "version",
   WORKFLOWHISTORY = "history",
@@ -170,6 +170,21 @@ class WorkflowRunLog extends AV.Object {
 
   set result(value: any | undefined) {
     this.set("result", value)
+  }
+
+  get logs(): Array<any> {
+    return this.get("logs")
+  }
+  set logs(value: Array<any> | undefined) {
+    this.set("logs", value)
+  }
+
+  get channel(): string {
+    return this.get("channel")
+  }
+
+  set channel(value: string | undefined) {
+    this.set("channel", value)
   }
 
   [key: `temp_${string}`]: any

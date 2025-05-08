@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import type Workflow from '~/models/Workflow'
-import type { ServerMessage } from '~/types/ws'
-import { Button } from '~/components/ui/button'
-import { ref } from 'vue'
+import type { ServerMessage, LogNode } from '~/types/ws'
+
+import User from '~/models/User'
 import { ChatInputLangchainName } from '~/types/node-data/chat-input'
+import WorkflowRunLog from '~/models/WorkflowRunLog'
 const props = defineProps<{ workflow: Workflow }>()
 const { setExecutionTime } = useNodeExecutionStats()
 const { currentWorkflow } = storeToRefs(useWorkflowStore())
+const { user } = storeToRefs(useUserStore())
 const canUsePlayground = ref(false)
 function formatStepLabel(step: any, showTimeIcon: boolean) {
   if (step.elapsed === -1) {
@@ -120,7 +122,7 @@ const sendMessage = () => {
     msgIndexMap.clear()
   }
 
-  ws.onmessage = (event) => {
+  ws.onmessage = async (event) => {
     const msg = JSON.parse(event.data) as ServerMessage
     console.log('🟢 服务器连接 message:', msg)
 
@@ -146,13 +148,7 @@ const sendMessage = () => {
         assistantMessages.value.push({ role: 'assistant', content: text })
         msgIndexMap.set(key, assistantMessages.value.length - 1)
       }
-      // const label = step.elapsed === -1
-      //   ? 'Pending'  // Pending 状态
-      //   : step.elapsed === -2
-      //     ? 'Skipped'  // Skipped 状态
-      //     : step.elapsed === 0
-      //       ? '0 ms'  // 特殊处理 0 毫秒
-      //       : step.elapsedStr  // 正常的时间字符串（例如 "1.23 ms"）
+
       // 侧边统计面板
       setExecutionTime(step.nodeId, formatStepLabel(step, true))
       // setExecutionTime(step.nodeId, step.elapsedStr)
@@ -169,6 +165,26 @@ const sendMessage = () => {
       })
       isProgress.value = false
       ws?.close()
+      const logs = msg.data.logs as LogNode[]
+      // console.log('logs', logs)
+      const workflowRunLog = new WorkflowRunLog()
+      workflowRunLog.workflow = currentWorkflow.value
+      workflowRunLog.user = user.value as User
+      workflowRunLog.name = currentWorkflow.value!.name
+      workflowRunLog.logs = logs
+      workflowRunLog.channel = 'playground'
+      workflowRunLog.result = msg.data.output
+      workflowRunLog.times = logs.reduce((sum, log) => {
+
+        let elapsed = log.elapsed
+        if (elapsed > 0) {
+          return sum + elapsed
+        }
+        return sum
+      }, 0)
+      await workflowRunLog.save()
+
+      //这里还会拿到 logs
     }
 
     if (msg.type === 'error') {

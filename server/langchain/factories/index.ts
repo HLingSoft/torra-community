@@ -57,6 +57,9 @@ import { agentMeta } from '~/types/node-data/agent'
 import { apiToolFactory } from './api-tool'
 import { apiToolMeta } from '~/types/node-data/api-tool'
 
+import { jsonParserFactory } from './json-parser'
+import { jsonParserMeta } from '~/types/node-data/json-parser'
+
 export const nodeFactoryMap: Record<string, NodeFactory> = {}
 
 export const initFactories = () => {
@@ -91,5 +94,5 @@ export const initFactories = () => {
 
   nodeFactoryMap[apiToolMeta.type] = apiToolFactory
 
-
+  nodeFactoryMap[jsonParserMeta.type] = jsonParserFactory
 }

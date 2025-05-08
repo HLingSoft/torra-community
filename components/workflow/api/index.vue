@@ -15,7 +15,13 @@ type KeyValueObject = Record<
 const { currentWorkflow } = storeToRefs(useWorkflowStore())
 const open = defineModel<boolean>('open')
 const tokenInputRef = ref<{ input: HTMLInputElement } | null>(null)
-
+interface KeyValueRow {
+  name: string
+  description: string
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object'
+  value: any
+  selected?: boolean
+}
 // type KeyValueSchema = Record<
 //   string,
 //   {
@@ -46,6 +52,7 @@ onMounted(async () => {
     return
   }
   const inputValue = (apiInputNode.data as APIInputData).inputValue as KeyValueObject || {}
+
   console.log('inputValue', inputValue)
   // 如果没有 inputValue 就提示
   if (!inputValue || Object.keys(inputValue).length === 0) {
@@ -183,8 +190,12 @@ const run = async () => {
       runResult.value = `❌ 执行失败：${json.error || '未知错误'}`
       return
     }
+    if (json.statusCode === 200) {
 
-    runResult.value = json.output
+      runResult.value = json.output
+    } else {
+      runResult.value = `❌ 执行失败：${json.error || '未知错误'}`
+    }
 
   } catch (err) {
     console.error('请求失败', err)
@@ -195,7 +206,40 @@ const run = async () => {
 }
 
 
+// const formatTag = (text: string, totalTags: number) => {
+//   let limit = 20
+//   if (totalTags > 10) {
+//     limit = 5
+//   } else if (totalTags > 5) {
+//     limit = 10
+//   }
 
+//   if (text.length <= limit) {
+//     return text
+//   }
+//   // 根据新的 limit 取前半段和后半段
+//   const front = Math.floor(limit / 2)
+//   const back = limit - front
+//   console.log('text.slice(0, front)', text.slice(0, front) + '...' + text.slice(-back))
+//   return text.slice(0, front) + '...' + text.slice(-back)
+// }
+
+// const onTagsUpdate = (row: KeyValueRow) => {
+//   if (Array.isArray(row.value)) {
+//     let limit = 20
+//     const total = row.value.length
+
+//     if (total > 10) {
+//       limit = 5
+//     } else if (total > 5) {
+//       limit = 10
+//     }
+
+//     row.value = row.value.map(tag =>
+//       tag.length > limit ? tag.slice(0, limit) : tag
+//     )
+//   }
+// }
 </script>
 
 <template>
@@ -279,8 +323,17 @@ const run = async () => {
                         </Select>
 
                       </div>
-
-
+                      <div v-if="row.type === 'array'">
+                        <TagsInput v-model="row.value">
+                          <TagsInputItem v-for="item in row.value" :key="item" :value="item">
+                            <TagsInputItemText class="truncate max-w-[160px] whitespace-nowrap">
+                              {{ item }}
+                            </TagsInputItemText>
+                            <TagsInputItemDelete />
+                          </TagsInputItem>
+                          <TagsInputInput placeholder="按回车确认" />
+                        </TagsInput>
+                      </div>
                     </TableCell>
                     <TableCell>
 
@@ -320,8 +373,8 @@ const run = async () => {
 
 
           </div>
-          <ScrollArea class="flex-1 overflow-auto">
-            <MDC :value="runResult" class=" prose min-h-0 mt-3 p-4 text-sm flex-1 bg-[#1e1e1e]  rounded-md">
+          <ScrollArea class="flex-1 min-h-0 max-w-2xl overflow-auto">
+            <MDC :value="runResult" class=" prose  mt-3 p-4 text-sm flex-1 bg-[#1e1e1e]   rounded-md">
 
             </MDC>
           </ScrollArea>

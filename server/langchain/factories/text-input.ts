@@ -2,7 +2,7 @@ import type { TextInputData } from '@/types/node-data/text-input'
 import type { BuildContext, FlowNode, InputPortVariable, NodeFactory, OutputPortVariable } from '~/types/workflow'
 
 import { HumanMessage } from '@langchain/core/messages'
-import { resolveInputVariables } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
 
 export const textInputFactory: NodeFactory = async (node: FlowNode, context: BuildContext) => {
   const data = node.data as TextInputData
@@ -17,9 +17,17 @@ export const textInputFactory: NodeFactory = async (node: FlowNode, context: Bui
   const outputPortId = outputVar.id
   // console.log('outputPortId', inputValues[variableNames[0]])
 
+  writeLog(
+    context,
+    node.id,
+    outputPortId,
+    inputValues[variableNames[0]],
+  )
+
   return {
 
     [outputPortId]: new HumanMessage(inputValues[variableNames[0]]),
+
   }
 
 }

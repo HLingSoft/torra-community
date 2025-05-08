@@ -11,7 +11,7 @@ import {
     RunnableSequence,
 } from '@langchain/core/runnables'
 import { ChatOpenAI } from '@langchain/openai'
-import { resolveInputVariables } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
 
 export async function structuredOutputFactory(node: FlowNode, context: BuildContext) {
 
@@ -59,10 +59,29 @@ export async function structuredOutputFactory(node: FlowNode, context: BuildCont
     ])
     // console.log('structuredOutputFactory inputMessage', inputMessage)
     const result = await runnablePrompt.invoke(inputMessage)
-    console.log('structuredOutputFactory result', result)
+    // console.log('structuredOutputFactory result', result)
+
+
+    writeLog(
+        context,
+        node.id,
+        structuredOutputVariable.id,
+        result,
+
+    )
+
+    writeLog(
+        context,
+        node.id,
+        dataFrameOutputVariable.id,
+        result,
+
+    )
+
     return {
         [structuredOutputVariable.id]: result,
         [dataFrameOutputVariable.id]: result,
         default: result,
+
     }
 }

@@ -5,10 +5,12 @@ import Workflow, { EnumWorkflow } from '~/models/Workflow'
 import UserWorkspace from '~/models/UserWorkspace'
 import { Check, ChevronsUpDown } from 'lucide-vue-next'
 import WorkflowHistory, { EnumWorkflowHistory } from '~/models/WorkflowHistory'
+import WorkflowRunLog, { EnumWorkflowRunLog } from '~/models/WorkflowRunLog'
 const { nodes, edges, currentWorkflow } = storeToRefs(useWorkflowStore())
 
 const { user, currentWorkspace } = storeToRefs(useUserStore())
 const history = useWorkflowHistoryStore()
+const { copy } = useClipboard()
 
 const playWorkflow = async () => {
 
@@ -283,6 +285,26 @@ const rollbackHistory = async (history: WorkflowHistory) => {
     isHistoryDialogOpen.value = false
   }
 }
+
+const isLogsDialogOpen = ref(false)
+const allCurrentWorkflowLogs = ref<WorkflowRunLog[]>([])
+watch(isLogsDialogOpen, async () => {
+  if (isLogsDialogOpen.value) {
+    if (!currentWorkflow.value) {
+      return
+    }
+    allCurrentWorkflowLogs.value = await new LC.Query(WorkflowRunLog).include(EnumWorkflowRunLog.USER).equalTo(EnumWorkflowRunLog.WORKFLOW, currentWorkflow.value).descending(EnumWorkflowRunLog.CREATEDAT).limit(1000).find()
+  }
+})
+
+const copyLogs = async (logs: Array<any>) => {
+  await copy(JSON.stringify(logs, null, 2))
+  useToast('Logs 复制成功')
+}
+const copyResult = async (result: string) => {
+  await copy(result)
+  useToast('Result 复制成功')
+}
 </script>
 
 <template>
@@ -308,9 +330,9 @@ const rollbackHistory = async (history: WorkflowHistory) => {
                 <DropdownMenuTrigger as-child>
                   <Button size="sm" variant="outline" class="w-full text-white">
 
-                    <div v-if="currentWorkflow" class="flex flex-col gap-0.5 leading-none">
+                    <div v-if="currentWorkflow" class="flex flex-col gap-0.5 leading-none truncate">
 
-                      <span class="text-xs">{{ currentWorkflow.name }}</span>
+                      <span class="text-xs ">{{ currentWorkflow.name }}</span>
                     </div>
                     <div v-else>
 
@@ -320,7 +342,7 @@ const rollbackHistory = async (history: WorkflowHistory) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent class="w-52 dark py-2" align="start">
-                  <DropdownMenuItem v-for="workflow in allWorkflows" :key="workflow.objectId" class="w-full py-2 max-w-48 text-xs" @select="currentWorkflow = workflow">
+                  <DropdownMenuItem v-for="workflow in allWorkflows" :key="workflow.objectId" class="w-full py-2   max-w-48 text-xs" @select="currentWorkflow = workflow">
                     {{ workflow.name }}
                     <Check v-if="workflow.objectId === currentWorkflow?.objectId" class="ml-auto" />
                   </DropdownMenuItem>
@@ -420,7 +442,7 @@ const rollbackHistory = async (history: WorkflowHistory) => {
                     </div>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <div class="flex items-center space-x-2 opacity-35 cursor-not-allowed">
+                    <div class="flex items-center space-x-2 " @click="isLogsDialogOpen = true">
                       <NuxtIcon name="material-symbols-light:logo-dev-outline-rounded" size="19" />
                       <p>Logs</p>
                     </div>
@@ -641,6 +663,94 @@ const rollbackHistory = async (history: WorkflowHistory) => {
                             <Button size="sm" variant="outline" class="ml-2" @click="rollbackHistory(history)">回退</Button>
                           </div>
                         </TableCell>
+                      </TableRow>
+                    </TableBody>
+
+                  </Table>
+                </div>
+              </ScrollArea>
+
+              <DialogFooter>
+                <DialogClose as-child>
+                  <Button type="button" variant="secondary">
+                    Close
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+
+          <Dialog v-model:open="isLogsDialogOpen">
+            <DialogTrigger as-child>
+
+
+            </DialogTrigger>
+            <DialogContent v-if="currentWorkflow" class="!max-w-7xl   dark text-white">
+              <DialogHeader>
+                <DialogTitle>Logs</DialogTitle>
+                <DialogDescription>
+                  Show the logs of the current workflow.
+                </DialogDescription>
+              </DialogHeader>
+
+              <ScrollArea class="h-[50vh]">
+                <div class="min-w-full overflow-x-auto">
+                  <Table class="min-w-full table-fixed">
+                    <TableCaption>
+                      {{ allCurrentWorkflowLogs.length > 0 ? `Found ${allCurrentWorkflowLogs.length} record(s)` : 'No records found' }}
+                    </TableCaption>
+
+
+                    <thead class="sticky top-0   z-10">
+                      <TableRow>
+                        <TableHead class="w-32">Name</TableHead>
+                        <TableHead class="w-20">Channel</TableHead>
+                        <TableHead class="w-20">Times</TableHead>
+                        <TableHead class="w-1/4">Logs</TableHead>
+                        <TableHead class="w-1/4">Result</TableHead>
+                        <TableHead class="w-20">CreatedAt</TableHead>
+                        <!-- <TableHead class="flex items-center justify-end space-x-2">Operator</TableHead> -->
+                      </TableRow>
+                    </thead>
+
+                    <TableBody>
+                      <TableRow v-for="log in allCurrentWorkflowLogs" :key="log.objectId">
+                        <TableCell class="font-medium w-32 ">
+                          <div class="line-clamp-1">
+                            {{ log.name }}
+                          </div>
+                        </TableCell>
+                        <TableCell class="font-medium w-20">
+                          {{ log.channel }}
+                        </TableCell>
+                        <TableCell class="font-medium w-20 ">
+                          {{ log.times }}
+                        </TableCell>
+                        <TableCell>
+                          <div class="flex flex-row items-center gap-2">
+                            <div class="line-clamp-1 ">{{ log.logs }}</div>
+                            <Button variant="destructive" size="sm" class="text-sm" @click="copyLogs(log.logs)">
+                              <NuxtIcon name="lucide:copy" size="16" />
+                            </Button>
+                          </div>
+
+                        </TableCell>
+                        <TableCell>
+                          <div class="flex flex-row items-center gap-2">
+                            <div class="line-clamp-1 ">{{ log.result }}</div>
+                            <Button variant="destructive" size="sm" class="text-sm" @click="copyResult(log.result)">
+                              <NuxtIcon name="lucide:copy" size="16" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell>{{ log.createdAt?.toLocaleString('zh-CN', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        }) }}</TableCell>
                       </TableRow>
                     </TableBody>
 

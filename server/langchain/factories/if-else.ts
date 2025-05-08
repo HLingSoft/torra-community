@@ -1,7 +1,7 @@
 import type { FlowNode, BuildContext } from '~/types/workflow'
 import type { IfElseData } from '@/types/node-data/if-else'
 import { RunnableLambda } from '@langchain/core/runnables'
-import { resolveInputVariables } from '../resolveInput'
+import { resolveInputVariables, writeLog } from '../resolveInput'
 
 export async function ifElseFactory(node: FlowNode, context: BuildContext) {
   const data = node.data as IfElseData
@@ -68,10 +68,18 @@ export async function ifElseFactory(node: FlowNode, context: BuildContext) {
   // const result = applyOperator(textInput, matchText)
   // // const result=true
   // console.log('ifElseFactory:', result)
+  if (result) {
+    writeLog(context, node.id, trueOutputVariable.id, `Matched: ${message}`)
+
+  } else {
+    writeLog(context, node.id, falseOutputVariable.id, `Not matched: ${message}`)
+
+  }
 
   return {
     [trueOutputVariable.id]: result ? message : undefined,
     [falseOutputVariable.id]: !result ? message : undefined,
-    default: result
+    default: result,
+
   }
 }

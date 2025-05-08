@@ -67,11 +67,32 @@ export async function apiRequestFactory(node: FlowNode, context: BuildContext) {
             (requestChain.pipe(res => res.raw ?? res)),                // runnable
             node.id,              // nodeId
             context.onRunnableElapsed, // 回调（可能是 undefined）
+            {
+                context,
+                portId: dataOutputVariable.id,
+                logFormat: (res) => {
+                    return {
+                        type: 'api-request Chain',
+                        data: res,
+                    }
+                }
+            }
         ),
         [dataFrameOutputVariable.id]: wrapRunnable(
             requestChain.pipe(res => res.table ?? []),                // runnable
             node.id,              // nodeId
             context.onRunnableElapsed, // 回调（可能是 undefined）
-        )
+            {
+                context,
+                portId: dataOutputVariable.id,
+                logFormat: (res) => {
+                    return {
+                        type: 'api-request Chain',
+                        data: res,
+                    }
+                }
+            }
+        ),
+
     }
 }

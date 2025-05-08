@@ -201,8 +201,9 @@ const data = ref<{ navMain: NavGroup[] }>({
           description: '',
         },
         {
-          title: 'JSON Cleaner',
+          title: 'JSON Parser',
           url: '#',
+          component: 'processing/json-parser',
           description: '',
         },
         {

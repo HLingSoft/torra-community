@@ -48,6 +48,7 @@ export interface OutputPortVariable {
 // export type BuildContext = Record<string, any>
 export type NodeResultsMap = Record<string, Record<string, any>>
 export interface BuildContext {
+  logs: NodeResultsMap,
   resolvedInput: Record<string, any>
   results: NodeResultsMap
   json: LangFlowJson

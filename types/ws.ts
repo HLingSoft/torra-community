@@ -19,7 +19,13 @@ export interface WSExecuteRunMessage {
     message: string
   }
 }
-
+export interface LogNode {
+  nodeId: string
+  name: string
+  inputs: Record<string, any>   // portId -> 值
+  outputs: Record<string, any>  // portId -> 值
+  elapsed: number
+}
 export interface WSExecuteProgressMessage {
   namespace: 'execute'
   type: 'progress'
@@ -30,7 +36,8 @@ export interface WSExecuteDoneMessage {
   namespace: 'execute'
   type: 'done'
   data: {
-    output: string
+    output: string,
+    logs: LogNode[]
   }
 }
 

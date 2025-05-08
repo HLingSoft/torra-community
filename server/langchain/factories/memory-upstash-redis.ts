@@ -1,6 +1,6 @@
 import type { BuildContext, FlowNode, InputPortVariable } from '~/types/workflow'
 import type { UpstashRedisChatMemoryData } from '~/types/node-data/memory-redis'
-import { resolveInputVariables } from '../resolveInput'
+import { resolveInputVariables, writeLog } from '../resolveInput'
 // import { RedisChatMessageHistory } from '@langchain/redis'
 import { UpstashRedisChatMessageHistory } from '@langchain/community/stores/message/upstash_redis'
 import { Redis } from "@upstash/redis";
@@ -45,8 +45,17 @@ export async function upstashRedisChatMemoryFactory(node: FlowNode, context: Bui
         })
     })
 
+    writeLog(
+        context,
+        node.id,
+        memoryOutputVariable.id,
+        `UpstashRedisMemory  url:${url} token:${token} sessionId:${sessionId}`,
+
+    )
+
 
     return {
         [memoryOutputVariable.id]: memory,
+
     }
 }

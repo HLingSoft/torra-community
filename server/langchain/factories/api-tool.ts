@@ -2,7 +2,7 @@ import { StructuredTool } from "langchain/tools";
 import { z } from "zod";
 import type { FlowNode, BuildContext } from '~/types/workflow'
 import type { APIToolData } from '~/types/node-data/api-tool'
-import { resolveInputVariables } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
 import { nanoid } from "nanoid";
 function sanitizeToolName(name: string): string {
     let cleaned = name
@@ -104,7 +104,7 @@ export async function apiToolFactory(node: FlowNode, context: BuildContext) {
     const url = inputValues[urlInputVariable.name];
     const body = inputValues[bodyVariable.name];
     const token = inputValues[tokenVariable.name];
-    const toolName = inputValues[toolNameVariable.name] || "http_request_tool";
+    const toolName = sanitizeToolName(inputValues[toolNameVariable.name]) || "http_request_tool";
     const toolDescription = inputValues[toolDescriptionVariable.name] || "Make authorized HTTP requests (GET, POST) to a given API endpoint.";
 
     // 🔥 这里断言成四种允许的 method 类型！
@@ -122,7 +122,17 @@ export async function apiToolFactory(node: FlowNode, context: BuildContext) {
         body
     });
 
+    writeLog(
+        context,
+        node.id,
+        toolOutputVariable.id,
+        `API Tool "${toolName}"  "${toolDescription}" created with method "${method}" and URL "${url}".`,
+
+    );
+    // console.log('apiToolFactory', tool);
+
     return {
         [toolOutputVariable.id]: tool,
+
     };
 }

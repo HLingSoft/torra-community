@@ -8,7 +8,7 @@ import type {
 
 import { PromptTemplate } from '@langchain/core/prompts'
 
-import { resolveInputVariables } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
 
 export async function promptTemplateFactory(node: FlowNode, context: BuildContext) {
 
@@ -35,7 +35,16 @@ export async function promptTemplateFactory(node: FlowNode, context: BuildContex
   const outputPortId = data.outputVariable?.id || 'output'
 
   // 返回格式必须为 { [outputPortId]: ... }
+
+  writeLog(
+    context,
+    node.id,
+    outputPortId,
+    finalPrompt,
+
+  )
   return {
     [outputPortId]: finalPrompt,
+
   }
 }

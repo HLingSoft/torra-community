@@ -1,19 +1,28 @@
 import type { TimezoneData } from '@/types/node-data/timezone'
-import type { FlowNode, NodeFactory } from '~/types/workflow'
+import type { BuildContext, FlowNode, NodeFactory } from '~/types/workflow'
 
 import { HumanMessage } from '@langchain/core/messages'
-import { DateTime } from 'luxon'  
+import { DateTime } from 'luxon'
+import { writeLog } from '../resolveInput'
 
-export const timezoneFactory: NodeFactory = async (node: FlowNode) => {
-  const { timezone,outputVariable} = node.data as TimezoneData
+export const timezoneFactory: NodeFactory = async (node: FlowNode, context: BuildContext) => {
+  const { timezone, outputVariable } = node.data as TimezoneData
 
-//   const timezone = data.timezone || 'UTC'
+  //   const timezone = data.timezone || 'UTC'
   const now = DateTime.now().setZone(timezone)
 
   const formattedTime = now.toFormat("yyyy-MM-dd HH:mm:ss ZZZZ") // 输出格式
- 
+
+  writeLog(
+    context,
+    node.id,
+    outputVariable.id,
+    `Current time in ${timezone}: ${formattedTime}`, // 仅用于调试
+
+  )
 
   return {
     [outputVariable.id]: new HumanMessage(`Current time in ${timezone}: ${formattedTime}`),
+
   }
 }

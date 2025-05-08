@@ -5,7 +5,7 @@ import { resolveInputVariables, wrapRunnable } from '../../langchain/resolveInpu
 import { ChatOpenAI } from '@langchain/openai'
 import { createReactAgent } from '@langchain/langgraph/prebuilt'
 import { RunnableLambda } from '@langchain/core/runnables'
-import { StructuredTool } from 'langchain/tools'
+
 
 export async function agentFactory(node: FlowNode, context: BuildContext) {
     const data = node.data as AgentData
@@ -36,6 +36,7 @@ export async function agentFactory(node: FlowNode, context: BuildContext) {
     const baseURL = inputValues[baseURLVariable.name]
     const apiKey = inputValues[apiKeyVariable.name]
     const question = inputValues[inputVariable.name]
+    console.log('🧠 agentFactory question:', question)
     const instruction = inputValues[instructionVariable.name]
 
     // const toolDescriptions = tools.map((t: StructuredTool) => t.description || '').join('\n\n')
@@ -49,6 +50,9 @@ export async function agentFactory(node: FlowNode, context: BuildContext) {
     //   你可以通过工具从 LeanCloud 查询数据。
     const prompt = `${instruction}\n\n` // ❗ 仅保留用户定义部分
     // console.log('🧠 agentFactory prompt:', prompt)
+    // const agentChain1 = RunnableSequence.from([agent, parser]);
+
+
 
     const agentChain = RunnableLambda.from(async () => {
         const messages = [
@@ -63,11 +67,23 @@ export async function agentFactory(node: FlowNode, context: BuildContext) {
         return final
     })
 
+
     return {
         [outputVariable.id]: wrapRunnable(
             agentChain,                // runnable
             node.id,              // nodeId
             context.onRunnableElapsed, // 回调（可能是 undefined）
+            {
+                context,
+                portId: outputVariable.id,
+                logFormat: (res) => {
+                    return {
+                        type: 'agent',
+                        data: res,
+                    }
+                }
+            }
         ),
+
     }
 }

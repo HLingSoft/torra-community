@@ -20,8 +20,8 @@ export default defineNitroPlugin(() => {
   const server = createServer()
   const wss = new WebSocketServer({ server })
 
-  wss.on('connection', (ws:WebSocket) => {
-    ws.on('message', async (raw:WebSocket.Data) => {
+  wss.on('connection', (ws: WebSocket) => {
+    ws.on('message', async (raw: WebSocket.Data) => {
       try {
         const msg: WSMessage = JSON.parse(raw.toString())
         // console.log('📩 Received message:', msg)
@@ -47,6 +47,8 @@ export default defineNitroPlugin(() => {
             type: 'done',
             data: {
               output: res.output,
+              logs: res.logs,
+
             },
           }
           ws.send(JSON.stringify(doneMsg))

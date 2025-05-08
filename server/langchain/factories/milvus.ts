@@ -1,7 +1,7 @@
 import type { FlowNode, BuildContext } from '~/types/workflow'
 import type { MilvusData } from '@/types/node-data/milvus'
 
-import { resolveInputVariables, wrapRunnable } from '../../langchain/resolveInput'
+import { resolveInputVariables, wrapRunnable, writeLog } from '../../langchain/resolveInput'
 import { RunnableLambda } from '@langchain/core/runnables'
 import { Milvus } from '@langchain/community/vectorstores/milvus'
 import type { MilvusLibArgs } from '@langchain/community/vectorstores/milvus'
@@ -93,9 +93,26 @@ export async function milvusFactory(node: FlowNode, context: BuildContext) {
     context.onRunnableElapsed,
   )
 
+  writeLog(
+    context,
+    node.id,
+    resultOutputVariable.id,
+    `Milvus ${collectionName} ${url} ${token}`,
+
+  )
+
+  writeLog(
+    context,
+    node.id,
+    dataframeOutputVariable.id,
+    `Milvus ${collectionName} ${url} ${token}`,
+
+  )
+
   return {
     [resultOutputVariable.id]: wrapped,
     [dataframeOutputVariable.id]: wrapped, // 如需 DataFrame，可在 resolve 阶段转换
+
   }
 }
 

@@ -1,9 +1,12 @@
 import { LC } from '~/composables'
 import { executeDAG } from '~/server/langchain/builder'
 import { generateLangFlowJSONFromVueFlow } from '~/server/langchain/transformer'
-// import type { DAGStepInfo } from '~/types/ws'
-import Workflow,{EnumWorkflow} from '~/models/Workflow'
+import WorkflowRunLog from '~/models/WorkflowRunLog'
+import Workflow, { EnumWorkflow } from '~/models/Workflow'
+import type {
+  DAGStepInfo,
 
+} from '~/types/ws'
 export default defineEventHandler(async (event) => {
   try {
     const authHeader = getHeader(event, 'authorization')
@@ -20,10 +23,10 @@ export default defineEventHandler(async (event) => {
     }
 
     const body = await readBody(event)
-    const input= JSON.stringify(body)
+    const input = JSON.stringify(body)
     console.log('input', input)
 
-    if (  !input) {
+    if (!input) {
       return {
         statusCode: 400,
         body: { error: 'Missing workflow or input message' }
@@ -33,16 +36,37 @@ export default defineEventHandler(async (event) => {
     const langflowJson = generateLangFlowJSONFromVueFlow(workflow)
 
     // const steps: DAGStepInfo[] = []
-    const res = await executeDAG(langflowJson, input, 'api')
+    const res = await executeDAG(langflowJson, input, 'api', {
+      onStep: (step: DAGStepInfo) => {
+        // console.log('onStep', step)
+      },
+    })
+    const workflowRunLog = new WorkflowRunLog()
+    workflowRunLog.workflow = workflow
+    workflowRunLog.name = workflow.name
+    workflowRunLog.logs = res.logs
+    workflowRunLog.channel = 'api'
+    workflowRunLog.result = res.output
+    workflowRunLog.times = res.logs.reduce((sum, log) => {
+      let elapsed = log.elapsed
+      if (elapsed > 0) {
+        return sum + elapsed
+      }
+      return sum
+    }, 0)
+    await workflowRunLog.save()
 
     return {
-      output: res.output
+      statusCode: 200,
+      output: res.output,
+      logs: res.logs,
     }
   } catch (e: any) {
     return {
       statusCode: 500,
       error: e.message,
-      stack: e.stack
+      output: ''
+      // stack: e.stack
     }
   }
 })

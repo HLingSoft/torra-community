@@ -4,7 +4,7 @@ import type { BuildContext, FlowNode, InputPortVariable } from '~/types/workflow
 import { ChatPromptTemplate } from '@langchain/core/prompts'
 import { ChatOpenAI } from '@langchain/openai'
 // import { AIMessage } from '@langchain/core/messages'
-import { resolveInputVariables, wrapRunnable } from '../../langchain/resolveInput'
+import { resolveInputVariables, wrapRunnable, writeLog } from '../../langchain/resolveInput'
 
 
 export async function chatOpenAIFactory(node: FlowNode, context: BuildContext) {
@@ -49,7 +49,14 @@ export async function chatOpenAIFactory(node: FlowNode, context: BuildContext) {
 
   const messagePortId = messageOutputVariable.id
   const lmPortId = languageModelOutputVariable.id
+  writeLog(
+    context,
+    node.id,
+    lmPortId,
 
+    `openai chat model with prompt chain. Prompt: ${prompt}`,
+
+  );
 
   return {
 
@@ -58,9 +65,21 @@ export async function chatOpenAIFactory(node: FlowNode, context: BuildContext) {
       chain,                // runnable
       node.id,              // nodeId
       context.onRunnableElapsed, // 回调（可能是 undefined）
+      {
+        context,
+        portId: messagePortId,
+        logFormat: (res) => {
+          return {
+            type: 'openai chat',
+            data: res,
+          }
+        }
+      }
+
     ),
 
+    [lmPortId]: chain,
 
-    [lmPortId]: chain
+
   }
 }

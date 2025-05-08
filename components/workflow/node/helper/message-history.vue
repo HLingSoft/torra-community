@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import  type {  MessageHistoryData} from '@/types/node-data/message-history'
-import  { messageHistoryMeta} from '@/types/node-data/message-history'
+import type { MessageHistoryData } from '@/types/node-data/message-history'
+import { messageHistoryMeta } from '@/types/node-data/message-history'
 import { createPortManager } from '~/components/workflow/useNodePorts'
 
 import { useVueFlow } from '@vue-flow/core'
@@ -13,8 +13,8 @@ const props = defineProps({
 
 })
 const currentNode = ref<{ id: string, data?: MessageHistoryData }>()
-const { addInputPort, addOutputPort } = createPortManager()
-const { nodes,edges} = storeToRefs(useWorkflowStore())
+const { addInputPort, addOutputPort, updateNodePosition } = createPortManager()
+const { nodes, edges } = storeToRefs(useWorkflowStore())
 const memoryInputVariableRef = ref<HTMLElement | null>(null)
 const dataOutputVariableRef = ref<HTMLElement | null>(null)
 const messageOutputVariableRef = ref<HTMLElement | null>(null)
@@ -29,35 +29,61 @@ onMounted(async () => {
     ..._.cloneDeep(messageHistoryMeta),
     ..._.cloneDeep(node.data), // ✅ 已有字段优先级更高，会覆盖默认值
   } as MessageHistoryData
-  
+
   currentNode.value = node
   await nextTick() // 等待 DOM 渲染完毕
- 
- 
-  if(memoryInputVariableRef.value && !node.data.saved) {
-    const portId= nanoLowercaseAlphanumericId(10)
-    currentNode.value.data!.memoryInputVariable.id=portId
-    addInputPort(props.id!, portId, 'aquamarine', memoryInputVariableRef.value.offsetTop)
-  }
 
- 
-  if (dataOutputVariableRef.value && !node.data.saved) {
-    const portId = nanoLowercaseAlphanumericId(10)
-    currentNode.value.data!.dataOutputVariable.id=portId
-    addOutputPort(props.id!, portId, 'pink',dataOutputVariableRef.value.offsetTop + dataOutputVariableRef.value.clientHeight / 2)
-  }
 
-    if (messageOutputVariableRef.value && !node.data.saved) {
-        const portId = nanoLowercaseAlphanumericId(10)
-        currentNode.value.data!.messageOutputVariable.id=portId
-        addOutputPort(props.id!, portId, 'pink',messageOutputVariableRef.value.offsetTop + messageOutputVariableRef.value.clientHeight / 2)
+  if (memoryInputVariableRef.value) {
+    if (!node.data.saved) {
+      const portId = nanoLowercaseAlphanumericId(10)
+      currentNode.value.data!.memoryInputVariable.id = portId
+      addInputPort(props.id!, portId, 'aquamarine', memoryInputVariableRef.value.offsetTop)
+    } else {
+      updateNodePosition(currentNode.value.data!.memoryInputVariable.id!, memoryInputVariableRef.value.offsetTop)
     }
 
-    if (dataframeOutputVariableRef.value && !node.data.saved) {
-        const portId = nanoLowercaseAlphanumericId(10)
-        currentNode.value.data!.dataframeOutputVariable.id=portId
-        addOutputPort(props.id!, portId, 'pink',dataframeOutputVariableRef.value.offsetTop + dataframeOutputVariableRef.value.clientHeight / 2)
+  }
+
+
+  if (dataOutputVariableRef.value) {
+    if (!node.data.saved) {
+      const portId = nanoLowercaseAlphanumericId(10)
+      currentNode.value.data!.dataOutputVariable.id = portId
+      addOutputPort(props.id!, portId, 'pink', dataOutputVariableRef.value.offsetTop + dataOutputVariableRef.value.clientHeight / 2)
+    } else {
+      updateNodePosition(currentNode.value.data!.dataOutputVariable.id!, dataOutputVariableRef.value.offsetTop + dataOutputVariableRef.value.clientHeight / 2)
     }
+    // const portId = nanoLowercaseAlphanumericId(10)
+    // currentNode.value.data!.dataOutputVariable.id = portId
+    // addOutputPort(props.id!, portId, 'pink', dataOutputVariableRef.value.offsetTop + dataOutputVariableRef.value.clientHeight / 2)
+  }
+
+  if (messageOutputVariableRef.value) {
+    if (!node.data.saved) {
+      const portId = nanoLowercaseAlphanumericId(10)
+      currentNode.value.data!.messageOutputVariable.id = portId
+      addOutputPort(props.id!, portId, 'pink', messageOutputVariableRef.value.offsetTop + messageOutputVariableRef.value.clientHeight / 2)
+    } else {
+      updateNodePosition(currentNode.value.data!.messageOutputVariable.id!, messageOutputVariableRef.value.offsetTop + messageOutputVariableRef.value.clientHeight / 2)
+    }
+    // const portId = nanoLowercaseAlphanumericId(10)
+    // currentNode.value.data!.messageOutputVariable.id = portId
+    // addOutputPort(props.id!, portId, 'pink', messageOutputVariableRef.value.offsetTop + messageOutputVariableRef.value.clientHeight / 2)
+  }
+
+  if (dataframeOutputVariableRef.value) {
+    if (!node.data.saved) {
+      const portId = nanoLowercaseAlphanumericId(10)
+      currentNode.value.data!.dataframeOutputVariable.id = portId
+      addOutputPort(props.id!, portId, 'pink', dataframeOutputVariableRef.value.offsetTop + dataframeOutputVariableRef.value.clientHeight / 2)
+    } else {
+      updateNodePosition(currentNode.value.data!.dataframeOutputVariable.id!, dataframeOutputVariableRef.value.offsetTop + dataframeOutputVariableRef.value.clientHeight / 2)
+    }
+    // const portId = nanoLowercaseAlphanumericId(10)
+    // currentNode.value.data!.dataframeOutputVariable.id = portId
+    // addOutputPort(props.id!, portId, 'pink', dataframeOutputVariableRef.value.offsetTop + dataframeOutputVariableRef.value.clientHeight / 2)
+  }
 
 })
 
@@ -100,6 +126,29 @@ watch(edges, () => {
 
 
       </div>
+
+
+
+      <div>
+        <div id="maxMessages" class="  flex w-full flex-row items-center space-x-2">
+          <p>Max Messages</p>
+          <NuxtIcon name="clarity:info-line" size="20" />
+        </div>
+        <div class="mt-5">
+          <NumberField id="maxMessages" v-model="currentNode.data.maxMessages" :max="200" :min="0">
+            <!-- <Label for="age">Age</Label> -->
+            <NumberFieldContent>
+              <NumberFieldDecrement />
+              <NumberFieldInput />
+              <NumberFieldIncrement />
+            </NumberFieldContent>
+          </NumberField>
+        </div>
+        <!-- <p class="text-[#D1D5DB] text-sm">Connect an upstream memory module (e.g., Redis Chat Memory) to retrieve conversation history.</p> -->
+
+
+      </div>
+
 
     </CardContent>
 

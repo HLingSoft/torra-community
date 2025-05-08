@@ -4,7 +4,7 @@
 import type { FlowNode, BuildContext, InputPortVariable } from '~/types/workflow'
 import type { MCPHttpData } from '@/types/node-data/mcp-http'
 
-import { resolveInputVariables, wrapRunnable } from '../../langchain/resolveInput'
+import { resolveInputVariables, wrapRunnable, writeLog } from '../../langchain/resolveInput'
 import { RunnableLambda } from '@langchain/core/runnables'
 
 import { StructuredTool } from 'langchain/tools'
@@ -71,22 +71,25 @@ export async function mcpHttpFactory(node: FlowNode, context: BuildContext) {
     const url = inputVals[urlVariable.name]
     const token = inputVals[tokenVariable.name]
 
-    /* 2️⃣ 构建懒执行 runnable —— RunnableLambda.from 自动推断泛型 */
-    // const loadToolsRunnable = RunnableLambda.from(async () => {
-    //     return await fetchMCPTools(url, token)  // 返回 StructuredTool[]
-    // })
 
-    /* 3️⃣ 用 wrapRunnable 加计时 & 延迟 */
-    // const wrapped = wrapRunnable(
-    //     {
-    //         invoke: async () => await fetchMCPTools(url, token)
-    //     },
-    //     node.id,
-    //     context.onRunnableElapsed
-    // )
+
+
 
     /* 4️⃣ 返回端口映射 */
+    const result = await fetchMCPTools(url, token)
+
+    writeLog(
+        context,
+        node.id,
+        outputVariable.id,
+        result.map(t => "工具名称: " + t.name + "\n工具描述:" + t.description).join(', '),
+
+    )
+
+
+
     return {
-        [outputVariable.id]: await fetchMCPTools(url, token),   // 下游真正用到时才会访问 MCP
+        [outputVariable.id]: result,   // 下游真正用到时才会访问 MCP
+
     }
 }

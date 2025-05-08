@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import type { APIInputData } from '@/types/node-data/api-input'
+import type { JSONParserData } from '@/types/node-data/json-parser'
 
 
-import { apiInputMeta } from '@/types/node-data/api-input'
+import { jsonParserMeta } from '@/types/node-data/json-parser'
 
 import { createPortManager } from '~/components/workflow/useNodePorts'
 import { useVueFlow } from '@vue-flow/core'
@@ -21,14 +21,17 @@ type KeyValueSchema = Record<
     }
 >
 
-const currentNode = ref<{ id: string, data?: APIInputData }>()
+const currentNode = ref<{ id: string, data?: JSONParserData }>()
 
+
+const languageModelVariableRef = ref<HTMLElement | null>(null)
+const inputMessageVariableRef = ref<HTMLElement | null>(null)
 
 const structuredOutputVariableRef = ref<HTMLElement | null>(null)
+const dataFrameOutputVariableRef = ref<HTMLElement | null>(null)
 
-
-const { addOutputPort } = createPortManager()
-const { nodes } = storeToRefs(useWorkflowStore())
+const { addInputPort, addOutputPort } = createPortManager()
+const { nodes, edges } = storeToRefs(useWorkflowStore())
 onMounted(async () => {
     const node = nodes.value.find(node => node.id === props.id)
     if (!node) {
@@ -37,15 +40,20 @@ onMounted(async () => {
 
     // 初始化 data
     node.data = {
-        ..._.cloneDeep(apiInputMeta),
+        ..._.cloneDeep(jsonParserMeta),
         ..._.cloneDeep(node.data), // ✅ 已有字段优先级更高，会覆盖默认值
-    } as APIInputData
+    } as JSONParserData
 
     currentNode.value = node
 
     await nextTick() // 等待 DOM 渲染完毕
     // ✅ 给每个字段位置添加 Input Port
 
+
+    if (inputMessageVariableRef.value && !node.data.saved) {
+        currentNode.value.data!.inputMessageVariable.id = nanoLowercaseAlphanumericId(10)
+        addInputPort(props.id!, currentNode.value.data!.inputMessageVariable.id, 'aquamarine', inputMessageVariableRef.value.offsetTop + inputMessageVariableRef.value.clientHeight / 2)
+    }
 
 
 
@@ -61,6 +69,16 @@ onMounted(async () => {
 
 
 
+watch(edges, () => {
+
+    if (!currentNode.value?.data) {
+        return
+    }
+
+
+
+    currentNode.value.data.inputMessageVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.inputMessageVariable.id)
+}, { deep: true, immediate: true })
 
 const { onNodeClick } = useVueFlow()
 onNodeClick((event) => {
@@ -70,23 +88,28 @@ onNodeClick((event) => {
 
 
 
+const methods = ref([
 
-const inputValueIsOpen = ref(false)
-const inputValueClonedData = ref<KeyValueSchema>({})
-const saveInputData = () => {
+    { id: 'get', name: 'GET' },
+    { id: 'post', name: 'POST' },
+
+
+])
+
+const outputSchemaIsOpen = ref(false)
+const outputSchemaClonedData = ref<KeyValueSchema>({})
+const saveoutputSchema = () => {
     if (!currentNode.value) {
         return
     }
-    console.log('inputValueClonedData.value', inputValueClonedData.value)
-    currentNode.value.data!.inputValue = inputValueClonedData.value
-    inputValueIsOpen.value = false
+    currentNode.value.data!.outputSchema.value = outputSchemaClonedData.value
+    outputSchemaIsOpen.value = false
 }
-watch(inputValueIsOpen, (val) => {
+watch(outputSchemaIsOpen, (val) => {
     if (val) {
-        inputValueClonedData.value = currentNode.value?.data?.inputValue || {}
-        console.log('inputValueClonedData.value', inputValueClonedData.value)
+        outputSchemaClonedData.value = currentNode.value?.data?.outputSchema.value || []
     } else {
-        inputValueClonedData.value = {}
+        outputSchemaClonedData.value = {}
     }
 }, { immediate: true })
 
@@ -105,16 +128,25 @@ watch(inputValueIsOpen, (val) => {
 
 
 
+                <div ref="inputMessageVariableRef">
+                    <div class="flex flex-row items-center space-x-2">
+                        <p>Input Message</p>
+                        <NuxtIcon name="clarity:info-line" size="20" />
+                    </div>
+                    <div class="w-full  mt-5">
+                        <EditTextDialog class="w-full" :disabled="currentNode.data.inputMessageVariable.connected" :model-value="currentNode.data.inputMessageVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.inputMessageVariable.value = val" />
+                    </div>
+                </div>
 
 
 
                 <div>
                     <div class="flex flex-row items-center space-x-2">
-                        <p>Input Schema<span class="text-red-500">*</span></p>
+                        <p>Output Schema<span class="text-red-500">*</span></p>
                         <NuxtIcon name="clarity:info-line" size="20" />
                     </div>
                     <div class="w-full  mt-5">
-                        <Button variant="outline" class="w-full" @click.stop="inputValueIsOpen = true">
+                        <Button :disabled="currentNode.data.outputSchema.connected" variant="outline" class="w-full" @click.stop="outputSchemaIsOpen = true">
                             <NuxtIcon name="mdi-light:table" size="20" />
                             Open Table
                         </Button>
@@ -138,27 +170,27 @@ watch(inputValueIsOpen, (val) => {
 
         </Card>
 
-        <Dialog v-model:open="inputValueIsOpen">
+        <Dialog v-model:open="outputSchemaIsOpen">
             <DialogContent class="dark  flex flex-col text-white w-full !max-w-7xl h-[80vh]">
                 <DialogHeader class="shrink-0">
                     <DialogTitle>
                         <div class="flex flex-row items-center space-x-2">
                             <NuxtIcon name="mdi-light:table" size="20" />
-                            Input Schema
+                            Output Schema
                         </div>
                     </DialogTitle>
                     <DialogDescription>
-                        Define the structure and data types of the API input parameters.
+                        Define the structure and data types for the model's output.
                     </DialogDescription>
                 </DialogHeader>
                 <div class="flex-1 overflow-auto">
-                    <FunctionCallSchemaEditor v-model="inputValueClonedData" />
+                    <FunctionCallSchemaEditor v-model="outputSchemaClonedData" />
 
                 </div>
 
                 <DialogFooter class="w-full shrink-0 flex flex-row items-center justify-between">
 
-                    <Button @click="saveInputData">
+                    <Button @click="saveoutputSchema">
                         Save
                     </Button>
                 </DialogFooter>

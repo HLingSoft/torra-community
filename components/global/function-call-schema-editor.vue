@@ -5,6 +5,7 @@ interface KeyValueRow {
   description: string
   type: string
   selected: boolean
+  items?: KeyValueRow[]  // <--- 重点：子元素，只有 type === 'array' 时才有
 }
 
 type KeyValueTable = KeyValueRow[]
@@ -20,12 +21,13 @@ const emit = defineEmits<{
 
 let idCounter = 0
 
-const createRow = (): KeyValueRow => ({
+const createRow = (isSubRow = false): KeyValueRow => ({
   id: ++idCounter,
   name: '',
   description: '',
   type: 'string',
-  selected: false
+  selected: false,
+  ...(isSubRow ? {} : { items: [] }) // 只有主行可以有 items
 })
 
 const objectToRows = (obj: KeyValueObject): KeyValueTable => {
@@ -42,10 +44,19 @@ const getBodyObject = (inputRows: KeyValueTable): KeyValueObject => {
   const obj: KeyValueObject = {}
   for (const row of inputRows) {
     if (row.name && row.type) {
-      obj[row.name] = {
-        name: row.name,
-        description: row.description || '',
-        type: row.type
+      if (row.type === 'array' && row.items) {
+        obj[row.name] = {
+          name: row.name,
+          description: row.description || '',
+          type: 'array'
+          // 可根据需要，把数组项转成对象，暂时不展开
+        }
+      } else {
+        obj[row.name] = {
+          name: row.name,
+          description: row.description || '',
+          type: row.type
+        }
       }
     }
   }
@@ -138,6 +149,8 @@ const typeList = [
               </Select>
             </TableCell>
           </TableRow>
+
+
         </TableBody>
       </Table>
     </div>
@@ -163,4 +176,3 @@ const typeList = [
     </div>
   </div>
 </template>
-  
