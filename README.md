@@ -23,7 +23,7 @@ When using, modifying, or distributing this software, **you must retain the attr
 ## Getting Started
 
 ```bash
-git clone https://github.com/your-org/torra-community.git
+git clone https://github.com/HLingSoft/torra-community.git
 cd torra-community
 
 pnpm install

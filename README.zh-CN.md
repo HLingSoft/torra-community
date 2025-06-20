@@ -23,7 +23,7 @@ Torra Community Edition 是一个基于 Nuxt3、VueFlow、Tailwind CSS v4 和 La
 ## 快速开始
 
 ```bash
-git clone https://github.com/your-org/torra-community.git
+git clone https://github.com/HLingSoft/torra-community.git
 cd torra-community
 
 pnpm install

@@ -24,7 +24,7 @@ Torra Community Edition は、Nuxt3、VueFlow、Tailwind CSS v4、LangChain.js �
 ## クイックスタート
 
 ```bash
-git clone https://github.com/your-org/torra-community.git
+git clone https://github.com/HLingSoft/torra-community.git
 cd torra-community
 
 pnpm install
