@@ -5,7 +5,7 @@ export interface TextOutputData {
   title: string // 节点标题
   icon?: string // 节点图标
   description: string // 节点描述
-  inputVariable: InputPortVariable // 输入变量
+  messageInputVariable: InputPortVariable // 输入变量
   outputVariable: OutputPortVariable
   show?: boolean // 控制展示区域是否折叠
   saved?: boolean // 是否保存
@@ -15,18 +15,18 @@ export const TextOutputLangchainName = 'TextOutput' // 节点类型
 export const textOutputMeta: TextOutputData = {
   type: TextOutputLangchainName,
   title: 'Text Output',
-  icon: '📤',
+  icon: 'solar:text-square-2-line-duotone',
   description: 'Display a text message in the Playground.',
-  inputVariable: {
-    name: 'input',
-    allowedTypes: ['Message'],
+  messageInputVariable: {
+    name: 'Input Data',
+    allowedTypes: ['Data', 'Structured Data', 'Data[]'],
     value: '',
-    forceStringify: true,
+
   } as InputPortVariable,
 
   outputVariable: {
     outputType: 'Data',
-    name: 'output',
+    name: 'When Done',
   } as OutputPortVariable,
   show: true,
 }

@@ -1,166 +1,97 @@
-<script lang="ts" setup>
-import type { PropType } from 'vue'
-import { GradientPath } from '@riadh-adrani/gradient-path'
+<script setup lang="ts">
 import { BezierEdge, useVueFlow } from '@vue-flow/core'
+import { onMounted, watchEffect } from 'vue'
+import type { EdgeProps } from '@vue-flow/core'
 
-const props = defineProps({
-  id: String,
-  source: String,
-  target: String,
-  segments: Number,
-  updateOnDrag: Boolean,
-  data: Object as PropType<{
-    sourceColor: { type: string, required: false, default: 'white' }
-    targetColor: { type: string, required: false, default: 'black' }
-    sourceParent: string
-    targetParent: string
-  }>,
-})
+/*
+ * GradientBezierEdge.vue – 极简稳定版
+ * ------------------------------------------------------------
+ * • 不再额外声明接口，只用 EdgeProps 再加两个可选 Id 字段。
+ * • 渐变用 objectBoundingBox，完全不用算坐标，绝对不串色。
+ */
 
-const { onNodeDrag, onSelectionDrag, onSelectionDragStop, onNodeDragStop } = useVueFlow()
+const props = defineProps<EdgeProps>()
 
-const edge = ref(null)
+const gradId = `grad-${props.id}`
 
-const grEdge = ref<GradientPath>(null as unknown as GradientPath)
+// ------------------------------ 取色 ------------------------------
+function handleId(side: 'source' | 'target') {
+  return side === 'source' ? props.sourceHandleId : props.targetHandleId
+}
 
-const getPath = (): SVGPathElement => {
+function getHandleEl(nodeId: string, hId?: string | null) {
+  return hId ? (document.querySelector(`[data-nodeid="${nodeId}"][data-handleid="${hId}"]`) as HTMLElement | null) : null
+}
+
+function readColor(nodeId: string, hId?: string | null) {
+  const el = getHandleEl(nodeId, hId)
+  if (!el) return '#ffffff'
+
+  const inline = (el.style.backgroundColor || el.style.background || '').trim()
+  if (inline) return inline
+
+  const css = getComputedStyle(el)
   return (
-    Array.from(document.querySelectorAll('.vue-flow__edge')).find(
-      item => (item as SVGGElement).dataset.id === props.id!,
-    ) as SVGGElement
-  ).querySelector('path') as SVGPathElement
+    css.getPropertyValue('--handle-bg').trim() ||
+    css.getPropertyValue('--vf-handle-color').trim() ||
+    css.backgroundColor ||
+    '#ffffff'
+  )
 }
 
-const segments = computed(() => props.segments!)
-const updateOnDrag = computed(() => props.updateOnDrag)
+// --------------------------- 渐变生成 / 更新 ---------------------------
+function ensureGradient() {
+  const svg = document.querySelector('svg.vue-flow__edges') as SVGSVGElement | null
+  if (!svg) return
 
-watch(
-  () => segments.value,
-  (value) => {
-    options.segments = value
-    redraw()
-  },
-)
-
-const options = reactive({
-  segments: segments.value,
-  samples: 1,
-  precision: 2,
-})
-
-const pathOptions = {
-  type: 'path',
-  fill: [
-    { color: props.data!.sourceColor, pos: 0 },
-    { color: props.data!.targetColor, pos: 1 },
-  ],
-  width: 3,
-}
-
-const createGP = () => {
-  return new GradientPath({
-    path: getPath(),
-    ...options,
-  })
-}
-
-const renderGP = () => {
-  return createGP().render(pathOptions)
-}
-
-const drawGP = () => {
-  if (grEdge.value !== null) {
-    grEdge.value.group.remove()
+  // <defs>
+  let defs = svg.querySelector('defs')
+  if (!defs) {
+    defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
+    svg.prepend(defs)
   }
 
-  grEdge.value = renderGP()
-}
-
-const redraw = () => {
-  grEdge.value.group.remove()
-  grEdge.value = renderGP()
-}
-
-const update = () => {
-  grEdge.value.update(pathOptions)
-}
-
-const remove = () => {
-  grEdge.value.group.remove()
-}
-
-const shouldUpdate = (movingNode: string) => {
-  return [props.data?.sourceParent, props.data?.targetParent].includes(movingNode)
-}
-
-const checkAndUpdate = (nodeId: string) => {
-  if (shouldUpdate(nodeId)) {
-    update()
-    return true
+  // <linearGradient>
+  let grad = defs.querySelector(`#${gradId}`) as SVGLinearGradientElement | null
+  if (!grad) {
+    grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient')
+    grad.id = gradId
+    grad.setAttribute('gradientUnits', 'objectBoundingBox')
+    grad.setAttribute('x1', '0%')        // 起点
+    grad.setAttribute('y1', '50%')
+    grad.setAttribute('x2', '100%')      // 终点 >100% 让粉色更长
+    grad.setAttribute('y2', '50%')
+    grad.innerHTML = '<stop offset="0%"/><stop offset="100%"/>'
+    defs.appendChild(grad)
   }
-  else {
-    return false
+
+  const [s0, s1] = grad.querySelectorAll('stop') as unknown as SVGStopElement[]
+  if (!s0 || !s1) return
+
+  // 👉 判断连线方向：源节点在右侧则需要反转颜色
+  const reversed = (props as any).sourceX > (props as any).targetX
+
+  if (!reversed) {
+    s0.setAttribute('stop-color', readColor(props.source, handleId('source')))
+    s1.setAttribute('stop-color', readColor(props.target, handleId('target')))
+  } else {
+    s0.setAttribute('stop-color', readColor(props.target, handleId('target')))
+    s1.setAttribute('stop-color', readColor(props.source, handleId('source')))
   }
 }
 
-onNodeDrag((event) => {
-  if (!updateOnDrag.value) {
-    return
-  }
+// --------------------------- 刷新钩子 ---------------------------
+const { onNodeDrag, onNodeDragStop, onNodesChange } = useVueFlow()
+const refresh = () => ensureGradient()
 
-  checkAndUpdate(event.node.id)
-})
-
-onSelectionDrag((event) => {
-  if (!updateOnDrag.value) {
-    return
-  }
-
-  for (const node of event.nodes) {
-    if (checkAndUpdate(node.id)) {
-      return
-    }
-  }
-})
-
-onNodeDragStop((event) => {
-  if (updateOnDrag.value) {
-    return
-  }
-
-  checkAndUpdate(event.node.id)
-})
-
-onSelectionDragStop((event) => {
-  if (updateOnDrag.value) {
-    return
-  }
-
-  for (const node of event.nodes) {
-    if (checkAndUpdate(node.id)) {
-      return
-    }
-  }
-})
-
-onMounted(() => {
-  drawGP()
-})
-
-onUnmounted(() => {
-  remove()
-})
+onMounted(refresh)
+onNodeDrag(refresh)
+onNodeDragStop(refresh)
+onNodesChange(refresh)
+watchEffect(refresh)
 </script>
 
 <template>
   <!-- @vue-ignore -->
-  <BezierEdge
-    :id="id"
-    ref="edge"
-    :source="source"
-    :target="target"
-    :updatable="true"
-    :class="id"
-    :style="{ stroke: 'transparent' }"
-  />
+  <BezierEdge v-bind="props" :style="{ stroke: `url(#${gradId})`, strokeWidth: 4 }" />
 </template>

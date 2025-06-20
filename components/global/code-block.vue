@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core'
-import { codeToHtml } from 'shiki'
+// import { codeToHtml } from 'shiki'
 
 const props = defineProps<{
     code: string
@@ -9,27 +9,10 @@ const props = defineProps<{
 
 
 const { copy } = useClipboard()
-const highlightedHtml = ref('')
-
-watch(
-  () => props.code,
-  async (newCode) => {
-    
-    highlightedHtml.value = await codeToHtml(newCode, {
-      lang: props.lang || 'bash',
-      theme: 'vitesse-dark'
-    })
-    // console.log('highlightedHtml', highlightedHtml.value)
-  },
-  { immediate: true, deep: true }
-)
-
-onMounted(async () => {
-    // highlightedHtml.value = await codeToHtml(props.code, {
-    //     lang: props.lang || 'bash',
-    //     theme: 'vitesse-dark'
-    // })
+const highlightedMarkdown = computed(() => {
+    return `\`\`\`${props.lang}\n${props.code}\n\`\`\``
 })
+
 
 function copyCode() {
     copy(props.code)
@@ -56,7 +39,7 @@ function copyCode() {
 
         <ScrollArea class="h-full">
 
-            <div class="flex-1 overflow-x-hidden   rounded-xl  leading-relaxed    text-sm" v-html="highlightedHtml" />
+            <MDC :value="highlightedMarkdown" class="text-sm" />
         </ScrollArea>
 
 

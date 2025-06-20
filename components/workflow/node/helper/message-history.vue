@@ -1,193 +1,67 @@
 <script lang="ts" setup>
 import type { MessageHistoryData } from '@/types/node-data/message-history'
 import { messageHistoryMeta } from '@/types/node-data/message-history'
-import { createPortManager } from '~/components/workflow/useNodePorts'
-
-import { useVueFlow } from '@vue-flow/core'
-
-// const { nodeExecutionTimes } = useNodeExecutionStats()
-
-// 引入公共样式
-const props = defineProps({
-  id: String
-
-})
-const currentNode = ref<{ id: string, data?: MessageHistoryData }>()
-const { addInputPort, addOutputPort, updateNodePosition } = createPortManager()
-const { nodes, edges } = storeToRefs(useWorkflowStore())
-const memoryInputVariableRef = ref<HTMLElement | null>(null)
-const dataOutputVariableRef = ref<HTMLElement | null>(null)
-const messageOutputVariableRef = ref<HTMLElement | null>(null)
-const dataframeOutputVariableRef = ref<HTMLElement | null>(null)
-onMounted(async () => {
-  const node = nodes.value.find(node => node.id === props.id)
-  if (!node) {
-    return
-  }
-
-  node.data = {
-    ..._.cloneDeep(messageHistoryMeta),
-    ..._.cloneDeep(node.data), // ✅ 已有字段优先级更高，会覆盖默认值
-  } as MessageHistoryData
-
-  currentNode.value = node
-  await nextTick() // 等待 DOM 渲染完毕
 
 
-  if (memoryInputVariableRef.value) {
-    if (!node.data.saved) {
-      const portId = nanoLowercaseAlphanumericId(10)
-      currentNode.value.data!.memoryInputVariable.id = portId
-      addInputPort(props.id!, portId, 'aquamarine', memoryInputVariableRef.value.offsetTop)
-    } else {
-      updateNodePosition(currentNode.value.data!.memoryInputVariable.id!, memoryInputVariableRef.value.offsetTop)
-    }
+const props = defineProps<{ id: string }>()
+const currentNode = ref<{ id: string, data: MessageHistoryData } | null>(null)
 
-  }
-
-
-  if (dataOutputVariableRef.value) {
-    if (!node.data.saved) {
-      const portId = nanoLowercaseAlphanumericId(10)
-      currentNode.value.data!.dataOutputVariable.id = portId
-      addOutputPort(props.id!, portId, 'pink', dataOutputVariableRef.value.offsetTop + dataOutputVariableRef.value.clientHeight / 2)
-    } else {
-      updateNodePosition(currentNode.value.data!.dataOutputVariable.id!, dataOutputVariableRef.value.offsetTop + dataOutputVariableRef.value.clientHeight / 2)
-    }
-    // const portId = nanoLowercaseAlphanumericId(10)
-    // currentNode.value.data!.dataOutputVariable.id = portId
-    // addOutputPort(props.id!, portId, 'pink', dataOutputVariableRef.value.offsetTop + dataOutputVariableRef.value.clientHeight / 2)
-  }
-
-  if (messageOutputVariableRef.value) {
-    if (!node.data.saved) {
-      const portId = nanoLowercaseAlphanumericId(10)
-      currentNode.value.data!.messageOutputVariable.id = portId
-      addOutputPort(props.id!, portId, 'pink', messageOutputVariableRef.value.offsetTop + messageOutputVariableRef.value.clientHeight / 2)
-    } else {
-      updateNodePosition(currentNode.value.data!.messageOutputVariable.id!, messageOutputVariableRef.value.offsetTop + messageOutputVariableRef.value.clientHeight / 2)
-    }
-    // const portId = nanoLowercaseAlphanumericId(10)
-    // currentNode.value.data!.messageOutputVariable.id = portId
-    // addOutputPort(props.id!, portId, 'pink', messageOutputVariableRef.value.offsetTop + messageOutputVariableRef.value.clientHeight / 2)
-  }
-
-  if (dataframeOutputVariableRef.value) {
-    if (!node.data.saved) {
-      const portId = nanoLowercaseAlphanumericId(10)
-      currentNode.value.data!.dataframeOutputVariable.id = portId
-      addOutputPort(props.id!, portId, 'pink', dataframeOutputVariableRef.value.offsetTop + dataframeOutputVariableRef.value.clientHeight / 2)
-    } else {
-      updateNodePosition(currentNode.value.data!.dataframeOutputVariable.id!, dataframeOutputVariableRef.value.offsetTop + dataframeOutputVariableRef.value.clientHeight / 2)
-    }
-    // const portId = nanoLowercaseAlphanumericId(10)
-    // currentNode.value.data!.dataframeOutputVariable.id = portId
-    // addOutputPort(props.id!, portId, 'pink', dataframeOutputVariableRef.value.offsetTop + dataframeOutputVariableRef.value.clientHeight / 2)
-  }
-
-})
-
-const { onNodeClick } = useVueFlow()
-onNodeClick((event) => {
-
-
-})
-
-
-watch(edges, () => {
-
-  if (!currentNode.value?.data) {
-    return
-  }
-
-  currentNode.value.data.memoryInputVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.memoryInputVariable.id)
-
-}, { deep: true, immediate: true })
 
 </script>
 
+
 <template>
 
-  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background  rounded-lg group flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card  focus:border focus: border-card">
-    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
-
-
-    <CardContent class="text-white flex flex-col space-y-8 -mt-8 flex-1 ">
-      <Separator class="my-5" />
+  <div>
+    <WorkflowBaseNode v-model:currentNode="currentNode" :id="props.id" :meta="messageHistoryMeta" @not-found="() => { }">
+      <template #content v-if="currentNode && currentNode.data">
 
 
 
-      <div ref="memoryInputVariableRef">
-        <div class="  flex w-full flex-row items-center space-x-2">
-          <p>Memory</p>
-          <NuxtIcon name="clarity:info-line" size="20" />
+        <div class="relative">
+          <div class="  flex w-full flex-row items-center space-x-2">
+            <p>{{ currentNode.data.memoryInputVariable.name }}</p>
+            <NuxtIcon name="clarity:info-line" size="20" />
+          </div>
+          <p class="text-[#D1D5DB] text-sm">Connect an upstream memory module (e.g., Redis Chat Memory) to retrieve conversation history.</p>
+          <div class="mt-5 w-full">
+            <EditTextDialog v-model:input-variable="currentNode.data.memoryInputVariable" :show-input="false" :handleBg="`oklch(66.6% 0.179 58.318)`" />
+          </div>
+          <!-- <Handle type="target" :id="currentNode.data.memoryInputVariable.id" :connectable-start="false" :position="Position.Left" :style="{ top: '12px', left: '-25px', '--handle-bg': 'oklch(66.6% 0.179 58.318)' }" /> -->
+
+
         </div>
-        <p class="text-[#D1D5DB] text-sm">Connect an upstream memory module (e.g., Redis Chat Memory) to retrieve conversation history.</p>
-
-
-      </div>
 
 
 
-      <div>
-        <div id="maxMessages" class="  flex w-full flex-row items-center space-x-2">
-          <p>Max Messages</p>
-          <NuxtIcon name="clarity:info-line" size="20" />
+        <div>
+          <div id="maxMessages" class="  flex w-full flex-row items-center space-x-2">
+            <p>Max Messages</p>
+            <NuxtIcon name="clarity:info-line" size="20" />
+          </div>
+          <div class="mt-5">
+            <NumberField id="maxMessages" v-model="currentNode.data.maxMessages" :max="100" :min="0">
+
+              <NumberFieldContent>
+                <NumberFieldDecrement />
+                <NumberFieldInput />
+                <NumberFieldIncrement />
+              </NumberFieldContent>
+            </NumberField>
+          </div>
+
+
         </div>
-        <div class="mt-5">
-          <NumberField id="maxMessages" v-model="currentNode.data.maxMessages" :max="200" :min="0">
-            <!-- <Label for="age">Age</Label> -->
-            <NumberFieldContent>
-              <NumberFieldDecrement />
-              <NumberFieldInput />
-              <NumberFieldIncrement />
-            </NumberFieldContent>
-          </NumberField>
+
+
+      </template>
+
+      <template #footer v-if="currentNode && currentNode.data">
+        <div class="flex flex-col space-y-2">
+          <NodeCardOutputFooter v-model:output-variable="currentNode.data.dataOutputVariable" class="!rounded-b-none" />
+          <NodeCardOutputFooter v-model:output-variable="currentNode.data.messageOutputVariable" />
         </div>
-        <!-- <p class="text-[#D1D5DB] text-sm">Connect an upstream memory module (e.g., Redis Chat Memory) to retrieve conversation history.</p> -->
-
-
-      </div>
-
-
-    </CardContent>
-
-    <div ref="messageOutputVariableRef" class="bg-card  rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
-      <div class="w-full h-full   flex items-center  justify-between">
-        <NuxtIcon v-if="currentNode.data.messageOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.messageOutputVariable.show = false" />
-
-        <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.messageOutputVariable.show = true" />
-
-        <div class="">
-          Message
-        </div>
-      </div>
-    </div>
-    <div ref="dataOutputVariableRef" class="bg-card  -mt-5 rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
-      <div class="w-full h-full   flex items-center  justify-between">
-        <NuxtIcon v-if="currentNode.data.dataOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataOutputVariable.show = false" />
-
-        <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataOutputVariable.show = true" />
-
-
-        <div class="">Data</div>
-      </div>
-
-    </div>
-
-
-    <div ref="dataframeOutputVariableRef" class="bg-card   -mt-5 rounded-b-lg py-2 pl-5 pr-10  flex items-center justify-center">
-      <div class="w-full h-full   flex items-center  justify-between">
-        <NuxtIcon v-if="currentNode.data.dataframeOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataframeOutputVariable.show = false" />
-
-        <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataframeOutputVariable.show = true" />
-
-        <div class="">
-          DataFrame
-        </div>
-      </div>
-    </div>
-  </Card>
-
-
+      </template>
+    </WorkflowBaseNode>
+  </div>
 </template>

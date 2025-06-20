@@ -1,4 +1,4 @@
-import type { FlowNode, BuildContext } from '~/types/workflow'
+import type { LangFlowNode, BuildContext } from '~/types/workflow'
 import type { MilvusData } from '@/types/node-data/milvus'
 
 import { resolveInputVariables, wrapRunnable, writeLog } from '../../langchain/resolveInput'
@@ -7,44 +7,42 @@ import { Milvus } from '@langchain/community/vectorstores/milvus'
 import type { MilvusLibArgs } from '@langchain/community/vectorstores/milvus'
 import type { Document } from '@langchain/core/documents'
 
-
-export async function milvusFactory(node: FlowNode, context: BuildContext) {
+export async function milvusFactory(node: LangFlowNode, context: BuildContext) {
   /* ---------- 1. 解析输入 ---------- */
   const data = node.data as MilvusData
-  const {
-    collectionNameVariable, connectionURIVariable, tokenVariable,
-    searchQueryVariable, resultOutputVariable, dataframeOutputVariable,
-    vectorFieldVariable, primaryFieldVariable, partitionKeyVariable,
-    partitionValueVariable, textFieldVariable, ingestDataVariable,
-    embeddingVariable,
-  } = data
 
-  const def = [
-    collectionNameVariable, connectionURIVariable, tokenVariable,
-    searchQueryVariable, vectorFieldVariable, primaryFieldVariable,
-    partitionKeyVariable, partitionValueVariable, textFieldVariable,
-    ingestDataVariable, embeddingVariable,
+  const variables = [
+    data.collectionNameInputVariable,
+    data.connectionURIInputVariable,
+    data.tokenInputVariable,
+    data.searchQueryInputVariable,
+    data.vectorFieldInputVariable,
+    data.primaryFieldInputVariable,
+    data.partitionKeyInputVariable,
+    data.partitionValueInputVariable,
+    data.textFieldInputVariable,
+    data.ingestDataInputVariable,
+    data.embeddingInputVariable,
   ]
 
-  const v = await resolveInputVariables(context, def)
+  const v = await resolveInputVariables(context, variables)
 
-  /* ---------- 2. 参数快照 ---------- */
-  const collectionName = v[collectionNameVariable.name]
-  const url = v[connectionURIVariable.name]
-  const token = v[tokenVariable.name]
-  const query = v[searchQueryVariable.name]
-  const vectorField = v[vectorFieldVariable.name]
-  const primaryField = v[primaryFieldVariable.name]
-  const partitionKey = v[partitionKeyVariable.name]
-  const partitionValue = v[partitionValueVariable.name]
-  const textField = v[textFieldVariable.name]
-  const ingestData = v[ingestDataVariable.name]
-  const embedding = v[embeddingVariable.name]
+  const collectionName = v[data.collectionNameInputVariable.id]
+  const url = v[data.connectionURIInputVariable.id]
+  const token = v[data.tokenInputVariable.id]
+  const query = v[data.searchQueryInputVariable.id]
+  const vectorField = v[data.vectorFieldInputVariable.id]
+  const primaryField = v[data.primaryFieldInputVariable.id]
+  const partitionKey = v[data.partitionKeyInputVariable.id]
+  const partitionValue = v[data.partitionValueInputVariable.id]
+  const textField = v[data.textFieldInputVariable.id]
+  const ingestData = v[data.ingestDataInputVariable.id]
+  const embedding = v[data.embeddingInputVariable.id]
 
   if (!embedding)
     throw new Error('Milvus 节点需要一个有效的 Embedding 实例')
 
-  /* ---------- 2. 懒执行 runnable：用 from() ---------- */
+  /* ---------- 2. 延迟执行 Runnable ---------- */
   const searchRunnable = RunnableLambda.from(async () => {
     const opts: MilvusLibArgs = {
       collectionName,
@@ -58,6 +56,7 @@ export async function milvusFactory(node: FlowNode, context: BuildContext) {
         search_params: { nprobe: 16 },
       },
     }
+
     if (vectorField) opts.vectorField = vectorField
     if (textField) opts.textField = textField
     if (primaryField) opts.primaryField = primaryField
@@ -68,14 +67,14 @@ export async function milvusFactory(node: FlowNode, context: BuildContext) {
     await store.ensureCollection()
     await store.ensurePartition()
 
-    if (data.ingestDataVariable.connected && ingestData) {
+    if (data.ingestDataInputVariable.connected && ingestData) {
       const docs = JSON.parse(ingestData)
       await store.addDocuments(docs)
     }
 
     const filter =
       partitionKey && partitionValue
-        ? `${partitionKey} == "${partitionValue}"`
+        ? `${partitionKey} == \"${partitionValue}\"`
         : undefined
 
     const raw = await store.similaritySearchWithScore(query, 30, filter)
@@ -91,59 +90,48 @@ export async function milvusFactory(node: FlowNode, context: BuildContext) {
     searchRunnable,
     node.id,
     context.onRunnableElapsed,
+    {
+      context,
+      portId: data.outputPortVariable.id,
+    }
   )
 
-  writeLog(
-    context,
-    node.id,
-    resultOutputVariable.id,
-    `Milvus ${collectionName} ${url} ${token}`,
-
-  )
-
-  writeLog(
-    context,
-    node.id,
-    dataframeOutputVariable.id,
-    `Milvus ${collectionName} ${url} ${token}`,
-
-  )
+  // writeLog(
+  //   context,
+  //   node.id,
+  //   data.outputPortVariable.id,
+  //   `Milvus collection: ${collectionName}, URL: ${url}`,
+  // )
 
   return {
-    [resultOutputVariable.id]: wrapped,
-    [dataframeOutputVariable.id]: wrapped, // 如需 DataFrame，可在 resolve 阶段转换
-
+    [data.outputPortVariable.id]: wrapped,
   }
 }
 
-export function filterTopRelevantDocs(
+function filterTopRelevantDocs(
   results: [Document, number][],
   maxStaticThreshold = 0.4,
   maxCount = 30
 ): [Document, number][] {
   if (results.length === 0) return [];
 
-  // 先按得分升序（距离越小越相似）
   const sorted = results.sort((a, b) => a[1] - b[1]);
 
-  // 取前 20 条样本
   const sampleSize = Math.min(20, sorted.length);
   const sampleScores = sorted.slice(0, sampleSize).map(([_, score]) => score);
 
   const avgScore = sampleScores.reduce((sum, s) => sum + s, 0) / sampleSize;
-  const dynamicThreshold = avgScore * 1.3; // 乘系数，让它稍微松一点
+  const dynamicThreshold = avgScore * 1.3;
 
   const finalThreshold = Math.min(dynamicThreshold, maxStaticThreshold);
-
-  console.log(`🧮 采样均值 = ${avgScore.toFixed(4)}, 动态阈值 = ${dynamicThreshold.toFixed(4)}, 最终阈值 = ${finalThreshold.toFixed(4)}`);
 
   const seen = new Set<string>();
   const kept: [Document, number][] = [];
 
   for (const [doc, score] of sorted) {
     const documentId = doc.metadata?.documentId;
-    if (score > finalThreshold) break; // 超过阈值直接停
-    if (!documentId || seen.has(documentId)) continue; // 跳过重复
+    if (score > finalThreshold) break;
+    if (!documentId || seen.has(documentId)) continue;
 
     kept.push([doc, score]);
     seen.add(documentId);
@@ -151,14 +139,7 @@ export function filterTopRelevantDocs(
     if (kept.length >= maxCount) break;
   }
 
-  if (kept.length === 0) {
-    console.warn('⚠️ 全部被过滤，只保留最相关的一条作为兜底');
-    kept.push(sorted[0]);
-  }
-
-  console.log(`✅ 最终保留 ${kept.length} 条，最高得分 ${kept[0][1].toFixed(4)}`);
+  if (kept.length === 0) kept.push(sorted[0]);
 
   return kept;
 }
-
-

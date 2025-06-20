@@ -2,7 +2,7 @@ import DayJS from 'dayjs'
 
 import cn from 'dayjs/locale/zh-cn.js'
 import relativeTime from 'dayjs/plugin/relativeTime.js'
-import AV from 'leancloud-storage'
+import AV from '~/models/fake-av' // 上面那个本地适配器
 
 DayJS.extend(relativeTime)
 
@@ -29,15 +29,15 @@ export enum EnumUser {
   VALIDATED = 'validated',
   USER = 'user',
   UNIONID = 'unionid',
-  EMAIL= 'email',
+  EMAIL = 'email',
 }
 
 class User extends AV.Object {
-  static LEANCLOUD_CLASSNAME = 'HL_User'
+  static CLASSNAME = 'Torra_User'
   public tempVars: Record<string, any> = {}
 
-  constructor() {
-    super()
+  constructor(initial?: any) {
+    super(User.CLASSNAME, initial)
     return new Proxy(this, {
       get(target, prop: string | symbol) {
         // 如果 prop 是 symbol，直接返回默认行为
@@ -72,9 +72,7 @@ class User extends AV.Object {
     })
   }
 
-  get leanCloudClassName(): string {
-    return 'HL_User'
-  }
+
 
   get createdAtShort(): string {
     return `${DayJS(this.createdAt).format('MM-DD HH')}点`
@@ -216,21 +214,6 @@ class User extends AV.Object {
     this.set('validated', value)
   }
 
-  get user(): AV.User {
-    return this.get('user')
-  }
-
-  set user(value: AV.User | undefined) {
-    this.set('user', value)
-  }
-
-  get unionid(): string {
-    return this.get('unionid')
-  }
-
-  set unionid(value: string | undefined) {
-    this.set('unionid', value)
-  }
 
   get email(): string {
     return this.get('email')
@@ -241,5 +224,5 @@ class User extends AV.Object {
   [key: `temp_${string}`]: any
 }
 
-AV.Object.register(User, 'HL_User')
+AV.Object.register(User, User.CLASSNAME)
 export default User

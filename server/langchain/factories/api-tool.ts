@@ -1,138 +1,183 @@
-import { StructuredTool } from "langchain/tools";
-import { z } from "zod";
-import type { FlowNode, BuildContext } from '~/types/workflow'
+import { z } from 'zod'
+import { nanoid } from 'nanoid'
+
+import { StructuredTool } from 'langchain/tools'
+import type { LangFlowNode, BuildContext } from '~/types/workflow'
 import type { APIToolData } from '~/types/node-data/api-tool'
 import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
-import { nanoid } from "nanoid";
+
+/** 字段定义结构 */
+type FieldDef = {
+    key: string
+    type: 'string' | 'number' | 'boolean' | 'array' | 'object'
+    description?: string
+    items?: FieldDef[]
+}
+
+/** 清洗工具名称（兼容 OpenAI Tool 要求） */
 function sanitizeToolName(name: string): string {
     let cleaned = name
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // 移除重音
-        .replace(/[^\w]/g, '_')          // 非单词字符换成 _
-        .replace(/^_+|_+$/g, '')          // 去掉开头/结尾的 _
-        .toLowerCase();
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w]/g, '_')
+        .replace(/^_+|_+$/g, '')
+        .toLowerCase()
 
-    // 如果清理后为空或太短，就随机生成一个
     if (!cleaned || cleaned.length < 3) {
-        const randomSuffix = nanoid(6);
-        cleaned = `tool_${randomSuffix}`;
+        cleaned = `tool_${nanoid(6)}`
     }
 
-    return cleaned;
+    return cleaned
 }
-class HttpRequestTool extends StructuredTool<z.ZodObject<{}>> {
-    name: string;
-    description: string;
-    schema = z.object({}); // ✅ 这里是空对象，不用 optional
 
-    private defaultInput: {
-        url: string;
-        method: "GET" | "POST" | "PUT" | "DELETE";
-        token?: string;
-        body?: Record<string, any>;
-    };
+/** 由字段定义数组生成 Zod 校验 schema */
+function generateZodSchemaFromFieldArray(fields: FieldDef[]): z.ZodObject<any> {
+    const shape: Record<string, z.ZodTypeAny> = {}
+    for (const field of fields) {
+        let zodType: z.ZodTypeAny
+        switch (field.type) {
+            case 'number': zodType = z.number(); break
+            case 'boolean': zodType = z.boolean(); break
+            case 'object': zodType = z.record(z.any()); break
+            case 'array':
+                if (field.items?.length) {
+                    const inner = generateZodSchemaFromFieldArray(field.items)
+                    zodType = z.array(inner)
+                } else {
+                    zodType = z.array(z.object({}).passthrough())
+                }
+                break
+            default: zodType = z.string()
+        }
+        if (field.description) {
+            zodType = zodType.describe(field.description.trim())
+        }
+        shape[field.key] = zodType
+    }
+    return z.object(shape)
+}
 
-    constructor({
-        name,
-        description,
-        url,
-        method,
-        token,
-        body,
-    }: {
-        name: string;
-        description: string;
-        url: string;
-        method: "GET" | "POST" | "PUT" | "DELETE";
-        token?: string;
-        body?: Record<string, any>;
+/** 结构化 HTTP 请求工具类 */
+class HttpRequestTool extends StructuredTool<any> {
+    name: string
+    description: string
+    schema: z.ZodTypeAny
+    private url: string
+    private method: 'GET' | 'POST' | 'PUT' | 'DELETE'
+    private token?: string
+    private context: BuildContext
+    private nodeId: string
+    private portId: string
+
+    constructor({ name, description, url, method, token, schema, context, nodeId, portId }: {
+        name: string
+        description: string
+        url: string
+        method: 'GET' | 'POST' | 'PUT' | 'DELETE'
+        token?: string
+        schema: z.ZodTypeAny
+        context: BuildContext
+        nodeId: string
+        portId: string
     }) {
-        super();
-        this.name = name;
-        this.description = description;
-        this.defaultInput = { url, method, token, body };
+        super()
+        this.name = name
+        this.description = description
+        this.url = url
+        this.method = method
+        this.token = token
+        this.schema = schema
+        this.context = context
+        this.nodeId = nodeId
+        this.portId = portId
     }
 
-    async _call(_: unknown): Promise<string> {
-        const { url, method, token, body } = this.defaultInput;
-
-        const headers: HeadersInit = {
-            "Content-Type": "application/json",
-        };
-        if (token) headers["Authorization"] = `Bearer ${token}`;
-
-        const requestOptions: RequestInit = { method, headers };
-        if (method !== "GET" && body) {
-            requestOptions.body = JSON.stringify(body);
-        }
+    async _call(input: any): Promise<string> {
+        const { context, nodeId, portId, name, url, method } = this
+        let parsed: any
 
         try {
-            const response = await fetch(url, requestOptions);
-            if (!response.ok) {
-                const errorText = await response.text();
-                return `Error ${response.status}: ${errorText}`;
-            }
-            const contentType = response.headers.get("content-type") || "";
+            parsed = this.schema.parse(input)
+            // writeLog(context, nodeId, name, portId, `[${name}] 调用输入: ${JSON.stringify(parsed)}`)
+        } catch (e: any) {
+            // writeLog(context, nodeId, name, portId, `[${name}] 输入校验失败: ${e?.message || e}`)
+            throw e
+        }
 
-            if (contentType.includes("application/json")) {
-                const result = await response.json();
-                return JSON.stringify(result, null, 2);
-            } else {
-                const text = await response.text();
-                return text.trim() || "Request succeeded but returned an empty response.";
+        const headers: HeadersInit = { 'Content-Type': 'application/json' }
+        if (this.token) headers['Authorization'] = `Bearer ${this.token}`
+
+        const options: RequestInit = { method, headers }
+        if (method !== 'GET') options.body = JSON.stringify(parsed)
+
+        try {
+            const response = await fetch(this.url, options)
+            if (!response.ok) {
+                const text = await response.text()
+                return `Error ${response.status}: ${text}`
             }
-        } catch (error: any) {
-            return `Request failed: ${error.message || error}`;
+
+            const contentType = response.headers.get('content-type') || ''
+            if (contentType.includes('application/json')) {
+                const json = await response.json()
+
+                return JSON.stringify(json, null, 2)
+            } else {
+                const text = (await response.text()).trim()
+
+                return text
+            }
+        } catch (err: any) {
+
+            return `Request failed: ${err.message || err}`
         }
     }
 }
 
-export async function apiToolFactory(node: FlowNode, context: BuildContext) {
-    const data = node.data as APIToolData;
+/** API Tool 节点工厂函数 */
+export async function apiToolFactory(node: LangFlowNode, context: BuildContext) {
+    const data = node.data as APIToolData
     const {
-        toolNameVariable,
-        toolDescriptionVariable,
+        toolNameInputVariable,
+        toolDescriptionInputVariable,
         methodType,
         urlInputVariable,
-        bodyVariable,
-        tokenVariable,
-        toolOutputVariable
-    } = data;
+        bodyInputVariable,
+        tokenInputVariable,
+        toolOutputVariable,
+    } = data
 
-    // 解析输入
-    const inputValues = await resolveInputVariables(context, [toolNameVariable, toolDescriptionVariable, urlInputVariable, bodyVariable, tokenVariable]);
-    const url = inputValues[urlInputVariable.name];
-    const body = inputValues[bodyVariable.name];
-    const token = inputValues[tokenVariable.name];
-    const toolName = sanitizeToolName(inputValues[toolNameVariable.name]) || "http_request_tool";
-    const toolDescription = inputValues[toolDescriptionVariable.name] || "Make authorized HTTP requests (GET, POST) to a given API endpoint.";
+    const inputValues = await resolveInputVariables(context, [
+        toolNameInputVariable,
+        toolDescriptionInputVariable,
+        urlInputVariable,
+        bodyInputVariable,
+        tokenInputVariable,
+    ])
 
-    // 🔥 这里断言成四种允许的 method 类型！
-    const method = (methodType.toUpperCase() as "GET" | "POST" | "PUT" | "DELETE");
+    const toolName = sanitizeToolName(inputValues[toolNameInputVariable.id])
+    const toolDescription = inputValues[toolDescriptionInputVariable.id] || 'Dynamic HTTP request tool'
+    const url = inputValues[urlInputVariable.id]
+    const token = inputValues[tokenInputVariable.id]
+    const method = methodType.toUpperCase() as 'GET' | 'POST' | 'PUT' | 'DELETE'
+    const rawBody = bodyInputVariable.value
 
-    // console.log('apiToolFactory', toolName, toolDescription, methodType, method, url, token, body);
+    const schema = method === 'GET' ? z.object({}) : generateZodSchemaFromFieldArray(rawBody)
 
-    // 初始化真正的 Tool
     const tool = new HttpRequestTool({
         name: toolName,
         description: toolDescription,
         url,
         method,
         token,
-        body
-    });
-
-    writeLog(
+        schema,
         context,
-        node.id,
-        toolOutputVariable.id,
-        `API Tool "${toolName}"  "${toolDescription}" created with method "${method}" and URL "${url}".`,
-
-    );
-    // console.log('apiToolFactory', tool);
+        nodeId: node.id,
+        portId: toolOutputVariable.id,
+    })
 
     return {
         [toolOutputVariable.id]: tool,
-
-    };
+    }
 }
+

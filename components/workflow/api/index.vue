@@ -7,35 +7,27 @@ import { nanoid } from 'nanoid'
 import { storeToRefs } from 'pinia'
 import { useWorkflowStore } from '~/stores/workflow'
 import { APIInputLangchainName } from '~/types/node-data/api-input'
+import type { KeyValueSchema } from '~/types/workflow'
 import type { APIInputData } from '~/types/node-data/api-input'
-type KeyValueObject = Record<
-  string,
-  { name: string, description: string; type: 'string' | 'number' | 'boolean' | 'array' | 'object', value: any }
->
-const { currentWorkflow } = storeToRefs(useWorkflowStore())
+const { setExecutionTime } = useNodeExecutionStats()
+const { currentWorkflow, executionErrorNodeIds } = storeToRefs(useWorkflowStore())
 const open = defineModel<boolean>('open')
 const tokenInputRef = ref<{ input: HTMLInputElement } | null>(null)
-interface KeyValueRow {
-  name: string
-  description: string
-  type: 'string' | 'number' | 'boolean' | 'array' | 'object'
-  value: any
-  selected?: boolean
-}
-// type KeyValueSchema = Record<
-//   string,
-//   {
-//       name: string
-//       description: string
-//       type: string
-//     value: any
-//   }
-// >
+
 interface APISchemaField {
   name: string
   description: string
   type: string
   value?: any
+}
+function formatStepLabel(step: any, showTimeIcon: boolean) {
+  if (step.elapsed === -1) {
+    return '<span style="color: orange;">Pending</span>'
+  } else if (step.elapsed === -2) {
+    return '<span style="color: red;">Skipped</span>'
+  } else {
+    return `<span style="color: #4ade80;">${showTimeIcon ? '⏱️ 耗时：' : ''}${step.elapsedStr}</span>`  // Tailwind绿色 #4ade80
+  }
 }
 onMounted(async () => {
   await until(currentWorkflow).toBeTruthy()
@@ -45,13 +37,14 @@ onMounted(async () => {
   }
   //找到 workflow 的 nodes 里面有没有APIInputLangchainName的节点，作为 API 的入口
   const apiInputNode = currentWorkflow.value!.nodes.find((node) => {
+    // console.log('node.data.type', node.data.type, APIInputLangchainName)
     return node.data.type === APIInputLangchainName
   })
   if (!apiInputNode) {
     useToast('请先添加 API Input 节点')
     return
   }
-  const inputValue = (apiInputNode.data as APIInputData).inputValue as KeyValueObject || {}
+  const inputValue = (apiInputNode.data as APIInputData).inputValue as KeyValueSchema || {}
 
   console.log('inputValue', inputValue)
   // 如果没有 inputValue 就提示
@@ -59,24 +52,21 @@ onMounted(async () => {
     useToast('请至少添加一个输入参数')
     return
   }
-  // console.log('apiInputNode', apiInputNode)
-
   const apiSchema: Record<string, any> = {}
-
   Object.entries(inputValue).forEach(([key, value]) => {
     apiSchema[key] = {
       name: value.name,
       description: value.description,
       type: value.type,
-      value: value.value || '',
+      defaultValue: value.defaultValue,
+      // 优先已有 value，没有则用 defaultValue
+      value: value.value !== undefined ? value.value : value.defaultValue,
     }
   })
-
   currentWorkflow.value!.apiSchema = apiSchema
-  console.log('currentWorkflow.value!.apiSchema', currentWorkflow.value!.apiSchema)
 
   await currentWorkflow.value!.save()
-  useToast('工作流已保存')
+  // useToast('工作流已保存')
 })
 
 const { copy } = useClipboard()
@@ -117,15 +107,15 @@ watch(
   () => [currentWorkflow.value?.apiSchema, currentWorkflow.value?.token],
   ([schemaRaw]) => {
     // console.log('schemaRaw', schemaRaw,currentWorkflow.value?.token)
-    const fields = schemaRaw as KeyValueObject || {}
+    const fields = schemaRaw as KeyValueSchema || {}
     const jsonBody: Record<string, any> = {}
-
-    for (const [, value] of Object.entries(fields)) {
-      const fieldName = value.name  // 防止空值
-      // console.log('fieldName', fields[fieldName].value)
-      const fieldValue = value.value
+    for (const [, v] of Object.entries(fields)) {
+      const fieldName = v.name
+      // 用 value，没填则用 defaultValue
+      const fieldValue = v.value !== undefined && v.value !== null && v.value !== ''
+        ? v.value
+        : v.defaultValue
       jsonBody[fieldName] = fieldValue
-
     }
 
 
@@ -186,16 +176,39 @@ const run = async () => {
       : `${seconds}秒`
 
     const json = await res.json()
+    console.log('API Response:', json)
     if (!res.ok) {
-      runResult.value = `❌ 执行失败：${json.error || '未知错误'}`
+      runResult.value = `❌ API执行失败：${json.error || '未知错误'}`
       return
     }
     if (json.statusCode === 200) {
 
       runResult.value = json.output
+      // 批量渲染统计面板
+      if (json.logs && Array.isArray(json.logs)) {
+        for (const log of json.logs) {
+          setExecutionTime(log.nodeId, formatStepLabel(log, true))
+        }
+      }
     } else {
-      runResult.value = `❌ 执行失败：${json.error || '未知错误'}`
+      // console.error('API执行错误', json.output)
+      runResult.value = json.output
+      // 批量渲染统计面板
+      if (json.logs && Array.isArray(json.logs)) {
+        for (const log of json.logs) {
+          setExecutionTime(log.nodeId, formatStepLabel(log, true))
+        }
+      }
+      if (json.errorNodeId) {
+        // 如果有错误节点ID，添加到执行错误节点列表
+        if (!executionErrorNodeIds.value.includes(json.errorNodeId)) {
+          executionErrorNodeIds.value.push(json.errorNodeId)
+        }
+      }
+
     }
+
+
 
   } catch (err) {
     console.error('请求失败', err)
@@ -205,46 +218,11 @@ const run = async () => {
   }
 }
 
-
-// const formatTag = (text: string, totalTags: number) => {
-//   let limit = 20
-//   if (totalTags > 10) {
-//     limit = 5
-//   } else if (totalTags > 5) {
-//     limit = 10
-//   }
-
-//   if (text.length <= limit) {
-//     return text
-//   }
-//   // 根据新的 limit 取前半段和后半段
-//   const front = Math.floor(limit / 2)
-//   const back = limit - front
-//   console.log('text.slice(0, front)', text.slice(0, front) + '...' + text.slice(-back))
-//   return text.slice(0, front) + '...' + text.slice(-back)
-// }
-
-// const onTagsUpdate = (row: KeyValueRow) => {
-//   if (Array.isArray(row.value)) {
-//     let limit = 20
-//     const total = row.value.length
-
-//     if (total > 10) {
-//       limit = 5
-//     } else if (total > 5) {
-//       limit = 10
-//     }
-
-//     row.value = row.value.map(tag =>
-//       tag.length > limit ? tag.slice(0, limit) : tag
-//     )
-//   }
-// }
 </script>
 
 <template>
   <Dialog v-model:open="open" class="w-screen">
-    <DialogContent v-if="currentWorkflow" class="!max-w-7xl w-screen dark text-white">
+    <DialogContent @interact-outside.prevent @pointer-down-outside.prevent @focus-outside.prevent v-if="currentWorkflow" class="!max-w-7xl w-screen dark text-white">
       <DialogHeader>
         <DialogTitle>API</DialogTitle>
         <DialogDescription>
@@ -374,6 +352,7 @@ const run = async () => {
 
           </div>
           <ScrollArea class="flex-1 min-h-0 max-w-2xl overflow-auto">
+
             <MDC :value="runResult" class=" prose  mt-3 p-4 text-sm flex-1 bg-[#1e1e1e]   rounded-md">
 
             </MDC>

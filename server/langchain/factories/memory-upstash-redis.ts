@@ -1,61 +1,48 @@
-import type { BuildContext, FlowNode, InputPortVariable } from '~/types/workflow'
-import type { UpstashRedisChatMemoryData } from '~/types/node-data/memory-redis'
+import type { LangFlowNode, BuildContext, InputPortVariable } from '~/types/workflow'
+import type { UpstashRedisChatMemoryData } from '@/types/node-data/memory-redis'
 import { resolveInputVariables, writeLog } from '../resolveInput'
-// import { RedisChatMessageHistory } from '@langchain/redis'
 import { UpstashRedisChatMessageHistory } from '@langchain/community/stores/message/upstash_redis'
-import { Redis } from "@upstash/redis";
+import { Redis } from "@upstash/redis"
 
-//针对使用@upstash/redis的情况
-export async function upstashRedisChatMemoryFactory(node: FlowNode, context: BuildContext) {
+/**
+ * Upstash Redis Chat Memory 节点工厂函数
+ */
+export async function upstashRedisChatMemoryFactory(node: LangFlowNode, context: BuildContext) {
     const data = node.data as UpstashRedisChatMemoryData
     const {
-        urlVariable,
-        tokenVariable,
+        urlInputVariable,
+        tokenInputVariable,
         memoryOutputVariable,
-        sessionIdVariable,
+        sessionIdInputVariable
     } = data
 
+    // 1. 解析输入变量
     const variableDefs = [
-        urlVariable,
-        tokenVariable,
-        sessionIdVariable
-
+        urlInputVariable,
+        tokenInputVariable,
+        sessionIdInputVariable
     ] as InputPortVariable[]
 
     const inputValues = await resolveInputVariables(context, variableDefs)
-    // console.log("upstashRedisChatMemoryFactory", inputValues)
-    const url = inputValues[urlVariable.name]
-    const token = inputValues[tokenVariable.name]
-    let sessionId = inputValues[sessionIdVariable.name]
-    // console.log("upstashRedisChatMemoryFactory", sessionId)
+    const url = inputValues[urlInputVariable.id]
+    const token = inputValues[tokenInputVariable.id]
+    let sessionId = inputValues[sessionIdInputVariable.id]
 
-    //如果没有 sessionId，则使用当前时间戳作为 sessionId
+    // 2. 若 sessionId 为空则用当前时间戳
     if (!sessionId) {
         sessionId = Date.now().toString()
     }
 
-
-
+    // 3. 创建 Upstash Redis Chat Memory 实例
     const memory = new UpstashRedisChatMessageHistory({
         sessionId,
-        sessionTTL: 3600,
-        client: new Redis({
-            url,
-            token
-        })
+        // sessionTTL: 3600, //永久
+        client: new Redis({ url, token })
     })
 
-    writeLog(
-        context,
-        node.id,
-        memoryOutputVariable.id,
-        `UpstashRedisMemory  url:${url} token:${token} sessionId:${sessionId}`,
 
-    )
-
-
+    // 4. 返回端口映射
     return {
-        [memoryOutputVariable.id]: memory,
-
+        [memoryOutputVariable.id]: memory
     }
 }

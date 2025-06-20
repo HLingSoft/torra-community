@@ -1,85 +1,73 @@
-import type { FlowNode, BuildContext } from '~/types/workflow'
+import type { LangFlowNode, BuildContext } from '~/types/workflow'
 import type { IfElseData } from '@/types/node-data/if-else'
-import { RunnableLambda } from '@langchain/core/runnables'
+import { MatchType } from '@/types/node-data/if-else'
 import { resolveInputVariables, writeLog } from '../resolveInput'
+import { InputPortVariable } from '~/types/workflow'
 
-export async function ifElseFactory(node: FlowNode, context: BuildContext) {
+export const ifElseFactory = async (node: LangFlowNode, context: BuildContext) => {
   const data = node.data as IfElseData
-
   const {
     textInputVariable,
     matchType,
-    matchTextVariable,
-    messageVariable,
+    matchTextInputVariable,
+    messageInputVariable,
     operator,
     caseSensitive,
     trueOutputVariable,
     falseOutputVariable,
   } = data
 
-  const variableDefs = [textInputVariable, matchTextVariable, messageVariable]
-  const inputValues = await resolveInputVariables(context, variableDefs)
+  console.log(`[IfElse] Node ${node.id} ${node.data.title} started`, matchType)
+  // -------- 解析输入 --------
+  // 只在字符串模式下才传 matchTextInputVariable
+  const inputVars = [
+    textInputVariable,
+    messageInputVariable,
+    matchType === MatchType.String ? matchTextInputVariable : undefined
+  ].filter((v): v is InputPortVariable => !!v)
 
-  const textInput = inputValues[textInputVariable.name] ?? ''
+  const inputVals = await resolveInputVariables(context, inputVars)
 
+  // 取输入值
+  const textInput = String(inputVals[textInputVariable.id] ?? '')
+  const matchText = String(inputVals[matchTextInputVariable?.id] ?? '')
+  const message = inputVals[messageInputVariable.id] ?? ''
 
-  const matchText = inputValues[matchTextVariable.name] ?? ''
-  const message = inputValues[messageVariable.name] ?? ''
-  // console.log('ifElseFactory:', textInput, matchText, message,matchType)
-  if (matchType !== 'String' && matchType !== 'Boolean') {
-    throw new Error(`[IfElse] Unsupported matchType: "${matchType}". Only "String" and "Boolean" are allowed.`)
+  // -------- 判断类型 --------
+  if (matchType !== MatchType.String && matchType !== MatchType.Boolean) {
+    throw new Error(`[IfElse] Unsupported matchType: ${matchType}`)
   }
 
+  // -------- 执行比较 --------
+  const norm = (s: string) => (caseSensitive ? s : s.toLowerCase())
 
-  function applyStringOperator(text: string, match: string) {
-    const t = caseSensitive ? text : text.toLowerCase()
-    const m = caseSensitive ? match : match.toLowerCase()
-
+  const applyString = () => {
+    const a = norm(textInput)
+    const b = norm(matchText)
     switch (operator) {
-      case 'equals': return t === m
-      case 'contains': return t.includes(m)
-      case 'startsWith': return t.startsWith(m)
-      case 'endsWith': return t.endsWith(m)
-      case 'matches': return new RegExp(m).test(t)
-      case 'isEmpty': return t.trim() === ''
-      case 'isNotEmpty': return t.trim() !== ''
-      case 'isNull': return t === 'null' || t === ''
-      case 'isNotNull': return t !== 'null' && t !== ''
+      case 'equals': return a === b
+      case 'contains': return a.includes(b)
+      case 'startsWith': return a.startsWith(b)
+      case 'endsWith': return a.endsWith(b)
+      case 'matches': return new RegExp(b).test(a)
+      case 'isEmpty': return a.trim() === ''
+      case 'isNotEmpty': return a.trim() !== ''
+      case 'isNull': return a === 'null' || a === ''
+      case 'isNotNull': return a !== 'null' && a !== ''
       default: return false
     }
   }
 
-  function applyBooleanOperator(text: string): boolean {
-    const normalized = text.toLowerCase().trim()
-    switch (operator) {
-      case 'true': return normalized === 'true'
-      case 'false': return normalized === 'false'
-      default: return false
-    }
+  const applyBoolean = () => {
+    const v = norm(textInput)
+    return operator === 'true' ? v === 'true' : operator === 'false' && v === 'false'
   }
 
-  let result = false
-  if (matchType === 'String') {
-    result = applyStringOperator(textInput, matchText)
-  } else if (matchType === 'Boolean') {
-    result = applyBooleanOperator(textInput)
-  }
-
-  // const result = applyOperator(textInput, matchText)
-  // // const result=true
-  // console.log('ifElseFactory:', result)
-  if (result) {
-    writeLog(context, node.id, trueOutputVariable.id, `Matched: ${message}`)
-
-  } else {
-    writeLog(context, node.id, falseOutputVariable.id, `Not matched: ${message}`)
-
-  }
+  const passed = matchType === MatchType.String ? applyString() : applyBoolean()
 
   return {
-    [trueOutputVariable.id]: result ? message : undefined,
-    [falseOutputVariable.id]: !result ? message : undefined,
-    default: result,
-
+    [trueOutputVariable.id]: passed ? message : undefined,
+    [falseOutputVariable.id]: passed ? undefined : message,
+    default: passed, // executor 依此剪枝
   }
 }

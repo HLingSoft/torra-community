@@ -7,28 +7,27 @@ export interface MilvusData {
   icon?: string
   description: string
 
-  collectionNameVariable: InputPortVariable
-  collectionDescVariable: InputPortVariable
-  connectionURIVariable: InputPortVariable
-  tokenVariable: InputPortVariable
+  collectionNameInputVariable: InputPortVariable
+  // collectionDatabaseInputVariable: InputPortVariable
+  connectionURIInputVariable: InputPortVariable
+  tokenInputVariable: InputPortVariable
 
-  primaryFieldVariable: InputPortVariable
-  partitionKeyVariable: InputPortVariable
-  partitionValueVariable: InputPortVariable
-  
-  textFieldVariable: InputPortVariable
-  vectorFieldVariable: InputPortVariable
+  primaryFieldInputVariable: InputPortVariable
+  partitionKeyInputVariable: InputPortVariable
+  partitionValueInputVariable: InputPortVariable
 
-  ingestDataVariable: InputPortVariable
-  searchQueryVariable: InputPortVariable
-  embeddingVariable: InputPortVariable
+  textFieldInputVariable: InputPortVariable
+  vectorFieldInputVariable: InputPortVariable
 
- 
+  ingestDataInputVariable: InputPortVariable
+  searchQueryInputVariable: InputPortVariable
+  embeddingInputVariable: InputPortVariable
 
-  resultOutputVariable: OutputPortVariable
-  dataframeOutputVariable: OutputPortVariable
 
-  
+
+  outputPortVariable: OutputPortVariable
+
+
 
   show?: boolean
   saved?: boolean
@@ -37,89 +36,81 @@ export interface MilvusData {
 export const MilvusLangchainName = 'MilvusRetriever'
 
 export const milvusMeta: MilvusData = {
-  icon: '📦',
+  icon: 'logos:milvus-icon',
   type: MilvusLangchainName,
   title: 'Milvus',
   description: 'Milvus vector store with search capabilities.',
 
-  collectionNameVariable: {
-    name: 'collectionName',
-    allowedTypes: ['Message'],
-   
-    forceStringify: true,
+  collectionNameInputVariable: {
+    name: 'Collection Name',
+    allowedTypes: ['Data'],
+
+
   } as InputPortVariable,
-  collectionDescVariable: {
-    name: 'collectionDesc',
-    allowedTypes: ['Message'],
-    defaultValue: 'system_01',
-    forceStringify: true,
+
+  connectionURIInputVariable: {
+    name: 'Connection URI',
+    allowedTypes: ['Data'],
+    defaultValue: '',
+
   } as InputPortVariable,
-  connectionURIVariable: {
-    name: 'connectionURI',
-    allowedTypes: ['Message'],
-    defaultValue: 'https://in05-37b92ef035357df.serverless.ali-cn-hangzhou.cloud.zilliz.com.cn',
-    forceStringify: true,
+  tokenInputVariable: {
+    name: 'Token',
+    allowedTypes: ['Data'],
+
+
   } as InputPortVariable,
-  tokenVariable: {
-    name: 'token',
-    allowedTypes: ['Message'],
-    forceStringify: true,
-   
-  } as InputPortVariable,
-  primaryFieldVariable: {
-    name: 'primaryField',
-    allowedTypes: ['Message'],
+  primaryFieldInputVariable: {
+    name: 'Primary Field',
+    allowedTypes: ['Data'],
     defaultValue: 'pk',
-    forceStringify: true,
+
   } as InputPortVariable,
-  partitionKeyVariable: {
-    name: 'partitionKey',
-    allowedTypes: ['Message'],
-    forceStringify: true,
+  partitionKeyInputVariable: {
+    name: 'Partition Key',
+    allowedTypes: ['Data'],
+
   } as InputPortVariable,
-  partitionValueVariable: {
-    name: 'partitionValue',
-    allowedTypes: ['Message'],
-    forceStringify: true,
- 
+  partitionValueInputVariable: {
+    name: 'Partition Value',
+    allowedTypes: ['Data'],
+
+
   } as InputPortVariable,
-  textFieldVariable: {
-    name: 'textField',
-    allowedTypes: ['Message'],
-    forceStringify: true,
-   
+  textFieldInputVariable: {
+    name: 'Text Field',
+    allowedTypes: ['Data'],
+
+
   } as InputPortVariable,
-  vectorFieldVariable: {
-    name: 'vectorField',
-    allowedTypes: ['Message'],
-    forceStringify: true,
-    
+  vectorFieldInputVariable: {
+    name: 'Vector Field',
+    allowedTypes: ['Data'],
+
+
   } as InputPortVariable,
-  ingestDataVariable: {
-    name: 'ingestData',
-    allowedTypes: ['Message'],
-  
+  ingestDataInputVariable: {
+    name: 'Ingest Data',
+    allowedTypes: ['Data'],
+
   } as InputPortVariable,
-  searchQueryVariable: {
-    name: 'searchQuery',
-    allowedTypes: ['Message'],
-    forceStringify: true,
-   
+  searchQueryInputVariable: {
+    name: 'Search Query',
+    allowedTypes: ['Data'],
+
+
   } as InputPortVariable,
-  embeddingVariable: {
-    name: 'embedding',
-    allowedTypes: ['Vector'],
-    
+  embeddingInputVariable: {
+    name: 'Embedding',
+    allowedTypes: ['Embedding'],
+
   } as InputPortVariable,
-  resultOutputVariable: {
-    outputType: 'Message',
-    name: 'searchResults',
+  outputPortVariable: {
+    outputType: 'Data',
+    name: 'When Done',
   } as OutputPortVariable,
-  dataframeOutputVariable: {
-    outputType: 'DataFrame',
-    name: 'dataFrame',
-  } as OutputPortVariable,
- 
+
+
   show: true,
   saved: false,
 }

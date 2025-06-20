@@ -1,16 +1,23 @@
 import type { InputPortVariable, OutputPortVariable } from '~/types/workflow'
-
+export interface KeyValueRow {
+    id: number
+    key: string
+    value: string // default value
+    selected: boolean
+    description: string
+    type: 'string' | 'number' | 'boolean' | 'object' | 'array'
+}
 export interface APIToolData {
     type: string
     title: string
     description: string
     icon?: string
     methodType: string
-    toolNameVariable: InputPortVariable
-    toolDescriptionVariable: InputPortVariable
+    toolNameInputVariable: InputPortVariable
+    toolDescriptionInputVariable: InputPortVariable
     urlInputVariable: InputPortVariable
-    tokenVariable: InputPortVariable
-    bodyVariable: InputPortVariable
+    tokenInputVariable: InputPortVariable
+    bodyInputVariable: InputPortVariable
     toolOutputVariable: OutputPortVariable
     show?: boolean
     saved?: boolean
@@ -22,46 +29,45 @@ export const apiToolMeta: APIToolData = {
     type: APIToolLangchainName,
     title: 'API Tool',
     description: 'Make authorized HTTP requests (GET, POST) to a given API endpoint.',//让 http 请求变成 Agent 的 Tool
-    icon: '🧠',
+    icon: 'logos:async-api-icon',
     methodType: 'get',
-    toolNameVariable: {
-        name: 'toolName',
-        allowedTypes: ['Message'],
+    toolNameInputVariable: {
+        name: 'Tool Name',
+        allowedTypes: ['Data'],
         value: '',
         defaultValue: 'http_request_tool',
-        forceStringify: true,
+
     } as InputPortVariable,
 
-    toolDescriptionVariable: {
-        name: 'toolDescription',
-        allowedTypes: ['Message'],
+    toolDescriptionInputVariable: {
+        name: 'Tool Description',
+        allowedTypes: ['Data'],
         value: '',
         defaultValue: 'Make authorized HTTP requests (GET, POST) to a given API endpoint.',
-        forceStringify: true,
+
     } as InputPortVariable,
 
     urlInputVariable: {
-        name: 'urlInput',
-        allowedTypes: ['Message'],
-        value: '',
-        forceStringify: true,
-    } as InputPortVariable,
-    tokenVariable: {
-        name: 'tokenInput',
-        allowedTypes: ['Message'],
-        value: '',
-        forceStringify: true,
-    } as InputPortVariable,
-    bodyVariable: {
-        name: 'body',
+        name: 'URL',
         allowedTypes: ['Data'],
-        forceStringify: true,
-        value: {
-        } as Record<string, any>,
+        value: '',
+
+    } as InputPortVariable,
+    tokenInputVariable: {
+        name: 'Token',
+        allowedTypes: ['Data'],
+        value: '',
+
+    } as InputPortVariable,
+    bodyInputVariable: {
+        name: 'Body',
+        allowedTypes: ['Data'],
+
+        value: [] as KeyValueRow[],
     } as InputPortVariable,
 
     toolOutputVariable: {
-        name: 'toolOutput',
+        name: 'When Done',
         outputType: 'Tool',
     } as OutputPortVariable,
     show: true,

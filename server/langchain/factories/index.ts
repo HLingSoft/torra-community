@@ -60,9 +60,59 @@ import { apiToolMeta } from '~/types/node-data/api-tool'
 import { jsonParserFactory } from './json-parser'
 import { jsonParserMeta } from '~/types/node-data/json-parser'
 
+import { subWorkflowFactory } from './sub-workflow'
+import { subWorkflowMeta } from '~/types/node-data/sub-workflow'
+
+import { listOutputFactory } from './list-output'
+import { listOutputMeta } from '~/types/node-data/list-output'
+
+import { loopFactory } from './loop'
+import { loopMeta } from '~/types/node-data/loop'
+
+import { dataToMessageFactory } from './data-to-message'
+import { dataToMessageMeta } from '~/types/node-data/data-to-message'
+
+import { passFactory } from './pass'
+import { passMeta } from '~/types/node-data/pass'
+
+import { listenFactory } from './listen'
+import { listenMeta } from '~/types/node-data/listen'
+
+import { notifyFactory } from './notify'
+import { notifyMeta } from '~/types/node-data/notify'
+
+import { imageRecognitionOpenAIFactory } from './image-recognition-openai'
+import { imageRecognitionOpenAIMeta } from '~/types/node-data/image-recognition-openai'
+
+import { imageGenerateOpenAIFactory } from './image-generate-openai'
+import { imageGenerateOpenAIMeta } from '~/types/node-data/image-generate-openai'
+
+
+
+
+import { urlFactory } from './url'
+import { urlMeta } from '~/types/node-data/url'
+
+
+import { combineDataFactory } from './combine-data'
+import { combineDataMeta } from '~/types/node-data/combine-data'
+
+import { speechRecognitionOpenAIFactory } from './speech-recognition-openai'
+import { speechRecognitionOpenAIMeta } from '~/types/node-data/speech-recognition-openai'
+
+import { speechGenerateOpenAIFactory } from './speech-generate-openai'
+import { speechGenerateOpenAIMeta } from '~/types/node-data/speech-generate-openai'
+
+import { structuredToDataFactory } from './structured-to-data'
+import { structuredToDataMeta } from '~/types/node-data/structured-to-data'
+
+import { dataToStructuredFactory } from './data-to-structured'
+import { dataToStructuredMeta } from '~/types/node-data/data-to-structured'
+
 export const nodeFactoryMap: Record<string, NodeFactory> = {}
 
 export const initFactories = () => {
+  console.log('🎯 initFactories 被调用');
   nodeFactoryMap[chatInputMeta.type] = chatInputFactory
   nodeFactoryMap[chatOpenAIMeta.type] = chatOpenAIFactory
   nodeFactoryMap[promptTemplateMeta.type] = promptTemplateFactory
@@ -95,4 +145,35 @@ export const initFactories = () => {
   nodeFactoryMap[apiToolMeta.type] = apiToolFactory
 
   nodeFactoryMap[jsonParserMeta.type] = jsonParserFactory
+
+  nodeFactoryMap[subWorkflowMeta.type] = subWorkflowFactory
+
+  nodeFactoryMap[listOutputMeta.type] = listOutputFactory
+  nodeFactoryMap[loopMeta.type] = loopFactory
+
+
+  nodeFactoryMap[dataToMessageMeta.type] = dataToMessageFactory
+
+  nodeFactoryMap[passMeta.type] = passFactory
+
+  nodeFactoryMap[listenMeta.type] = listenFactory
+
+  nodeFactoryMap[notifyMeta.type] = notifyFactory
+
+  nodeFactoryMap[imageRecognitionOpenAIMeta.type] = imageRecognitionOpenAIFactory
+
+  nodeFactoryMap[imageGenerateOpenAIMeta.type] = imageGenerateOpenAIFactory
+
+
+  nodeFactoryMap[urlMeta.type] = urlFactory
+  nodeFactoryMap[combineDataMeta.type] = combineDataFactory
+
+  nodeFactoryMap[speechRecognitionOpenAIMeta.type] = speechRecognitionOpenAIFactory
+
+  nodeFactoryMap[structuredToDataMeta.type] = structuredToDataFactory
+
+  nodeFactoryMap[dataToStructuredMeta.type] = dataToStructuredFactory
+
+  nodeFactoryMap[speechGenerateOpenAIMeta.type] = speechGenerateOpenAIFactory
+
 }

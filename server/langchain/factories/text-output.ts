@@ -1,32 +1,35 @@
 import type { TextOutputData } from '@/types/node-data/text-output'
-import type { BuildContext, FlowNode, InputPortVariable, NodeFactory, OutputPortVariable } from '~/types/workflow'
+import type { BuildContext, LangFlowNode, InputPortVariable, NodeFactory, OutputPortVariable } from '~/types/workflow'
 import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
 
-export const textOutputFactory: NodeFactory = async (node: FlowNode, context: BuildContext) => {
+/**
+ * TextOutput 节点工厂函数
+ */
+export const textOutputFactory: NodeFactory = async (
+  node: LangFlowNode,
+  context: BuildContext
+) => {
   const data = node.data as TextOutputData
-  const variableDefs = [data.inputVariable] as InputPortVariable[]
-  const variableNames = variableDefs.map(v => v.name)
 
-  const inputValues = await resolveInputVariables(context, variableDefs)
 
+  // 统一解析输入
+  const inputValues = await resolveInputVariables(context, [data.messageInputVariable])
+  const inputValue = inputValues[data.messageInputVariable.id] as string
   const outputVar = data.outputVariable as OutputPortVariable
-
-
   const outputPortId = outputVar.id
 
-  writeLog(
-    context,
-    node.id,
-    outputPortId,
-    inputValues[variableNames[0]],
+  // 写日志
+  // writeLog(
+  //   context,
+  //   node.id,
+  //   outputPortId,
+  //   inputValue
+  // )
 
-  )
+  // console.log('TextOutputFactory inputValue:', inputValue)
 
   return {
-
-    [outputPortId]: inputValues[variableNames[0]],
-    default: inputValues[variableNames[0]],
-
+    [outputPortId]: inputValue,
+    default: inputValue,
   }
-
 }

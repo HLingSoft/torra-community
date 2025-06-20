@@ -1,107 +1,23 @@
 <script lang="ts" setup>
 import type { StructuredOutputData } from '@/types/node-data/structured-output'
 
-
 import { structuredOutputMeta } from '@/types/node-data/structured-output'
 
-import { createPortManager } from '~/components/workflow/useNodePorts'
-import { useVueFlow } from '@vue-flow/core'
-// 引入公共样式
-const props = defineProps({
-    id: String,
 
-})
 
 type KeyValueSchema = Record<
-  string,
-  {
-      name: string
-      description: string
-      type: string
-  }
+    string,
+    {
+        name: string
+        description: string
+        defaultValue: any
+        type: string
+    }
 >
 
-const currentNode = ref<{ id: string, data?: StructuredOutputData }>()
+const props = defineProps<{ id: string }>()
+const currentNode = ref<{ id: string, data: StructuredOutputData } | null>(null)
 
-
-const languageModelVariableRef = ref<HTMLElement | null>(null)
-const inputMessageVariableRef = ref<HTMLElement | null>(null)
-
-const structuredOutputVariableRef = ref<HTMLElement | null>(null)
-const dataFrameOutputVariableRef = ref<HTMLElement | null>(null)
-
-const { addInputPort, addOutputPort, removePort, updateNodePosition } = createPortManager()
-const { nodes, edges } = storeToRefs(useWorkflowStore())
-onMounted(async () => {
-    const node = nodes.value.find(node => node.id === props.id)
-    if (!node) {
-        return
-    }
-
-    // 初始化 data
-    node.data = {
-        ..._.cloneDeep(structuredOutputMeta),
-        ..._.cloneDeep(node.data), // ✅ 已有字段优先级更高，会覆盖默认值
-    } as StructuredOutputData
-
-    currentNode.value = node
-
-    await nextTick() // 等待 DOM 渲染完毕
-    // ✅ 给每个字段位置添加 Input Port
-
-
-    if (languageModelVariableRef.value && !node.data.saved) {
-        currentNode.value.data!.languageModelVariable.id = nanoLowercaseAlphanumericId(10)
-        addInputPort(props.id!, currentNode.value!.data!.languageModelVariable.id, 'aquamarine', languageModelVariableRef.value.offsetTop - 10)
-    }
-    if (inputMessageVariableRef.value && !node.data.saved) {
-        currentNode.value.data!.inputMessageVariable.id = nanoLowercaseAlphanumericId(10)
-        addInputPort(props.id!, currentNode.value.data!.inputMessageVariable.id, 'aquamarine', inputMessageVariableRef.value.offsetTop + inputMessageVariableRef.value.clientHeight / 2)
-    }
-
-
-
-    if (structuredOutputVariableRef.value && !node.data.saved) {
-        currentNode.value.data!.structuredOutputVariable.id = nanoLowercaseAlphanumericId(10)
-        addOutputPort(props.id!, currentNode.value.data!.structuredOutputVariable.id, 'pink', structuredOutputVariableRef.value.offsetTop + structuredOutputVariableRef.value.clientHeight / 2)
-    }
-
-    if (dataFrameOutputVariableRef.value && !node.data.saved) {
-        currentNode.value.data!.dataFrameOutputVariable.id = nanoLowercaseAlphanumericId(10)
-        addOutputPort(props.id!, currentNode.value.data!.dataFrameOutputVariable.id, 'pink', dataFrameOutputVariableRef.value.offsetTop + dataFrameOutputVariableRef.value.clientHeight / 2)
-    }
-
-
-})
-
-
-
-watch(edges, () => {
-
-    if (!currentNode.value?.data) {
-        return
-    }
-
-
-    currentNode.value.data.languageModelVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.languageModelVariable.id)
-    currentNode.value.data.inputMessageVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.inputMessageVariable.id)
-}, { deep: true, immediate: true })
-
-const { onNodeClick } = useVueFlow()
-onNodeClick((event) => {
-
-
-})
-
-
-
-const methods = ref([
-
-    { id: 'get', name: 'GET' },
-    { id: 'post', name: 'POST' },
-
-
-])
 
 const outputSchemaIsOpen = ref(false)
 const outputSchemaClonedData = ref<KeyValueSchema>({})
@@ -109,59 +25,47 @@ const saveoutputSchema = () => {
     if (!currentNode.value) {
         return
     }
-    currentNode.value.data!.outputSchema.value = outputSchemaClonedData.value
+    currentNode.value.data!.outputSchemaInputVariable.value = outputSchemaClonedData.value
     outputSchemaIsOpen.value = false
 }
 watch(outputSchemaIsOpen, (val) => {
     if (val) {
-        outputSchemaClonedData.value = currentNode.value?.data?.outputSchema.value || []
+        outputSchemaClonedData.value = currentNode.value?.data?.outputSchemaInputVariable.value || []
     } else {
         outputSchemaClonedData.value = {}
     }
 }, { immediate: true })
 
 
-
 </script>
 
+
 <template>
+
     <div>
-        <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card   focus:border focus: border-card">
-
-            <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
-            <CardContent class="text-white space-y-8 -mt-8  flex-1 nodrag nopan cursor-auto ">
-                <Separator class="my-5" />
-
-
-
-                <div ref="languageModelVariableRef">
+        <WorkflowBaseNode v-model:currentNode="currentNode" :id="props.id" :meta="structuredOutputMeta" @not-found="() => { }">
+            <template #content v-if="currentNode && currentNode.data">
+                <div class="relative">
                     <div class="flex flex-row items-center space-x-2">
-                        <p>Language Model<span class="text-red-500">*</span></p>
+                        <p>{{ currentNode.data.languageModelInputVariable.name }}<span class="text-red-500">*</span></p>
                         <NuxtIcon name="clarity:info-line" size="20" />
                     </div>
-
-
-                </div>
-
-                <div ref="inputMessageVariableRef">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>Input Message</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
+                    <div class="mt-5 w-full">
+                        <EditTextDialog v-model:input-variable="currentNode.data.languageModelInputVariable" :show-input="false" :handleBg="`oklch(82.7% 0.119 306.383)`" />
                     </div>
-                    <div class="w-full  mt-5">
-                        <EditTextDialog class="w-full" :disabled="currentNode.data.inputMessageVariable.connected" :model-value="currentNode.data.inputMessageVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.inputMessageVariable.value = val" />
-                    </div>
+
+                    <!-- <Handle type="target" :id="currentNode.data.languageModelInputVariable.id" :connectable-start="false" :position="Position.Left" :style="{ top: '12px', left: '-25px', '--handle-bg': 'oklch(82.7% 0.119 306.383)' }" /> -->
                 </div>
 
 
 
                 <div>
                     <div class="flex flex-row items-center space-x-2">
-                        <p>Output Schema<span class="text-red-500">*</span></p>
+                        <p>{{ currentNode.data.outputSchemaInputVariable.name }}<span class="text-red-500">*</span></p>
                         <NuxtIcon name="clarity:info-line" size="20" />
                     </div>
                     <div class="w-full  mt-5">
-                        <Button :disabled="currentNode.data.outputSchema.connected" variant="outline" class="w-full" @click.stop="outputSchemaIsOpen = true">
+                        <Button :disabled="currentNode.data.outputSchemaInputVariable.connected" variant="outline" class="w-full" @click.stop="outputSchemaIsOpen = true">
                             <NuxtIcon name="mdi-light:table" size="20" />
                             Open Table
                         </Button>
@@ -169,34 +73,16 @@ watch(outputSchemaIsOpen, (val) => {
                 </div>
 
 
-            </CardContent>
+            </template>
 
-            <div ref="structuredOutputVariableRef" class="bg-card   py-2 pl-5 pr-10  flex items-center justify-center">
-                <div class="w-full h-full   flex items-center  justify-between">
-                    <NuxtIcon v-if="currentNode.data.structuredOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.structuredOutputVariable.show = false" />
+            <template #footer v-if="currentNode && currentNode.data">
 
-                    <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.structuredOutputVariable.show = true" />
+                <NodeCardOutputFooter v-model:output-variable="currentNode.data.structuredOutputVariable" />
 
-                    <div class="  ">
-                        Structured Data
-                    </div>
-                </div>
-            </div>
-            <div ref="dataFrameOutputVariableRef" class="bg-card  -mt-5 py-2 pl-5 pr-10  flex items-center justify-center">
-                <div class="w-full h-full   flex items-center  justify-between">
-                    <NuxtIcon v-if="currentNode.data.dataFrameOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataFrameOutputVariable.show = false" />
-
-                    <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.dataFrameOutputVariable.show = true" />
-
-                    <div class="  ">
-                        DataFrame
-                    </div>
-                </div>
-            </div>
-        </Card>
-
+            </template>
+        </WorkflowBaseNode>
         <Dialog v-model:open="outputSchemaIsOpen">
-            <DialogContent class="dark  flex flex-col text-white w-full !max-w-7xl h-[80vh]">
+            <DialogContent @interact-outside.prevent @pointer-down-outside.prevent @focus-outside.prevent class="dark  flex flex-col text-white w-full !max-w-7xl h-[80vh]">
                 <DialogHeader class="shrink-0">
                     <DialogTitle>
                         <div class="flex flex-row items-center space-x-2">

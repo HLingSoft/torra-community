@@ -15,15 +15,15 @@ export interface ChatInputData {
 export const ChatInputLangchainName = 'ChatInput' // 节点类型
 
 export const chatInputMeta: ChatInputData = {
-  icon: '💬',
+  icon: 'mingcute:chat-1-line',
   title: 'Chat Input',
   description: 'Get chat inputs from the Playground.',
   type: ChatInputLangchainName,
-  dynamicValue: true,
+  dynamicValue: true, //是否可以自己输入
   inputValue: '',
   outputVariable: {
-    outputType: 'Message',
-    name: 'output',
+    outputType: 'Data',
+    name: 'When Done',
   } as OutputPortVariable,
   show: true,
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
- 
+
 interface KeyValueRow {
   id: number
   key: string
@@ -47,19 +47,45 @@ const getBodyObject = (inputRows: KeyValueTable): KeyValueObject => {
 }
 
 const rows = ref<KeyValueTable>(objectToRows(props.modelValue))
+// watch(
+//   () => props.modelValue,
+//   (newVal) => {
+//     rows.value = objectToRows(newVal || {})
+//   },
+//   { immediate: true, deep: true }
+// )
 
-watch(rows, (newRows) => {
-  emit('update:modelValue', getBodyObject(newRows))
-}, { deep: true })
+watch(
+  rows,
+  (newRows) => {
+    const newObject = getBodyObject(newRows)
+    const oldObject = props.modelValue
 
-onMounted(() => {
-    if(rows.value.length === 0) {
-        rows.value.push(createRow())
+    const changed =
+      Object.keys(newObject).length !== Object.keys(oldObject).length ||
+      Object.entries(newObject).some(([key, val]) => oldObject[key] !== val)
+
+    if (changed) {
+      console.log('KeyValueEditor: emit update:modelValue', newObject)
+      emit('update:modelValue', newObject)
     }
+  },
+  { deep: true }
+)
+// onMounted(() => {
+//   if (rows.value.length === 0) {
+//     rows.value.push(createRow())
+//   }
 
 
+//   const maxId = Math.max(...rows.value.map(r => r.id), 0)
+//   if (maxId > idCounter) idCounter = maxId
+// })
+onMounted(() => {
+  rows.value = objectToRows(props.modelValue || {})
   const maxId = Math.max(...rows.value.map(r => r.id), 0)
   if (maxId > idCounter) idCounter = maxId
+  if (rows.value.length === 0) rows.value.push(createRow())
 })
 
 const addRow = () => {
@@ -84,7 +110,7 @@ const resetRows = () => {
 }
 
 const hasSelected = computed(() => rows.value.some(row => row.selected))
- 
+
 </script>
 
 <template>

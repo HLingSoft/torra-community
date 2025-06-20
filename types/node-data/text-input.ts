@@ -5,7 +5,7 @@ export interface TextInputData {
   type: string // 节点类型
   icon?: string // 节点图标
   description: string // 节点描述
-  inputVariable: InputPortVariable
+  inputInputVariable: InputPortVariable
   outputVariable: OutputPortVariable
   show: boolean // 控制 UI 展示
   saved: boolean // 是否保存
@@ -15,16 +15,16 @@ export const textInputMeta: TextInputData = {
   title: 'Text Input',
   description: 'Text input node',
   type: TextInputLangchainName,
-  icon: '',
-  inputVariable: {
-    name: 'input',
-    allowedTypes: ['Message'],
+  icon: 'solar:text-line-duotone',
+  inputInputVariable: {
+    name: 'Input',
+    allowedTypes: ['Data'],
     value: '',
-    forceStringify: true,
+
   } as InputPortVariable,
   outputVariable: {
-    name: 'output',
-    outputType: 'Message',
+    name: 'When Done',
+    outputType: 'Data',
   } as OutputPortVariable,
   show: true,
   saved: false,

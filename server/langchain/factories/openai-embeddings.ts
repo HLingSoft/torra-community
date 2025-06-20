@@ -1,43 +1,37 @@
-import type { FlowNode, BuildContext } from '~/types/workflow'
-import type { OpenAIEmbeddingsData } from '~/types/node-data/openai-embeddings'
+import type { LangFlowNode, BuildContext } from '~/types/workflow'
+import type { OpenAIEmbeddingsData } from '@/types/node-data/openai-embeddings'
 import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
 import { OpenAIEmbeddings } from '@langchain/openai'
 
-export async function openAIEmbeddingsFactory(node: FlowNode, context: BuildContext) {
+/**
+ * OpenAIEmbeddings 节点工厂函数
+ */
+export async function openAIEmbeddingsFactory(node: LangFlowNode, context: BuildContext) {
   const data = node.data as OpenAIEmbeddingsData
-  const { modelName, apiKeyVariable, baseURLVariable, outputVariable } = data
+  const { modelName, apiKeyInputVariable, baseURLInputVariable, outputVariable } = data
 
-  const inputValues = await resolveInputVariables(context, [apiKeyVariable, baseURLVariable])
-  const apiKey = inputValues[apiKeyVariable.name]
-  const baseURL = inputValues[baseURLVariable.name]
+  // 解析 API Key 和 BaseURL 变量
+  const inputValues = await resolveInputVariables(context, [apiKeyInputVariable, baseURLInputVariable])
+  const apiKey = inputValues[apiKeyInputVariable.id]
+  const baseURL = inputValues[baseURLInputVariable.id]
 
+  // 创建 OpenAI Embeddings 实例
   const embeddings = new OpenAIEmbeddings({
     openAIApiKey: apiKey,
     model: modelName,
     stripNewLines: true,
-
     dimensions: 1536,
     configuration: { baseURL },
   })
 
-  //   const embeddings = new OpenAIEmbeddings({
-  //     apiKey: "zk-d0f948e7d5d3c362d37f211e732b2a69", // In Node.js defaults to process.env.OPENAI_API_KEY
-  //     model: 'text-embedding-3-large',
-  //     dimensions: 1536,
-  //     configuration: { baseURL: 'https://api.zhizengzeng.com/v1' }
-  // });
-
-
-  writeLog(
-    context,
-    node.id,
-    outputVariable.id,
-    `OpenAIEmbeddings ${modelName} 初始化成功`,
-
-  )
+  // writeLog(
+  //   context,
+  //   node.id,
+  //   outputVariable.id,
+  //   `OpenAIEmbeddings ${modelName} 初始化成功`,
+  // )
 
   return {
     [outputVariable.id]: embeddings,
-
   }
 }

@@ -7,10 +7,10 @@ export interface APIRequestData {
     icon?: string
     methodType: string
     urlInputVariable: InputPortVariable
-    tokenVariable: InputPortVariable
-    bodyVariable: InputPortVariable
+    tokenInputVariable: InputPortVariable
+    bodyInputVariable: InputPortVariable
     dataOutputVariable: OutputPortVariable
-    dataFrameOutputVariable: OutputPortVariable
+
     show?: boolean
     saved?: boolean
 }
@@ -21,34 +21,31 @@ export const apiRequestMeta: APIRequestData = {
     type: APIRequestLangchainName,
     title: 'API Request',
     description: 'Make HTTP requests using URLs or cURL commands.',
-    icon: '🧠',
+    icon: 'hugeicons:api',
     methodType: 'get',
     urlInputVariable: {
-        name: 'urlInput',
-        allowedTypes: ['Message'],
-        value: '',
-        forceStringify: true,
-    } as InputPortVariable,
-    tokenVariable: {
-        name: 'tokenInput',
-        allowedTypes: ['Message'],
-        value: '',
-        forceStringify: true,
-    } as InputPortVariable,
-    bodyVariable: {
-        name: 'body',
+        name: 'URL',
         allowedTypes: ['Data'],
-        forceStringify: true,
+        value: '',
+
+    } as InputPortVariable,
+    tokenInputVariable: {
+        name: 'Token',
+        allowedTypes: ['Data'],
+        value: '',
+
+    } as InputPortVariable,
+    bodyInputVariable: {
+        name: 'Body',
+        allowedTypes: ['Data'],
+
         value: {
         } as Record<string, any>,
     } as InputPortVariable,
     dataOutputVariable: {
-        name: 'dataOutput',
+        name: 'When Done',
         outputType: 'Data',
     } as OutputPortVariable,
-    dataFrameOutputVariable: {
-        name: 'dataFrameOutput',
-        outputType: 'DataFrame',
-    } as OutputPortVariable,
+
     show: true,
 }

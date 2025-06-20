@@ -1,7 +1,7 @@
 /* 中文字体：只覆盖中文字符 */
 @font-face {
   font-family: 'CustomChineseFont';
-  src: url('https://file.webkankan.com/YmCKEcRy8q2J2ARu3RcVUDaemu7IcMjx/SourceHanSerifCN-Medium.otf') format('opentype');
+  src: url('https://file.web.hlingsoft.com/LNuesVw1QH7xiXcghEE61YKSCuyN3zKI/SourceHanSerifCN-Medium.otf') format('opentype');
   unicode-range: U+4E00-9FFF, U+3400-4DBF, U+3000-303F;
 }
 
@@ -109,57 +109,41 @@ body {
 .slide-fade1-leave-to {
   opacity: 0;
 }
-
-
-/* 1. 保留圆圈 handle，但清理边框/阴影 */
-.vue-flow__node-input,
-.vue-flow__node-output {
-  outline: none !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* 2. 禁用 node 聚焦/选中时的样式 */
-.vue-flow__node-input.selected,
-.vue-flow__node-input:focus,
-.vue-flow__node-input:focus-visible,
-.vue-flow__node-output.selected,
-.vue-flow__node-output:focus,
-.vue-flow__node-output:focus-visible {
-  outline: none !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* 3. 保留 handle 样式，但可以自定义（比如大小/颜色） */
-.vue-flow__handle {
-  width: 12px;
-  height: 12px;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
  
-}
+.vue-flow__handle-connecting:not(.vue-flow__handle-valid) {
+  /* 把圆点彻底涂灰 */
+ --handle-bg: #bdbdbd !important;        /* 变量 */    /* 如果你用默认主题，改这个变量就够 */
+  background: #bdbdbd !important; /* 保险起见同时覆盖 */
+  border-color: #bdbdbd !important;
+   
 
-/* 你可以单独再加颜色 */
-.vue-flow__node-input .vue-flow__handle {
-  background-color: var(--vf-node-color) !important;
-  border: none !important;
-  box-shadow: none !important;
- 
-  
-}
-
-.vue-flow__node-output .vue-flow__handle {
-  background-color: var(--vf-node-color) !important;
-  border: none !important;
-  box-shadow: none !important;
-  
+  cursor: not-allowed;           /* 鼠标显示禁用 */
+  pointer-events: none;          /* 防止掉线后还能点 */
 }
  
- 
- .u-node-connector-input{
-  width: 10px;
+ .vue-flow__handle.target.connected{
+    outline-offset: 0px !important;
  }
-
+.vue-flow__handle {
+    width: 10px !important;
+    height: 10px !important;
+    outline: 3px solid var(--handle-bg, red) !important;
+    outline-offset: 4px;
+    border: none;
+    background: var(--handle-bg, red) !important;
+    border:none !important;
  
+}
+.vue-flow__handle.target {
+  --handle-bg: aquamarine;
+}
+.vue-flow__handle.source {
+  --handle-bg: hotpink;
+}
+  
+ 
+ 
+ .vue-flow__minimap {
+  transform: scale(75%);
+  transform-origin: bottom right;
+}

@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import type Workflow from '~/models/Workflow'
 import type { ServerMessage, LogNode } from '~/types/ws'
-
+import type { DAGStepInfo } from '~/types/workflow'
 import User from '~/models/User'
 import { ChatInputLangchainName } from '~/types/node-data/chat-input'
 import WorkflowRunLog from '~/models/WorkflowRunLog'
+// import { safeStringify } from '~/server/langchain/resolveInput'
 const props = defineProps<{ workflow: Workflow }>()
 const { setExecutionTime } = useNodeExecutionStats()
-const { currentWorkflow } = storeToRefs(useWorkflowStore())
+const { currentWorkflow, executionErrorNodeIds } = storeToRefs(useWorkflowStore())
 const { user } = storeToRefs(useUserStore())
 const canUsePlayground = ref(false)
 function formatStepLabel(step: any, showTimeIcon: boolean) {
@@ -101,18 +102,15 @@ const sendMessage = () => {
   //开发环境下使用本地 服务器连接
   //生产环境下使用云端 服务器连接
 
-  if (process.env.NODE_ENV === 'production') {
-    // ws = new 服务器连接('wss://workflow.allaicg.cn')
-    ws = new WebSocket('wss://askpro.aliyun.hlingsoft.com')
-  } else {
-    ws = new WebSocket('ws://localhost:3001')
-  }
+  ws = new WebSocket('ws://localhost:3001')
+
 
   const msgIndexMap = new Map<string, number>()
 
   ws.onopen = () => {
     console.log('🟢 服务器连接 connected')
     assistantMessages.value = []
+    console.log('发送工作流执行请求', props.workflow)
     ws?.send(JSON.stringify({
       namespace: 'execute',
       type: 'run',
@@ -139,6 +137,7 @@ const sendMessage = () => {
 
       // const text = `✅ [${step.index}/${step.total}] ${step.type} (${step.nodeId}) — <span style="color: #4ade80">${label}</span>`
       const text = `✅ [${step.index}/${step.total}] ${step.type} (${step.nodeId}) — ${formatStepLabel(step, false)}`
+      // console.log('text', text)
 
       // 若已存在该 nodeId，对应位置直接替换
       const key = step.nodeId
@@ -155,23 +154,23 @@ const sendMessage = () => {
     }
 
     if (msg.type === 'done') {
-      assistantMessages.value.push({
-        role: 'assistant',
-        content: '✅ 工作流执行完成！',
-      })
+
+      console.log('工作流执行完成', msg.data.output)
       messages.value.push({
         role: 'ai',
-        content: msg.data.output,
+        // content: JSON.stringify(msg.data.output, null, 2),
+        content: msg.data.output
       })
+      //
       isProgress.value = false
       ws?.close()
-      const logs = msg.data.logs as LogNode[]
+      const logs = msg.data.logs as DAGStepInfo[]
       // console.log('logs', logs)
       const workflowRunLog = new WorkflowRunLog()
       workflowRunLog.workflow = currentWorkflow.value
       workflowRunLog.user = user.value as User
       workflowRunLog.name = currentWorkflow.value!.name
-      workflowRunLog.logs = logs
+      workflowRunLog.logs = msg.data.logs;
       workflowRunLog.channel = 'playground'
       workflowRunLog.result = msg.data.output
       workflowRunLog.times = logs.reduce((sum, log) => {
@@ -183,8 +182,27 @@ const sendMessage = () => {
         return sum
       }, 0)
       await workflowRunLog.save()
+      if (msg.data.statusCode === 200) {
+        isError.value = false
+        assistantMessages.value.push({
+          role: 'assistant',
+          content: '✅ 工作流执行完成！',
+        })
+      } else {
+        isError.value = true
+        assistantMessages.value.push({
+          role: 'assistant',
+          content: msg.data.output,
+        })
+        if (msg.data.errorNodeId) {
+          // 如果有错误节点ID，添加到执行错误节点列表
+          if (!executionErrorNodeIds.value.includes(msg.data.errorNodeId)) {
+            executionErrorNodeIds.value.push(msg.data.errorNodeId)
+          }
+        }
+      }
 
-      //这里还会拿到 logs
+
     }
 
     if (msg.type === 'error') {
@@ -218,6 +236,8 @@ const stopWS = () => {
   isProgress.value = false
   ws?.close()
 }
+
+
 </script>
 
 <template>
@@ -230,6 +250,7 @@ const stopWS = () => {
               <Avatar>
                 <AvatarFallback>{{ msg.role === 'user' ? 'U' : index + 1 }}</AvatarFallback>
               </Avatar>
+              <!-- <div>{{ msg.content }}</div> -->
               <MDC :value="msg.content" class="rounded-xl p-3 bg-muted prose   text-white">
               </MDC>
             </div>
@@ -254,7 +275,8 @@ const stopWS = () => {
         <ScrollArea class="flex-1 overflow-y-auto p-4 text-white" ref="assistantScrollRef">
           <div class="space-y-4">
             <div v-for="(msg, index) in assistantMessages" :key="index" class="flex flex-row items-start gap-3">
-
+              <!-- <div>{{ msg.content }}</div> -->
+              <!-- <ContentRenderer :value="{ body: [{ type: 'text', value: md }] }" /> -->
               <MDC :value="msg.content" class="rounded-xl p-3 bg-muted prose   text-white">
               </MDC>
             </div>

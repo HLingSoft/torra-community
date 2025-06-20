@@ -1,98 +1,92 @@
 import { RunnableLambda } from '@langchain/core/runnables'
-import type { FlowNode, BuildContext } from '~/types/workflow'
+import type { LangFlowNode, BuildContext } from '~/types/workflow'
 import { resolveInputVariables, wrapRunnable } from '../../langchain/resolveInput'
 import type { APIRequestData } from '~/types/node-data/api-request'
 
-export async function apiRequestFactory(node: FlowNode, context: BuildContext) {
+export async function apiRequestFactory(node: LangFlowNode, context: BuildContext) {
+    /* ---------- 1. 类型与变量准备 ---------- */
     const data = node.data as APIRequestData
-
     const {
         methodType,
         urlInputVariable,
-        bodyVariable,
+        bodyInputVariable,
+        tokenInputVariable,
         dataOutputVariable,
-        dataFrameOutputVariable,
-        tokenVariable
+
     } = data
-    // console.log(urlInputVariable)
 
-    // 同时解析 URL 和 body
-    const inputValues = await resolveInputVariables(context, [urlInputVariable, bodyVariable, tokenVariable])
+    /* ---------- 2. 解析 URL、Body 和 Token ---------- */
+    const inputValues = await resolveInputVariables(context, [
+        urlInputVariable,
+        bodyInputVariable,
+        tokenInputVariable,
+    ])
 
-    const url = inputValues[urlInputVariable.name]
-    const body = inputValues[bodyVariable.name]
-    const token = inputValues[data.tokenVariable.name]
-    const method = methodType.toLocaleLowerCase()
-    // console.log('url', url)
-    // 构造请求链
+    const url = inputValues[urlInputVariable.id]
+    const body = inputValues[bodyInputVariable.id]
+    const token = inputValues[tokenInputVariable.id]
+    const method = methodType.toLowerCase()
+
+    /* ---------- 3. 构造 API 请求 runnable ---------- */
     const requestChain = RunnableLambda.from(async () => {
         try {
             const headers: HeadersInit = {
                 'Content-Type': 'application/json',
-            };
-            // 如果有 token，自动添加 Authorization 头
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
             }
-            const requestOptions: RequestInit = {
-                method: method,
-                headers
+            if (token) headers['Authorization'] = `Bearer ${token}`
+
+            const options: RequestInit = {
+                method,
+                headers,
             }
 
-            if (method.toLocaleLowerCase() !== 'get') {
-                requestOptions.body = JSON.stringify(body)
-            }
-            const response = await fetch(url, requestOptions)
-
-            if (!response.ok) {
-
-                const errorText = await response.text()
-                return { error: `HTTP ${response.status} ${response.statusText}`, details: errorText }
+            if (method !== 'get') {
+                options.body = JSON.stringify(body)
             }
 
-            const result = await response.json()
-            const isArrayOfObjects = Array.isArray(result) && result.every(item => typeof item === 'object')
+            const res = await fetch(url, options)
+            if (!res.ok) {
+                const errorText = await res.text()
 
+                return {
+                    raw: {
+                        error: `HTTP ${res.status} ${res.statusText}`,
+                        details: errorText,
+                    }
+                }
+            }
+            //  const result = await res.json()
+            const result = await res.text()
             return {
                 raw: result,
-                table: isArrayOfObjects ? result : [],
+
             }
+
         } catch (err: any) {
-            return { error: err.message || '请求失败' }
+            console.error('API 请求失败:', err)
+            return {
+                raw: err.message,
+            }
         }
     })
 
+    /* ---------- 4. 包装延迟执行对象 ---------- */
+    const wrappedRaw = wrapRunnable(
+        requestChain.pipe(r => r.raw ?? ''),
+        node.id,
+        context.onRunnableElapsed,
+        {
+            context,
+            portId: dataOutputVariable.id,
+            logFormat: res => ({ type: 'api-request Chain', data: res }),
+        },
+    )
+
+
+
+    /* ---------- 5. 返回封装结果 ---------- */
     return {
-        [dataOutputVariable.id]: wrapRunnable(
-            (requestChain.pipe(res => res.raw ?? res)),                // runnable
-            node.id,              // nodeId
-            context.onRunnableElapsed, // 回调（可能是 undefined）
-            {
-                context,
-                portId: dataOutputVariable.id,
-                logFormat: (res) => {
-                    return {
-                        type: 'api-request Chain',
-                        data: res,
-                    }
-                }
-            }
-        ),
-        [dataFrameOutputVariable.id]: wrapRunnable(
-            requestChain.pipe(res => res.table ?? []),                // runnable
-            node.id,              // nodeId
-            context.onRunnableElapsed, // 回调（可能是 undefined）
-            {
-                context,
-                portId: dataOutputVariable.id,
-                logFormat: (res) => {
-                    return {
-                        type: 'api-request Chain',
-                        data: res,
-                    }
-                }
-            }
-        ),
+        [dataOutputVariable.id]: wrappedRaw,
 
     }
 }

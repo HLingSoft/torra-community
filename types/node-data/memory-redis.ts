@@ -6,10 +6,10 @@ export interface UpstashRedisChatMemoryData {
     description: string
     icon?: string
 
-    sessionIdVariable: InputPortVariable
+    sessionIdInputVariable: InputPortVariable
 
-    urlVariable: InputPortVariable
-    tokenVariable: InputPortVariable
+    urlInputVariable: InputPortVariable
+    tokenInputVariable: InputPortVariable
     memoryOutputVariable: OutputPortVariable
 }
 
@@ -18,33 +18,33 @@ export const UpstashRedisChatMemoryLangchainName = 'UpstashRedisChatMemory'
 export const upstashRedisChatMemoryMeta: UpstashRedisChatMemoryData = {
     type: UpstashRedisChatMemoryLangchainName,
     title: 'Upstash Redis Chat Memory',
-    icon: '🟥',
+    icon: 'logos:upstash-icon',
     description: 'Retrieves and store chat messages from Upstash Redis.',
-    sessionIdVariable: {
-        name: 'sessionId',
-        allowedTypes: ['Message'],
+    sessionIdInputVariable: {
+        name: 'Session ID',
+        allowedTypes: ['Data'],
         value: '',
-        forceStringify: true,
+
     } as InputPortVariable,
 
-    urlVariable: {
-        name: 'url',
-        allowedTypes: ['Message'],
+    urlInputVariable: {
+        name: 'Upstash Redis URL',
+        allowedTypes: ['Data'],
         value: '',
-        defaultValue: 'https://fluent-dodo-23157.upstash.io',
-        forceStringify: true,
+        defaultValue: '',
+
     } as InputPortVariable,
-    tokenVariable: {
-        name: 'token',
-        allowedTypes: ['Message'],
+    tokenInputVariable: {
+        name: 'Upstash Redis Token',
+        allowedTypes: ['Data'],
         value: '',
-        defaultValue: 'AVp1AAIjcDE4YTM3ZjA5NjMzNTc0MDVmODIzZmViZDM3NzMxYTg5MXAxMA',
-        forceStringify: true,
+        defaultValue: '',
+
     } as InputPortVariable,
 
 
     memoryOutputVariable: {
-        name: 'memoryOutput',
+        name: 'Return Memory',
         outputType: 'Memory',
     } as OutputPortVariable,
 }

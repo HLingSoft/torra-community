@@ -7,8 +7,8 @@ export interface OpenAIEmbeddingsData {
   icon?: string
 
   modelName: string
-  apiKeyVariable: InputPortVariable
-  baseURLVariable: InputPortVariable
+  apiKeyInputVariable: InputPortVariable
+  baseURLInputVariable: InputPortVariable
   outputVariable: OutputPortVariable
 
   show?: boolean
@@ -21,22 +21,22 @@ export const openAIEmbeddingsMeta: OpenAIEmbeddingsData = {
   type: OpenAIEmbeddingsLangchainName,
   title: 'OpenAI Embeddings',
   description: 'Generate embeddings using OpenAI models.',
-  icon: '🧠',
+  icon: 'streamline-logos:openai-logo',
   modelName: 'text-embedding-3-small',
-  apiKeyVariable: {
-    name: 'apiKeyInput',
-    allowedTypes: ['Message'],
-    
-    forceStringify: true,
+  apiKeyInputVariable: {
+    name: 'OpenAI API Key',
+    allowedTypes: ['Data'],
+
+
   } as InputPortVariable,
-  baseURLVariable: {
-    name: 'baseURLInput',
-    allowedTypes: ['Message'],
-    forceStringify: true,
+  baseURLInputVariable: {
+    name: 'Base Url',
+    allowedTypes: ['Data'],
+
   } as InputPortVariable,
   outputVariable: {
-    name: 'embeddings',
-    outputType: 'Embeddings',
+    name: 'Returned Embeddings',
+    outputType: 'Embedding',
   } as OutputPortVariable,
   show: true,
 }

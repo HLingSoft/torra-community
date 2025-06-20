@@ -1,38 +1,72 @@
 /* ────────────────────────────────────────────────
    nodes/mcpHttpFactory.ts
 ───────────────────────────────────────────────── */
-import type { FlowNode, BuildContext, InputPortVariable } from '~/types/workflow'
+import type { LangFlowNode, BuildContext, InputPortVariable, OutputPortVariable } from '~/types/workflow'
 import type { MCPHttpData } from '@/types/node-data/mcp-http'
 
-import { resolveInputVariables, wrapRunnable, writeLog } from '../../langchain/resolveInput'
-import { RunnableLambda } from '@langchain/core/runnables'
-
+import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
 import { StructuredTool } from 'langchain/tools'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 import { z } from 'zod'
 
-/* ---------- 工具函数：MCP JSON → Zod ---------- */
+/** JsonSchema转ZodSchema，支持基础类型、数组、对象、指针等 */
 function jsonSchemaToZod(schema: any) {
     const props = schema?.properties ?? {}
+    const required: string[] = schema?.required ?? []
     const shape: Record<string, any> = {}
 
     for (const [k, v] of Object.entries(props as Record<string, any>)) {
-        const desc = (v as any).description ?? ''
+        const desc = (v as any).description || `字段 ${k}（类型：${(v as any).type ?? 'any'}）`
+        let zType: any
+
         switch ((v as any).type) {
-            case 'string': shape[k] = z.string().describe(desc); break
-            case 'number': shape[k] = z.number().describe(desc); break
-            case 'boolean': shape[k] = z.boolean().describe(desc); break
-            default: shape[k] = z.any().describe(desc)
+            case 'string': zType = z.string(); break
+            case 'number': zType = z.number(); break
+            case 'boolean': zType = z.boolean(); break
+            case 'object': zType = z.record(z.any()); break
+            case 'array':
+                const itemType = v.items
+                    ? jsonSchemaToZod({ properties: { item: v.items }, required: v.items?.required ?? [] }).shape.item
+                    : z.any()
+                zType = z.array(itemType)
+                break
+            case 'pointer':
+                zType = z.object({
+                    __type: z.literal('Pointer'),
+                    className: z.string().describe('目标 class 名称'),
+                    objectId: z.string().describe('对象 ID')
+                })
+                break
+            case 'date':
+                zType = z.string().describe(desc + '（格式为 YYYY-MM-DD 或 ISO 日期）')
+                break
+            default:
+                zType = z.any()
         }
+        if (!required.includes(k)) zType = zType.optional()
+        shape[k] = zType.describe(desc)
     }
     return z.object(shape)
 }
+/** 保证输入schema为zod对象 */
+function ensureZodSchema(schema: any) {
+    if (schema && typeof schema.safeParse === 'function') {
+        return schema as z.ZodTypeAny
+    } else {
+        return jsonSchemaToZod(schema)
+    }
+}
 
-/* ---------- 真正访问 MCP 并返回 LC-Tool[] ---------- */
-async function fetchMCPTools(url: string, token: string) {
+/** 真正访问 MCP 并返回工具数组（延迟调用 Tool._call） */
+async function fetchMCPTools(
+    url: string,
+    token: string,
+    context: BuildContext,
+    node: LangFlowNode,
+    outputVariable: OutputPortVariable
+) {
     const client = new Client({ name: 'mcp-http', version: '1.0.0' })
-
     const headers: Record<string, string> = {}
     if (token) headers.Authorization = `Bearer ${token}`
 
@@ -40,56 +74,44 @@ async function fetchMCPTools(url: string, token: string) {
         requestInit: { headers },
     })
     await client.connect(transport)
-
     const list = (await client.listTools()).tools ?? []
 
     return list.map(toolInfo => {
-        const zodSchema = jsonSchemaToZod(toolInfo.inputSchema ?? {})
-
+        const zodSchema = ensureZodSchema(toolInfo.inputSchema ?? {})
         return new (class extends StructuredTool<typeof zodSchema> {
             name = toolInfo.name
             description = toolInfo.description ?? 'MCP Tool'
             schema = zodSchema
             async _call(args: z.infer<typeof zodSchema>) {
                 const result = await client.callTool({ name: toolInfo.name, arguments: args })
+
                 return (result.content as any[])?.[0]?.text ?? '无返回内容'
             }
         })()
     })
 }
 
-/* ---------- Factory ---------- */
-export async function mcpHttpFactory(node: FlowNode, context: BuildContext) {
+/**
+ * MCP-HTTP 工厂函数（LangFlow专用签名）
+ */
+export async function mcpHttpFactory(node: LangFlowNode, context: BuildContext) {
     const data = node.data as MCPHttpData
-    const { urlVariable, tokenVariable, outputVariable } = data
+    const { urlInputVariable, tokenInputVariable, outputVariable } = data
 
-    /* 1️⃣ 解析输入变量（纯同步） */
+    // 1. 解析输入变量
     const inputVals = await resolveInputVariables(
         context,
-        [urlVariable, tokenVariable] as InputPortVariable[],
+        [urlInputVariable, tokenInputVariable] as InputPortVariable[],
     )
-    const url = inputVals[urlVariable.name]
-    const token = inputVals[tokenVariable.name]
+    const url = inputVals[urlInputVariable.id]
+    const token = inputVals[tokenInputVariable.id]
+
+    // 2. 拉取 MCP 工具（返回 StructuredTool[]，只在真正用时才调用 _call）
+    const result = await fetchMCPTools(url, token, context, node, outputVariable)
 
 
-
-
-
-    /* 4️⃣ 返回端口映射 */
-    const result = await fetchMCPTools(url, token)
-
-    writeLog(
-        context,
-        node.id,
-        outputVariable.id,
-        result.map(t => "工具名称: " + t.name + "\n工具描述:" + t.description).join(', '),
-
-    )
-
-
-
+    // 3. 返回端口映射
     return {
-        [outputVariable.id]: result,   // 下游真正用到时才会访问 MCP
-
+        [outputVariable.id]: result
     }
 }

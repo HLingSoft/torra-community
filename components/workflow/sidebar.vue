@@ -122,6 +122,48 @@ const data = ref<{ navMain: NavGroup[] }>({
       ],
     },
     {
+      title: 'Image',
+      url: '#',
+      items: [
+        {
+          title: 'OpenAI Image Recognition ',
+          url: '#',
+          component: 'image/recognition-openai',
+          isActive: false, isDisabled: false,
+          description: '',
+        },
+        {
+          title: 'OpenAI Image Generate ',
+          url: '#',
+          component: 'image/generate-openai',
+          isActive: false, isDisabled: false,
+          description: '',
+        },
+
+      ],
+    },
+    {
+      title: 'Voice',
+      url: '#',
+      items: [
+        {
+          title: 'OpenAI Voice Recognition ',
+          url: '#',
+          component: 'voice/recognition-openai',
+          isActive: false, isDisabled: false,
+          description: '',
+        },
+        {
+          title: 'OpenAI Voice Generate ',
+          url: '#',
+          component: 'voice/generate-openai',
+          isActive: false, isDisabled: false,
+          description: '',
+        },
+
+      ],
+    },
+    {
       title: '数据源',
       url: '#',
       items: [
@@ -163,6 +205,8 @@ const data = ref<{ navMain: NavGroup[] }>({
         {
           title: 'URL',
           url: '#',
+          component: 'data/url',
+          isActive: false, isDisabled: false,
           description: '',
         },
         {
@@ -184,7 +228,14 @@ const data = ref<{ navMain: NavGroup[] }>({
           description: '',
         },
         {
-          title: 'Filter   Data',
+          title: 'Data to Message',
+          url: '#',
+          component: 'processing/data-to-message',
+          isActive: false, isDisabled: false,
+          description: '',
+        },
+        {
+          title: 'Filter Data',
           url: '#',
           component: 'processing/filter-data',
           isActive: false, isDisabled: false,
@@ -193,10 +244,21 @@ const data = ref<{ navMain: NavGroup[] }>({
         {
           title: 'Combine Data',
           url: '#',
+          component: 'processing/combine-data',
+          isActive: false, isDisabled: false,
           description: '',
         },
         {
-          title: 'Combine Text',
+          title: 'Structured To Data',
+          component: 'processing/structured-to-data',
+          isActive: false, isDisabled: false,
+          url: '#',
+          description: '',
+        },
+        {
+          title: 'Data To Structured',
+          component: 'processing/data-to-structured',
+          isActive: false, isDisabled: false,
           url: '#',
           description: '',
         },
@@ -206,31 +268,17 @@ const data = ref<{ navMain: NavGroup[] }>({
           component: 'processing/json-parser',
           description: '',
         },
+
+
         {
-          title: 'LLM Router',
+          title: 'Save File To Aliyun',
           url: '#',
+
+          isActive: false,
+          isDisabled: false,
           description: '',
         },
-        {
-          title: 'Parse DataFrame',
-          url: '#',
-          description: '',
-        },
-        {
-          title: 'Save to File',
-          url: '#',
-          description: '',
-        },
-        {
-          title: 'Split Text',
-          url: '#',
-          description: '',
-        },
-        {
-          title: 'Update Data',
-          url: '#',
-          description: '',
-        },
+
       ],
     },
     {
@@ -340,33 +388,34 @@ const data = ref<{ navMain: NavGroup[] }>({
         {
           title: 'Listen',
           url: '#',
+          component: 'logic/listen',
           isActive: false, isDisabled: false,
           description: '',
         },
         {
           title: 'Loop',
           url: '#',
+          component: 'logic/loop',
           isActive: false, isDisabled: false,
           description: '',
         },
         {
           title: 'Notify',
           url: '#',
-          isActive: false, isDisabled: false,
+          component: 'logic/notify',
+          isActive: false,
+          isDisabled: false,
           description: '',
         },
         {
           title: 'Pass',
           url: '#',
-          isActive: false, isDisabled: false,
+          component: 'logic/pass',
+          isActive: false,
+          isDisabled: false,
           description: '',
         },
-        {
-          title: 'Run Flow',
-          url: '#',
-          isActive: false, isDisabled: false,
-          description: '',
-        },
+
 
       ],
     },
@@ -442,6 +491,14 @@ const data = ref<{ navMain: NavGroup[] }>({
           isActive: false, isDisabled: false,
           description: '',
         },
+        {
+          title: 'List Output',
+          url: '#',
+          component: 'helper/list-output',
+          isActive: false,
+          isDisabled: false,
+          description: '',
+        },
 
 
 
@@ -470,6 +527,30 @@ const data = ref<{ navMain: NavGroup[] }>({
           url: '#',
           description: '',
         },
+
+      ],
+    },
+    {
+      title: 'SubFlow',
+      url: '#',
+      items: [
+        {
+          title: 'Workflow',
+          url: '#',
+          component: 'subflow/workflow',
+          isActive: false,
+          isDisabled: false,
+          description: '',
+        },
+
+
+      ],
+    },
+    {
+      title: 'Plugins',
+      url: '#',
+      items: [
+
 
       ],
     },

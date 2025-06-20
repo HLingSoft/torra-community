@@ -1,63 +1,49 @@
-import User, { EnumUser } from '~/models/User'
- 
 import { defineStore } from 'pinia'
-import UserWorkspace  from '~/models/UserWorkspace'
+import User from '~/models/User'
+import UserWorkspace from '~/models/UserWorkspace'
 export const useUserStore = defineStore(
   'user',
   () => {
     const user = ref<User | null>(null)
+    const currentWorkspace = ref<UserWorkspace | null>(null)
     const showLoginComponent = ref(false)
-    const needShowLoginButton = ref(false)
-    const leancloudUser = ref(LC.User.current())
-    const currentWorkspace = ref<UserWorkspace>()
-    const setUser = (gwUser: User) => {
-      user.value = gwUser
-      showLoginComponent.value = false
-      needShowLoginButton.value = false
-    }
-    const hasLeancloudUser = computed(() => {
-      return LC.User.current() !== null
-    })
-    const isRequesting = ref(false)
-    const isLoggedIn = computed(() => {
-      return leancloudUser.value !== null || user.value !== null
-    })
-    const getUser = async () => {
-      if (user && user.value) {
-        // return (await new LC.Query(User).equalTo(EnumUser.USER, LC.User.current()).first()) as User
-        return user.value as User
-      }
-      else if (isLoggedIn.value) {
-        return (await new LC.Query(User).equalTo(EnumUser.USER, LC.User.current()).first()) as User
-      }
-      else {
-        return null
-      }
-    }
+
+
 
     const init = async () => {
-      console.log('useUserStore 初始化')
-      isRequesting.value = true
-      if (leancloudUser.value && !user.value) {
-        user.value = await getUser()
-        showLoginComponent.value = false
-        needShowLoginButton.value = false
+      const users = await User.all()
+      const localStorageUser = localStorage.getItem('torra-user')
+      if (users.length === 0 && !localStorageUser) {
+        showLoginComponent.value = true
+        return
       }
-
-      // await promiseTimeout(1000)
-      isRequesting.value = false
+      console.log('users', users, localStorageUser)
+      showLoginComponent.value = false
+      if (users.length > 0 && localStorageUser) {
+        user.value = users.find(u => u.objectId === localStorageUser) || null
+      }
+      console.log('user', user.value)
+      // localStorage.getItem('torra-user') && (user.value = await User.find(localStorage.getItem('torra-user')!))
     }
 
-    // await getUser()
-    // const isLoggedIn = ref(LC.User.current() !== null)
+    watch(user, () => {
+      if (user.value === null) {
+        showLoginComponent.value = true
+        localStorage.removeItem('torra-user')
+      } else {
+        showLoginComponent.value = false
+        localStorage.setItem('torra-user', user.value.objectId)
+      }
+
+    })
 
     const logOut = async () => {
-      await LC.User.logOut()
-      needShowLoginButton.value = true
+      localStorage.removeItem('torra-user')
       user.value = null
+      showLoginComponent.value = true
     }
     init()
 
-    return { user, setUser, isLoggedIn, getUser, init, hasLeancloudUser, isRequesting, logOut, showLoginComponent, needShowLoginButton ,currentWorkspace}
-  } 
+    return { user, logOut, showLoginComponent, currentWorkspace }
+  }
 )

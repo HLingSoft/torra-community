@@ -1,85 +1,99 @@
 import type { ChatOpenAIData } from '@/types/node-data/chat-openai'
-import type { BuildContext, FlowNode, InputPortVariable } from '~/types/workflow'
-// import { RunnableLambda } from '@langchain/core/runnables'
-import { ChatPromptTemplate } from '@langchain/core/prompts'
+import type {
+  BuildContext,
+  LangFlowNode,
+  InputPortVariable,
+  OutputPortVariable
+} from '~/types/workflow'
+
 import { ChatOpenAI } from '@langchain/openai'
-// import { AIMessage } from '@langchain/core/messages'
-import { resolveInputVariables, wrapRunnable, writeLog } from '../../langchain/resolveInput'
+import {
+  resolveInputVariables,
+  wrapRunnable
+} from '../../langchain/resolveInput'
+import { RunnableLambda } from '@langchain/core/runnables'
+import { HumanMessage, SystemMessage } from '@langchain/core/messages'
+import type { BaseMessage } from '@langchain/core/messages'
 
+interface LanguageModel {
+  model: ChatOpenAI
+  messages: BaseMessage[]
+}
 
-export async function chatOpenAIFactory(node: FlowNode, context: BuildContext) {
+/** ChatOpenAI 节点工厂函数 */
+export async function chatOpenAIFactory(
+  node: LangFlowNode,
+  context: BuildContext
+) {
   const data = node.data as ChatOpenAIData
   const {
     modelName,
+    historyMessageInputVariable,
     temperature,
     streaming,
-    inputTextVariable,
-    systemMessageVariable,
-    apiKeyVariable,
-    baseURLVariable,
+    inputTextInputVariable,
+    systemMessageInputVariable,
+    apiKeyInputVariable,
+    baseURLInputVariable,
     messageOutputVariable,
-    languageModelOutputVariable,
+    languageModelOutputVariable
   } = data
 
-  const variableDefs = [inputTextVariable, systemMessageVariable, apiKeyVariable, baseURLVariable] as InputPortVariable[]
+  const variableDefs: InputPortVariable[] = [
+    inputTextInputVariable,
+    systemMessageInputVariable,
+    apiKeyInputVariable,
+    baseURLInputVariable,
+    historyMessageInputVariable
+  ]
 
   const inputValues = await resolveInputVariables(context, variableDefs)
-
+  // console.log('ChatOpenAI 节点解析的输入变量:', inputValues)
 
   const model = new ChatOpenAI({
     modelName,
     temperature,
     streaming,
-    openAIApiKey: inputValues[apiKeyVariable.name],
-    configuration: { baseURL: inputValues[baseURLVariable.name] },
-  })
-
-  const prompt = await ChatPromptTemplate.fromMessages([
-    ['system', '{system}'],
-    ['human', '{input}'],
-  ]).partial({
-    input: inputValues[inputTextVariable.name],
-    system: inputValues[systemMessageVariable.name],
+    openAIApiKey: inputValues[apiKeyInputVariable.id],
+    configuration: {
+      baseURL: inputValues[baseURLInputVariable.id]
+    }
   })
 
 
-  const chain = prompt.pipe(model)
+  const messages = [
+    new SystemMessage(inputValues[systemMessageInputVariable.id]),
+    ...(Array.isArray(inputValues[historyMessageInputVariable.id])
+      ? inputValues[historyMessageInputVariable.id]
+      : []),
+    new HumanMessage(inputValues[inputTextInputVariable.id] || '')
 
+  ]
 
+  const chain = RunnableLambda.from(async (_input, options) => {
+    const resultMessage = await model.invoke(messages, options)
+
+    return resultMessage.content
+  })
 
   const messagePortId = messageOutputVariable.id
   const lmPortId = languageModelOutputVariable.id
-  writeLog(
+
+  const wrapped = wrapRunnable(chain, node.id, context.onRunnableElapsed, {
     context,
-    node.id,
-    lmPortId,
+    portId: messagePortId,
 
-    `openai chat model with prompt chain. Prompt: ${prompt}`,
-
-  );
+    logFormat: res => ({
+      type: 'openai chat',
+      data: res
+    })
+  })
 
   return {
-
-    // [messagePortId]: chain,
-    [messagePortId]: wrapRunnable(
-      chain,                // runnable
-      node.id,              // nodeId
-      context.onRunnableElapsed, // 回调（可能是 undefined）
-      {
-        context,
-        portId: messagePortId,
-        logFormat: (res) => {
-          return {
-            type: 'openai chat',
-            data: res,
-          }
-        }
-      }
-
-    ),
-
-    [lmPortId]: chain,
-
-
+    [messagePortId]: wrapped,
+    [lmPortId]: {
+      model,
+      messages
+    } as LanguageModel
   }
 }

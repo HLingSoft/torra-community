@@ -1,5 +1,5 @@
 import type {
-  DAGStepInfo,
+
   WSErrorMessage,
   WSExecuteDoneMessage,
   WSExecuteProgressMessage,
@@ -9,8 +9,9 @@ import type {
 import { createServer } from 'node:http'
 import { WebSocketServer } from 'ws'
 import { executeDAG } from '~/server/langchain/builder'
+import { LangFlowJson, DAGStepInfo } from '~/types/workflow'
 import type { WebSocket } from 'ws'
-import { generateLangFlowJSONFromVueFlow } from '~/server/langchain/transformer'
+import * as _ from 'lodash-es'
 
 export default defineNitroPlugin(() => {
   if (process.env.NODE_ENV === 'prerender') {
@@ -23,14 +24,17 @@ export default defineNitroPlugin(() => {
   wss.on('connection', (ws: WebSocket) => {
     ws.on('message', async (raw: WebSocket.Data) => {
       try {
-        const msg: WSMessage = JSON.parse(raw.toString())
-        // console.log('📩 Received message:', msg)
+        const msg: WSExecuteRunMessage = JSON.parse(raw.toString())
 
         if (isWithNamespace(msg) && msg.namespace === 'execute' && msg.type === 'run') {
-          const runMsg = msg as WSExecuteRunMessage
-          const langflowJson = generateLangFlowJSONFromVueFlow(runMsg.workflow)
 
-          const res = await executeDAG(langflowJson, runMsg.input.message, 'chat', {
+          const langflowJson: LangFlowJson = {
+            nodes: _.cloneDeep(msg.workflow.nodes),
+            edges: _.cloneDeep(msg.workflow.edges)
+          }
+
+
+          const res = await executeDAG(langflowJson, msg.input.message, 'chat', {
             onStep: (step: DAGStepInfo) => {
               const progressMsg: WSExecuteProgressMessage = {
                 namespace: 'execute',
@@ -40,7 +44,7 @@ export default defineNitroPlugin(() => {
               ws.send(JSON.stringify(progressMsg))
             },
           })
-          console.log('🔄 DAG execution result:', res.output)
+
 
           const doneMsg: WSExecuteDoneMessage = {
             namespace: 'execute',
@@ -48,6 +52,11 @@ export default defineNitroPlugin(() => {
             data: {
               output: res.output,
               logs: res.logs,
+              statusCode: res.statusCode,
+              results: res.results,
+              errorNodeId: res.errorNodeId,
+              errorType: res.errorType,
+              errorMessage: res.errorMessage,
 
             },
           }

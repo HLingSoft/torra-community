@@ -1,75 +1,49 @@
-# Nuxt Minimal Starter
+# Torra Community Edition
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+🌐 [English](./README.md) | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
 
-## Setup
+Torra Community Edition is an open-source visual agent and workflow editor built with Nuxt3, VueFlow, Tailwind CSS v4, and LangChain.js.
 
-Make sure to install dependencies:
+This edition is free to use, modify, and extend.  
+When using, modifying, or distributing this software, **you must retain the attribution and copyright of the original authors, the Torra Team.**
+
+---
+
+## Features
+
+- 🚀 Visual workflow editor (VueFlow)
+- 🎨 Modern UI (Tailwind CSS v4)
+- 🤖 Integrated LangChain.js for LLM workflows
+- 🗂 Local storage (no cloud dependency)
+- 🛠 Fast deployment and prototyping
+- 🔓 Community-driven and open to contributions
+
+---
+
+## Getting Started
 
 ```bash
-# npm
-npm install
+git clone https://github.com/your-org/torra-community.git
+cd torra-community
 
-# pnpm
 pnpm install
 
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
 pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+---
 
-Build the application for production:
+## License
 
-```bash
-# npm
-npm run build
+This project is open-sourced under the [MIT License](./LICENSE).
 
-# pnpm
-pnpm build
+> **Note:**  
+> When using, modifying, or distributing this project (in whole or in part),  
+> you must retain the license content and clearly credit the Torra Team as the original author.
 
-# yarn
-yarn build
+---
 
-# bun
-bun run build
-```
+## Acknowledgment
 
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+Created and maintained by **Torra Team**.  
+For more information, please visit [https://www.torra.cloud](https://www.torra.cloud).

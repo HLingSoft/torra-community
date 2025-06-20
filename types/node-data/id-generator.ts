@@ -11,17 +11,17 @@ export interface IDGeneratorData {
   saved?: boolean // 是否保存
 }
 
-export const  IDGeneratorLangchainName = 'IDGenerator' // 节点类型
+export const IDGeneratorLangchainName = 'IDGenerator' // 节点类型
 
 export const iDGeneratorMeta: IDGeneratorData = {
-  icon: '💬',
+  icon: 'solar:user-id-broken',
   title: 'ID Generator',
   description: 'Generates a unique ID.',
   type: IDGeneratorLangchainName,
   inputValue: '',
   outputVariable: {
-    outputType: 'ID',
-    name: 'output',
+    outputType: 'Data',
+    name: 'When Done',
   } as OutputPortVariable,
   show: true,
 }

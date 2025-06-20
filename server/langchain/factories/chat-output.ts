@@ -1,36 +1,38 @@
 import type { ChatOutputData } from '@/types/node-data/chat-output'
-import type { BuildContext, FlowNode, InputPortVariable, OutputPortVariable } from '~/types/workflow'
+import type {
+  BuildContext,
+  LangFlowNode,
+  InputPortVariable,
 
-import { AIMessage } from '@langchain/core/messages'
+} from '~/types/workflow'
 
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
 
-export async function chatOutputFactory(node: FlowNode, context: BuildContext) {
+import {
+  resolveInputVariables,
+
+} from '../../langchain/resolveInput'
+
+/** ChatOutput 节点工厂函数 */
+export async function chatOutputFactory(
+  node: LangFlowNode,
+  context: BuildContext
+) {
+  const data = node.data as ChatOutputData
   const {
-    inputVariable,
-    outputVariable,
-  } = node.data as ChatOutputData
+    inputInputVariable,
+    outputVariable
+  } = data
 
-
-  const variableDefs = [inputVariable] as InputPortVariable[]
-
+  const variableDefs: InputPortVariable[] = [inputInputVariable]
 
   const inputValues = await resolveInputVariables(context, variableDefs)
 
-  writeLog(
-    context,
-    node.id,
-    outputVariable.id,
-    inputValues[inputVariable.name],
+  const inputValue = inputValues[inputInputVariable.id]
+  const outputPortId = outputVariable.id
 
-  )
 
   return {
-
-    [outputVariable.id]: new AIMessage(inputValues[inputVariable.name]),
-
+    [outputPortId]: inputValue,
+    default: inputValue
   }
 }
-
-
-

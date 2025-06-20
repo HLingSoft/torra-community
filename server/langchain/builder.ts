@@ -1,336 +1,419 @@
-import type { FlowNode, LangFlowJson, NodeResultsMap, BuildContext } from '~/types/workflow'
-import type { DAGStepInfo } from '~/types/ws'
+/**
+ * LangFlow/VueFlow DAG 执行核心模块（执行器核心引擎）
+ *
+ * -----------------------------------------------------------------------------
+ * 【算法与工程设计说明】
+ * -----------------------------------------------------------------------------
+ * 本模块负责对用户可视化配置的工作流（DAG: Directed Acyclic Graph，有向无环图）进行自动化推理与调度执行。
+ * 支持以下复杂场景，保证任意复杂流式数据/AI流程的可用性和稳定性：
+ * 
+ * 1. 【连通子图自动发现】  
+ *    - 以所有入口节点（如 APIInput、ChatInput 等，依 runType 匹配）为起点，  
+ *    - 利用“无向图广度优先遍历”（Weakly Connected Components, BFS算法）  
+ *      自动检索与入口连通的全部节点（弱连通分量），  
+ *    - 彻底排除所有与主流程不连通的“孤岛节点”，保持流程图鲁棒性与可维护性。
+ * 
+ * 2. 【拓扑排序驱动的执行调度】  
+ *    - 针对“弱连通分量”内所有节点，基于经典Kahn算法（DAG Topological Sort）执行调度，  
+ *    - 动态维护节点的入度表和依赖关系，仅当所有上游节点已完成后才允许节点入队执行，  
+ *    - 严格保证所有节点执行顺序完全遵循数据依赖（拓扑序），防止数据未就绪或环路问题。
+ *
+ * 3. 【分支/循环/工具节点全兼容】
+ *    - 支持分支条件（如IfElse节点）、循环执行（loop）、侧挂工具（如APITool等）等高级DAG操作模式，  
+ *    - 保证所有依赖满足的节点都能无遗漏执行，且不会破坏主链路顺序。
+ *
+ * -----------------------------------------------------------------------------
+ * 【工程特性与适用场景】
+ * -----------------------------------------------------------------------------
+ * - 适合VueFlow/LangFlow等可视化AI工作流引擎，  
+ * - 任意复杂多入口/多分支/工具节点/主流程可拓扑排序并行执行，  
+ * - 支持工程化流程拆分、复用、自动剪枝、可扩展调度等。
+ *
+ * -----------------------------------------------------------------------------
+ * 【术语说明】
+ * -----------------------------------------------------------------------------
+ * - DAG: Directed Acyclic Graph，有向无环图，保证无环结构可被拓扑排序。
+ * - 弱连通分量（Weakly Connected Component）：在无向图意义下，所有通过任意方向边相连的节点集合。
+ * - Kahn算法（Kahn's algorithm）：高效的DAG拓扑排序算法，实现依赖驱动调度。
+ * - 拓扑序/拓扑排序（Topological Sort）：保证每个节点的所有依赖节点都先于其被执行。
+ *
+ * -----------------------------------------------------------------------------
+ * 【代码作者/维护】
+ * @author  KK
+ * @since   2025-06
+ * -----------------------------------------------------------------------------
+ */
+import type {
+  LangFlowJson,
+  LangFlowEdge,
+  LangFlowNode,
+  DAGStepInfo,
+  ExecuteDAGOptions,
+  OutputPortVariable,
+  BuildContext,
+  DAGRunResult
+} from '~/types/workflow'
+import { toJsonSafe, collectLoopBodyNodes } from '~/server/langchain/resolveInput'
 import { initFactories, nodeFactoryMap } from './factories'
-import { ChatInputData } from '~/types/node-data/chat-input'
-import * as _ from 'lodash-es'
+import { ChatInputData } from '@/types/node-data/chat-input'
 
 initFactories()
 
-interface ExecuteDAGOptions {
-  onStep?: (step: DAGStepInfo) => void
-}
+const DEFAULT_HANDLE = '__default'
+// function isLoopNode(node: LangFlowNode): boolean {
+//   return node.data.type === 'Loop';
+// }
+/**
+ * 构建有向邻接表和入边邻接表（供拓扑排序用）
+ */
+function buildAdjForTopo(edges: LangFlowEdge[], allowList: Set<string>, nodes: Record<string, LangFlowNode> = {}): { out: Record<string, string[]>, inDegree: Record<string, number> } {
+  // 出边（source->target），和入度统计
+  const out: Record<string, string[]> = {}
+  const inDegree: Record<string, number> = {}
+  allowList.forEach(id => inDegree[id] = 0)
+  edges.forEach(e => {
+    // --- ① 过滤 LoopItemResult → Loop 自回线 ------------------
+    const tgt = nodes[e.target];
+    if (tgt?.data?.type === 'Loop') {
 
-type OutputConnection = {
-  fromPortId: string
-  toNodeId: string
-  toPortId: string
-}
-
-export async function executeDAG(
-  json: LangFlowJson,
-  inputMessage: string,
-  runType = 'chat', // 'chat' or 'api'
-  options?: ExecuteDAGOptions,
-) {
-  // --- Context & state ---------------------------------------------------
-  const nodeElapsedMap = new Map<string, number>()
-  const context: BuildContext = {
-    logs: {},
-    results: {},
-    json,
-    resolvedInput: {},
-    onRunnableElapsed,
-  }
-  const nodeStatus = new Map<string, 'pending' | 'completed' | 'skipped'>()
-  const stepCache = new Map<string, { index: number; total: number; type: string }>()
-  const skipSet = new Set<string>()
-
-  function onRunnableElapsed(nodeId: string, ms: number) {
-    nodeStatus.set(nodeId, 'completed')
-    const cache = stepCache.get(nodeId)
-    if (options?.onStep) {
-      const step: DAGStepInfo = {
-        index: cache?.index ?? 0,
-        total: cache?.total ?? 0,
-        nodeId,
-        type: cache?.type ?? 'unknown',
-        elapsed: ms,
-        elapsedStr: formatElapsed(ms),
-        output: context.results[nodeId],
-        outputPreview: '',
-      }
-      options.onStep(step)
-      nodeElapsedMap.set(nodeId, ms)
+      const resHandle = tgt.data.loopItemResultInputVariable?.id;
+      if (e.targetHandle === resHandle) return;   // ← **首轮忽略**
     }
-  }
-
-  // --- Initial topology -------------------------------------------------
-  const customNodeIds = Object.entries(json.nodes)
-    .filter(([_, node]) => node.type === 'custom')
-    .map(([id]) => id)
-
-  const initialInputConns = buildInputConnections(json)
-  const initialSorted = topoSortSafe(json.nodes, initialInputConns, customNodeIds)
-
-  const executed = new Set<string>()
-
-  // --- Helper: check if all inputs ready under current skipSet ------------
-  function areInputsReady(nodeId: string): boolean {
-    const ins = buildInputConnections(json, skipSet)
-    const conns = ins[nodeId] || {}
-    return Object.values(conns).every(arr =>
-      arr.length === 0 ||
-      arr.some(c => executed.has(c.fromNodeId))
-    )
-  }
-
-  // --- Main execution loop ----------------------------------------------
-  while (true) {
-    const nextId = initialSorted.find(id =>
-      !executed.has(id) &&
-      !skipSet.has(id) &&
-      areInputsReady(id)
-    )
-    if (!nextId) break
-
-    const node = json.nodes[nextId]
-    console.log(`🔗 Executing ${nextId} (${node.data.type})`)
-
-    // --- Bind input message for start node -------------------------------
-    if (isStartNode(json, nextId, runType)) {
-      if (node.data.type === 'ChatInput') {
-        const data = node.data as ChatInputData
-        if (data.dynamicValue) data.inputValue = inputMessage
-      } else {
-        node.data.inputValue = inputMessage
-      }
-    }
-
-    // --- Resolve upstream port inputs ------------------------------------
-    const resolvedInput: Record<string, any> = {}
-    const ins = buildInputConnections(json, skipSet)[nextId] || {}
-    for (const [portId, conns] of Object.entries(ins)) {
-      const arr = Array.isArray(conns) ? conns : [conns]
-      const vals = arr
-        .map(c => context.results[c.fromNodeId]?.[c.fromPortId])
-        .filter(v => v !== undefined)
-      resolvedInput[portId] = vals.length === 1 ? vals[0] : vals
-    }
-
-    // --- Factory invocation ----------------------------------------------
-    const factory = nodeFactoryMap[node.data.type]
-    if (!factory) throw new Error(`Factory not found for ${node.data.type}`)
-    const t0 = performance.now()
-    const output = await factory(node, { ...context, resolvedInput })
-    const buildMs = performance.now() - t0
-
-    context.results[nextId] = output
-    executed.add(nextId)
-
-    const hasRunnable = Object.values(output).some(hasInvoke)
-    nodeStatus.set(nextId, hasRunnable ? 'pending' : 'completed')
-
-    if (options?.onStep) {
-      const step: DAGStepInfo = {
-        index: executed.size,
-        total: initialSorted.length,
-        nodeId: nextId,
-        type: node.data.type,
-        elapsed: hasRunnable ? -1 : buildMs,
-        elapsedStr: hasRunnable ? 'Pending' : formatElapsed(buildMs),
-        output,
-        outputPreview: '',
-      }
-      options.onStep(step)
-      nodeElapsedMap.set(nextId, step.elapsed)
-    }
-    stepCache.set(nextId, {
-      index: executed.size,
-      total: initialSorted.length,
-      type: node.data.type,
-    })
-
-    // --- IfElse: update skipSet -------------------------------------------
-    if (node.data.type === 'IfElse') {
-      const isTrue = output.default === true
-      const skipPort = isTrue ? node.data.falseOutputVariable.id : node.data.trueOutputVariable.id
-      const activePort = isTrue ? node.data.trueOutputVariable.id : node.data.falseOutputVariable.id
-
-      // 用完整图去收集
-      const fullOutConns = buildOutputConnections(json)
-
-      // 1) 假分支所有下游
-      const skipDown = new Set<string>()
-      for (const conn of fullOutConns[nextId]?.[skipPort] || []) {
-        collectDownstream(conn.toNodeId, fullOutConns).forEach(id => skipDown.add(id))
-      }
-
-      // 2) 真分支所有下游
-      const activeDown = new Set<string>()
-      for (const conn of fullOutConns[nextId]?.[activePort] || []) {
-        collectDownstream(conn.toNodeId, fullOutConns).forEach(id => activeDown.add(id))
-      }
-
-      // 3) 只跳过纯假分支里的节点（剔除共有的那部分）
-      for (const id of skipDown) {
-        if (!activeDown.has(id)) {
-          skipSet.add(id)
-        }
-      }
-    }
-
-  }
-
-  // --- Finalize statuses for any remaining pendings ---------------------
-  for (const id of initialSorted) {
-    if (!executed.has(id) && !skipSet.has(id)) continue
-    if (!executed.has(id)) {
-      nodeStatus.set(id, 'skipped')
-    }
-  }
-
-  // --- Extract final output ---------------------------------------------
-  const lastId = [...executed].pop()!
-  const lastNode = json.nodes[lastId]
-  const lastRes = context.results[lastId] || {}
-  const output =
-    lastRes.default ??
-    lastRes[lastNode.data.outputVariable?.id] ??
-    Object.values(lastRes)[0] ??
-    'No output'
-
-  const logs = extractNodesFromLogsByConnections(context, json, executed, nodeElapsedMap)
-  return { results: context.results, logs, output }
+    // ------------------------------------------------------------
+    if (!allowList.has(e.source) || !allowList.has(e.target)) return
+    out[e.source] ||= []
+    out[e.source].push(e.target)
+    inDegree[e.target]++
+  })
+  return { out, inDegree }
 }
 
-
-// --- Helpers ------------------------------------------------------------
-
-function hasInvoke(v: unknown): v is { invokeIfAvailable: Function } {
-  return typeof (v as any)?.invokeIfAvailable === 'function'
-}
-
-function buildInputConnections(
-  json: LangFlowJson,
-  skipSet: Set<string> = new Set(),
-) {
-  const conns: Record<string, Record<string, { fromNodeId: string; fromPortId: string }[]>> = {}
-  for (const edge of json.edges) {
-    const from = edge.data.sourceParent, to = edge.data.targetParent
-    if (!from || !to) continue
-    if (skipSet.has(from) || skipSet.has(to)) continue
-    conns[to] ||= {}
-    conns[to][edge.target] ||= []
-    conns[to][edge.target].push({ fromNodeId: from, fromPortId: edge.source })
-  }
-  return conns
-}
-
-function buildOutputConnections(
-  json: LangFlowJson,
-  skipSet: Set<string> = new Set(),
-) {
-  const out: Record<string, Record<string, OutputConnection[]>> = {}
-  for (const edge of json.edges) {
-    const from = edge.data.sourceParent, to = edge.data.targetParent
-    if (!from || !to) continue
-    if (skipSet.has(from) || skipSet.has(to)) continue
-    out[from] ||= {}
-    out[from][edge.source] ||= []
-    out[from][edge.source].push({ fromPortId: edge.source, toNodeId: to, toPortId: edge.target })
-  }
-  return out
-}
-
-function collectDownstream(
-  startId: string,
-  outputConnections: ReturnType<typeof buildOutputConnections>,
-) {
-  const visited = new Set<string>()
-  const stack = [startId]
-  while (stack.length) {
-    const cur = stack.pop()!
-    if (visited.has(cur)) continue
-    visited.add(cur)
-    const outs = outputConnections[cur] || {}
-    for (const arr of Object.values(outs)) {
-      arr.forEach(c => stack.push(c.toNodeId))
-    }
-  }
-  return visited
-}
-
-function topoSortSafe(
-  nodes: Record<string, FlowNode>,
-  inputConns: ReturnType<typeof buildInputConnections>,
-  customNodeIds: string[],
-): string[] {
-  const adj: Record<string, string[]> = {}
-  const indegree: Record<string, number> = {}
-  customNodeIds.forEach(id => { adj[id] = []; indegree[id] = 0 })
-  for (const [tgt, ports] of Object.entries(inputConns)) {
-    if (!customNodeIds.includes(tgt)) continue
-    Object.values(ports).flat().forEach(({ fromNodeId }) => {
-      if (!customNodeIds.includes(fromNodeId)) return
-      adj[fromNodeId].push(tgt)
-      indegree[tgt]++
-    })
-  }
-  const q = customNodeIds.filter(id => indegree[id] === 0)
-  const res: string[] = []
-  while (q.length) {
-    const cur = q.shift()!
-    res.push(cur)
-    adj[cur].forEach(nxt => {
-      indegree[nxt]--
-      if (indegree[nxt] === 0) q.push(nxt)
-    })
-  }
-  return res
-}
-
+/**
+ * 判断节点是否为“入口节点”
+ */
 function isStartNode(json: LangFlowJson, nodeId: string, runType: string): boolean {
-  const t = json.nodes[nodeId]?.data?.type
+  const node = json.nodes.find(n => n.id === nodeId)
+  if (!node) return false
+  const t = node.data?.type
   if (runType === 'api') return t === 'APIInput'
   if (runType === 'chat') return t === 'ChatInput'
   return false
 }
 
-function formatElapsed(ms: number): string {
-  if (ms < 0) return ms === -2 ? 'Skipped' : 'Pending'
-  if (ms < 0.1) return '0.1 ms'
-  if (ms < 1) return `${ms.toFixed(2)} ms`
-  if (ms < 10) return `${ms.toFixed(1)} ms`
-  if (ms < 1000) return `${Math.round(ms)} ms`
-  const s = Math.floor(ms / 1000), rem = Math.round(ms % 1000)
-  if (s < 60) return `${s} s ${rem} ms`
-  const m = Math.floor(s / 60), sec = s % 60
-  return `${m} m ${sec}s`
-}
-
-function extractNodesFromLogsByConnections(
-  context: BuildContext,
-  json: LangFlowJson,
-  executed: Set<string>,
-  nodeElapsedMap: Map<string, number>
-) {
-  const inConns = buildInputConnections(json)
-  const outConns = buildOutputConnections(json)
-  const structured: Array<any> = []
-
-  for (const nodeId of executed) {
-    const node = json.nodes[nodeId]
-    if (!node || node.type !== 'custom') continue
-    const name = node.data.title || node.data.name || 'Unnamed'
-    const inputs: Record<string, any> = {}
-    const connMap = inConns[nodeId] || {}
-    for (const [port, arr] of Object.entries(connMap)) {
-      const vals = arr
-        .map(c => context.logs[c.fromNodeId]?.[c.fromPortId])
-        .filter(v => v !== undefined)
-      inputs[port] = vals.length === 1 ? vals[0] : vals
-    }
-    const outputs: Record<string, any> = {}
-    const logs = context.logs[nodeId] || {}
-    for (const port of Object.keys(outConns[nodeId] || {})) {
-      if (logs.hasOwnProperty(port)) outputs[port] = logs[port]
-    }
-    let elapsed = nodeElapsedMap.get(nodeId) ?? -2
-    if (elapsed > 0 && elapsed < 0.1) elapsed = 0.1
-    if (elapsed > 0) elapsed = Math.round(elapsed * 100) / 100
-
-    structured.push({ nodeId, name, inputs, outputs, elapsed })
+/**
+ * 无向BFS（弱连通分量遍历）：
+ * 从 startNodeIds 出发，遍历所有通过任意连线连通的节点
+ */
+function getWeaklyConnectedNodeIds(
+  startNodeIds: string[],
+  edges: LangFlowEdge[]
+): Set<string> {
+  const neighborMap: Record<string, Set<string>> = {}
+  // 构建“无向邻接表”——每条边正反都加
+  edges.forEach(e => {
+    neighborMap[e.source] ||= new Set()
+    neighborMap[e.target] ||= new Set()
+    neighborMap[e.source].add(e.target)
+    neighborMap[e.target].add(e.source)
+  })
+  const visited = new Set<string>()
+  const queue = [...startNodeIds]
+  while (queue.length > 0) {
+    const nodeId = queue.shift()!
+    if (visited.has(nodeId)) continue
+    visited.add(nodeId)
+    neighborMap[nodeId]?.forEach(nei => {
+      if (!visited.has(nei)) queue.push(nei)
+    })
   }
-
-  return structured
+  return visited
 }
+
+/**
+ * 构建出边/入边邻接表（供输入解析用）
+ */
+function buildAdj(edges: LangFlowEdge[]) {
+  const out: Record<string, Record<string, LangFlowEdge[]>> = {}
+  const inp: Record<string, Record<string, LangFlowEdge[]>> = {}
+  edges.forEach(e => {
+    const sH = e.sourceHandle ?? DEFAULT_HANDLE
+    const tH = e.targetHandle ?? DEFAULT_HANDLE
+    out[e.source] ||= {}
+    out[e.source][sH] ||= []
+    out[e.source][sH].push(e)
+    inp[e.target] ||= {}
+    inp[e.target][tH] ||= []
+    inp[e.target][tH].push(e)
+  })
+  return { out, inp }
+}
+
+export async function executeDAG(
+  json: LangFlowJson,
+  inputMessage: string,
+  runType: 'loop' | 'chat' | 'api' = 'chat',
+  opts: ExecuteDAGOptions & {
+    maxLoopIterations?: number
+    onRunnableElapsed?: (nodeId: string, ms: number) => void
+    results?: Record<string, any>
+    customNodeIds?: string[]
+  } = {}
+): Promise<DAGRunResult> {
+
+  const ctx: BuildContext = {
+    logs: {},
+    resolvedInput: {},
+    results: opts.results ?? {},
+    json,
+    onRunnableElapsed: opts.onRunnableElapsed,
+  }
+  const dagSteps: DAGStepInfo[] = []
+
+  try {
+    // 构建节点字典、邻接表
+    const nodes: Record<string, LangFlowNode> = Object.fromEntries(json.nodes.map(n => [n.id, n]))
+    const { out: outAdj, inp: inAdj } = buildAdj(json.edges)
+
+    // --------- 第一步：用无向BFS找到所有入口节点可达节点（弱连通分量） -----------
+    let allowList: Set<string>;
+    if (opts.customNodeIds && opts.customNodeIds.length > 0) {
+      allowList = new Set(opts.customNodeIds)
+    } else {
+
+      /* ⬇️ 这里保持最朴素的“入口 = APIInput / ChatInput”即可  
+   *    强行把 Loop 当起点，反而可能让 Loop 节点因为「入度 ≠ 0」永远排不进队列
+   */
+      const startNodeIds = json.nodes
+        .filter(n => isStartNode(json, n.id, runType))   // 只挑 APIInput / ChatInput
+        .map(n => n.id);
+
+      allowList = getWeaklyConnectedNodeIds(startNodeIds, json.edges);
+      //   裁剪掉所有 loop 节点的 body（customNodeIds）
+      //    这样主流程不会调度到它们
+
+      json.nodes.forEach(node => {
+        if (node.data.type === 'Loop') {
+          const bodyNodeIds = collectLoopBodyNodes(
+            json,
+            node.id,
+            node.data.itemOutputVariable.id,
+            node.data.loopItemResultInputVariable.id,
+          );
+          // console.log('🔄 Loop node', node.id, 'body nodes:', bodyNodeIds);
+          bodyNodeIds.forEach(id => {
+            // 不要剔除 loop 节点本身
+            if (id !== node.id) allowList.delete(id)
+          });
+        }
+      });
+    }
+
+
+
+    // console.log('🔍 Weakly connected component (allowList):', runType, Array.from(allowList))
+
+    // console.log('🔍 Weakly connected component (nodes):', json.nodes.filter(n => allowList.has(n.id)).map(n => n.id))
+    // console.log('🔍 Weakly connected component (edges):', json.edges.filter(e => allowList.has(e.source) && allowList.has(e.target)).map(e => `${e.source} -> ${e.target}`))
+
+    // --------- 第二步：拓扑排序方式依赖执行 -----------
+    const { out: topoOut, inDegree } = buildAdjForTopo(json.edges, allowList, nodes)
+
+
+    // 备份最初的入度表 —— 以后每轮 Loop 要用
+    // const inDegreeOrig = { ...inDegree }   // ← “顶部” 就在这里
+
+
+    // 初始化：入度为0的节点入队（所有依赖都满足，可以执行）
+    const queue: string[] = Object.entries(inDegree)
+      .filter(([, deg]) => deg === 0)
+      .map(([id]) => id)
+
+
+
+    const executed = new Set<string>()
+
+    // const loopCount: Record<string, number> = {}
+
+    const total = allowList.size
+
+    // 跳过分支（IfElse等用到）
+    const skip = new Set<string>()
+    const markSkipBranch = (start: string) => {
+      const stack = [start]
+      while (stack.length) {
+        const cur = stack.pop()!
+        if (skip.has(cur)) continue
+        skip.add(cur)
+        /* 👇 关键：剪枝时同步踢出 allowList */
+        // allowList.delete(cur)
+
+        Object.values(outAdj[cur] || {}).flat().forEach(e => stack.push(e.target))
+      }
+    }
+
+
+    // console.log('allowList（弱连通分量）:', allowList);
+    // console.log('queue 初始化:', queue);
+    // console.log('nodeMap', nodeFactoryMap)
+    // ------- DAG 拓扑主循环 -----------
+    while (queue.length > 0) {
+      const id = queue.shift()!
+      if (!allowList.has(id)) continue
+      if (skip.has(id)) continue
+      if (executed.has(id)) continue
+
+      const node = nodes[id]
+
+
+
+      // 对入口节点赋值 inputMessage
+      if (isStartNode(json, id, runType)) {
+        if (node.data.type === 'ChatInput' && node.data.dynamicValue !== false) {
+          (node.data as ChatInputData).inputValue = inputMessage
+        } else {
+          node.data.inputValue = inputMessage
+        }
+      }
+
+      // 解析输入（从所有入边取已执行节点的输出，支持多输入）
+      const rInput: Record<string, any> = {}
+      Object.entries(inAdj[id] || {}).forEach(([tH, edges]) => {
+        const vs = edges.map(e => ctx.results[e.source]?.[e.sourceHandle ?? DEFAULT_HANDLE]).filter(v => v !== undefined)
+        if (vs.length) rInput[tH] = vs.length === 1 ? vs[0] : vs
+      })
+      if (Object.keys(rInput).length === 0 && isStartNode(json, id, runType)) rInput[DEFAULT_HANDLE] = inputMessage
+      ctx.resolvedInput = rInput
+
+      const t0 = performance.now()
+
+
+      let output: any
+      let error: string | undefined
+      let elapsed = 0
+      try {
+        // console.log(`🟡 factory for type [${node.data.type}]:`, nodeFactoryMap[node.data.type]);
+        const fac = nodeFactoryMap[node.data.type]
+        if (!fac) throw new Error(`Factory not found for ${node.data.type}`)
+        console.log('节点', node.id, '类型', node.data.type, 'title', node.data.title, '开始执行')
+        output = await fac(node as any, ctx)
+        // console.log('节点', node.id, '类型', node.data.type, '执行完成，输出:', output)
+      } catch (e) {
+        // console.error('节点', node.id, '类型', node.data.type, '执行失败:', e)
+        error = (e instanceof Error ? e.message : String(e))
+        output = { error }
+      }
+      elapsed = performance.now() - t0
+      ctx.results[id] = output
+      ctx.logs[id] = { elapsed }
+      executed.add(id)
+
+
+      // 日志
+      const dagStep: DAGStepInfo = {
+        index: dagSteps.length + 1,
+        total,
+        nodeId: id,
+        nodeTitle: node.data.title,
+        type: node.data.type,
+        output: toJsonSafe(output),
+        elapsed,
+        elapsedStr: elapsed < 1000 ? `${elapsed.toFixed(1)}ms` : `${(elapsed / 1000).toFixed(2)}s`,
+        ...(error ? { error } : {})
+      }
+      dagSteps.push(dagStep)
+      opts.onStep?.(dagStep)
+
+      if (error) {
+        // 直接终止整个流程（如果你想整个失败就停下，不继续后面节点）
+        return {
+          statusCode: 500,
+          results: ctx.results,
+          logs: dagSteps,
+          output: `❌ 节点[${id}][${node.data.type}]执行失败: ${error}`,
+          errorNodeId: id,
+          errorType: node.data.type,
+          errorMessage: error
+        }
+      }
+
+
+      // ----------- IfElse 节点，剪掉未命中的分支 -----------
+      if (node.data.type === 'IfElse') {
+        const d = node.data as {
+          trueOutputVariable: OutputPortVariable;
+          falseOutputVariable: OutputPortVariable;
+
+        };
+        const cond = !!output.default;           // true / false 分支
+
+        /** 把 “从指定 handle 出去的整条支路” 全部 skip 掉 */
+        const skipByHandle = (handleId?: string) => {
+          if (!handleId) return;
+          // ⚠️ 一定要用 handle → edge → targetId
+          (outAdj[id]?.[handleId] || []).forEach(e => markSkipBranch(e.target));
+        };
+
+        if (cond) {
+          // 命中 true，剪掉 false 侧
+          skipByHandle(d.falseOutputVariable?.id);
+        } else {
+          // 命中 false，剪掉 true 侧
+          skipByHandle(d.trueOutputVariable?.id);
+        }
+      }
+
+      // ------- 拓扑排序推进 -----------
+      (topoOut[id] || []).forEach(targetId => {
+        inDegree[targetId]--
+        if (inDegree[targetId] === 0 && !executed.has(targetId) && !queue.includes(targetId)) {
+          queue.push(targetId)
+        }
+      })
+
+
+    }
+
+    // 计算最终输出
+    // 优先取 TextOutput、ChatOutput 等终端节点；否则最后一个主链节点
+    let finalOutput: any = undefined
+    const terminalTypes = ['TextOutput', 'ChatOutput']
+    let lastTerminalNode = dagSteps.slice().reverse().find(s => terminalTypes.includes(s.type))
+    if (lastTerminalNode) {
+      const lastResult = ctx.results[lastTerminalNode.nodeId]
+      if (lastResult && 'default' in lastResult) {
+        finalOutput = lastResult.default
+      } else if (lastResult && typeof lastResult === 'object' && Object.keys(lastResult).length > 0) {
+        finalOutput = lastResult[Object.keys(lastResult)[0]]
+      } else {
+        finalOutput = lastResult
+      }
+    } else if (dagSteps.length > 0) {
+      const lastResult = ctx.results[dagSteps[dagSteps.length - 1].nodeId]
+      if (lastResult && 'default' in lastResult) {
+        finalOutput = lastResult.default
+      } else if (lastResult && typeof lastResult === 'object' && Object.keys(lastResult).length > 0) {
+        finalOutput = lastResult[Object.keys(lastResult)[0]]
+      } else {
+        finalOutput = lastResult
+      }
+    }
+
+
+    return {
+      statusCode: 200,
+      results: ctx.results,
+      logs: dagSteps,
+      output: finalOutput
+    }
+  } catch (error) {
+    console.error('❌ DAG execution failed:', error)
+    // throw error
+    return {
+      statusCode: 500,
+      results: ctx.results,
+      logs: dagSteps,
+      output: '❌执行失败:' + (error instanceof Error ? error.message : String(error)),
+    }
+  }
+}
+

@@ -1,74 +1,88 @@
-import type { JSONParserData } from '@/types/node-data/json-parser';
-import type { BuildContext, FlowNode, InputPortVariable } from '~/types/workflow';
+import type { JSONParserData } from '@/types/node-data/json-parser'
+import type {
+    BuildContext,
+    LangFlowNode,
+    InputPortVariable
+} from '~/types/workflow'
 
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput';
-import { jsonrepair } from 'jsonrepair';
-import { z, ZodTypeAny } from 'zod';
+import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
+import { jsonrepair } from 'jsonrepair'
+import { z, ZodTypeAny } from 'zod'
 
+/**
+ * 根据定义构建 Zod 校验器
+ */
 function buildZodSchema(schemaDef: Record<string, string>) {
-    const shape: Record<string, ZodTypeAny> = {};
+    const shape: Record<string, ZodTypeAny> = {}
     for (const [key, type] of Object.entries(schemaDef)) {
         switch (type) {
             case 'string':
-                shape[key] = z.string();
-                break;
+                shape[key] = z.string()
+                break
             case 'number':
-                shape[key] = z.number();
-                break;
+                shape[key] = z.number()
+                break
             case 'boolean':
-                shape[key] = z.boolean();
-                break;
+                shape[key] = z.boolean()
+                break
             case 'array':
-                shape[key] = z.array(z.any());
-                break;
+                shape[key] = z.array(z.any())
+                break
             case 'object':
-                shape[key] = z.record(z.any());
-                break;
+                shape[key] = z.record(z.any())
+                break
             default:
-                shape[key] = z.any();
+                shape[key] = z.any()
         }
     }
-    return z.object(shape);
+    return z.object(shape)
 }
 
+/**
+ * 尝试提取 JSON 结构（容错）
+ */
 function extractJsonLike(input: string): string {
-    // 去掉 ```json、``` 以及首尾空格
-    let cleaned = input.replace(/```json|```/gi, '').trim();
-
-    const likelyKeyValueOnly = !cleaned.includes('{') && !cleaned.includes('[');
+    let cleaned = input.replace(/```json|```/gi, '').trim()
+    const likelyKeyValueOnly = !cleaned.includes('{') && !cleaned.includes('[')
     if (likelyKeyValueOnly) {
-        cleaned = `{${cleaned}}`; // 包一层大括号
+        cleaned = `{${cleaned}}`
     }
-
-    return cleaned;
+    return cleaned
 }
 
-export async function jsonParserFactory(node: FlowNode, context: BuildContext) {
-    const { inputMessageVariable, outputSchema, structuredOutputVariable } = node.data as JSONParserData;
+/**
+ * JSON 解析器节点工厂函数
+ */
+export async function jsonParserFactory(
+    node: LangFlowNode,
+    context: BuildContext
+) {
+    const {
+        inputMessageInputVariable,
+        outputSchemaInputVariable,
+        structuredOutputVariable
+    } = node.data as JSONParserData
 
-    const variableDefs = [inputMessageVariable] as InputPortVariable[];
-    const inputValues = await resolveInputVariables(context, variableDefs);
-    const inputMessage = inputValues[inputMessageVariable.name];
+    const variableDefs = [inputMessageInputVariable] as InputPortVariable[]
+    const inputValues = await resolveInputVariables(context, variableDefs)
+    const inputMessage = inputValues[inputMessageInputVariable.id]
 
-    let result: any;
+    let result: any
 
     try {
-        const cleaned = extractJsonLike(inputMessage);
-        const repaired = jsonrepair(cleaned);
-        const parsed = JSON.parse(repaired);
+        const cleaned = extractJsonLike(inputMessage)
+        const repaired = jsonrepair(cleaned)
+        const parsed = JSON.parse(repaired)
 
-        const schema = buildZodSchema(outputSchema.value);
-        result = schema.parse(parsed);
-
+        const schema = buildZodSchema(outputSchemaInputVariable.value)
+        result = schema.parse(parsed)
     } catch (err: any) {
-        result = { error: true, message: err.message };
+        result = { error: true, message: err.message }
     }
-    console.log('jsonParserFactory result', result);
 
-    writeLog(context, node.id, structuredOutputVariable.id, result);
+
 
     return {
-        [structuredOutputVariable.id]: result,
-
-    };
+        [structuredOutputVariable.id]: result
+    }
 }

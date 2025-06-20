@@ -1,6 +1,0 @@
-runtime: nodejs
-install:
-  - node --max-old-space-size=4096 $(which npm) install --force 
-build: node --max-old-space-size=4096 $(which npm) run build
-run: NITRO_PORT=$LEANCLOUD_APP_PORT && node .output/server/index.mjs
-

@@ -1,46 +1,57 @@
-import type { FilterDataData } from '@/types/node-data/filter-data'
-import type { BuildContext, FlowNode, InputPortVariable, OutputPortVariable } from '~/types/workflow'
+import type { FilterData } from '@/types/node-data/filter-data'
+import type {
+    BuildContext,
+    LangFlowNode,
+    InputPortVariable,
+} from '~/types/workflow'
 
+import {
+    resolveInputVariables,
+    writeLog
+} from '../../langchain/resolveInput'
 
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
-
-export async function filterDataFactory(node: FlowNode, context: BuildContext) {
+/** FilterData 节点工厂函数 */
+export async function filterDataFactory(
+    node: LangFlowNode,
+    context: BuildContext
+) {
+    const data = node.data as FilterData
     const {
-        filterKey,
-        inputVariable,
-        outputVariable,
-    } = node.data as FilterDataData
+        inputInputVariable,
+        filterKeyInputVariable,
+        outputVariable
+    } = data
 
+    const variableDefs: InputPortVariable[] = [
+        inputInputVariable,
+        filterKeyInputVariable
+    ]
 
-    const variableDefs = [inputVariable, filterKey] as InputPortVariable[]
-    // console.log('filterDataFactory variableDefs:', variableDefs)
 
     const inputValues = await resolveInputVariables(context, variableDefs)
-    const inputValue = inputValues[inputVariable.name]
-    const filterKeyValue = inputValues[filterKey.name]
-    // console.log('filterDataFactory inputValues:', inputValues)
 
-    const inputValueObject = JSON.parse(inputValue) as Record<string, any>
-    const result = inputValueObject[filterKeyValue]
-    //能够字段判断 result 的类型吗，然后返回具体的类型，否则都是字符串了
-    // console.log('filterDataFactory result:', result)
 
-    writeLog(
-        context,
-        node.id,
-        outputVariable.id,
-        result,
+    const inputRaw = inputValues[inputInputVariable.id]
+    const filterKey = inputValues[filterKeyInputVariable.id]
 
-    )
+    let result: any
+    let inputObj: any
+    if (typeof inputRaw === 'object' && inputRaw !== null) {
+        inputObj = inputRaw
+    } else if (typeof inputRaw === 'string' && inputRaw.trim().startsWith('{')) {
+        try {
+            inputObj = JSON.parse(inputRaw)
+        } catch (e) {
+            inputObj = {}
+        }
+    } else {
+        inputObj = {}
+    }
+    result = inputObj?.[filterKey]
 
 
 
     return {
-
-        [outputVariable.id]: result,
-
+        [outputVariable.id]: result
     }
 }
-
-
-

@@ -1,5 +1,7 @@
 // types/ws.ts
 
+import type Workflow from "~/models/Workflow"
+import type { DAGStepInfo } from "~/types/workflow"
 export type WSNamespace = 'execute' | 'chat' | 'status'
 
 export type WSMessage =
@@ -14,7 +16,7 @@ export type WSMessage =
 export interface WSExecuteRunMessage {
   namespace: 'execute'
   type: 'run'
-  workflow: any // 建议替换为 WorkflowJSON
+  workflow: Workflow
   input: {
     message: string
   }
@@ -37,7 +39,12 @@ export interface WSExecuteDoneMessage {
   type: 'done'
   data: {
     output: string,
-    logs: LogNode[]
+    logs: DAGStepInfo[]
+    statusCode: number
+    results: Record<string, any>
+    errorNodeId?: string
+    errorType?: string
+    errorMessage?: string
   }
 }
 
@@ -54,15 +61,5 @@ export interface WSErrorMessage {
   stack?: string
 }
 
-export interface DAGStepInfo {
-  index: number
-  total: number
-  nodeId: string
-  type: string
-  output: any
-  outputPreview: string
-  elapsed: number
-  elapsedStr: string
-}
 
 export type ServerMessage = WSExecuteProgressMessage | WSExecuteDoneMessage | WSErrorMessage

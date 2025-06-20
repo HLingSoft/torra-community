@@ -1,33 +1,26 @@
 import type { ChatInputData } from '@/types/node-data/chat-input'
 import type {
   BuildContext,
-  FlowNode,
+  LangFlowNode,
   NodeFactory,
-
   OutputPortVariable,
 } from '~/types/workflow'
-import { writeLog } from '../../langchain/resolveInput'
-import { HumanMessage } from '@langchain/core/messages'
 
-export const chatInputFactory: NodeFactory = async (node: FlowNode, context: BuildContext) => {
-  // 强转一下 data 以便获取 outputVariable
+
+/**
+ * ChatInput 节点工厂函数
+ * - 用于将静态输入字符串包装为 LangChain 的 HumanMessage
+ * - 输出至指定的 OutputPortVariable
+ */
+export const chatInputFactory: NodeFactory = async (
+  node: LangFlowNode,
+  context: BuildContext
+) => {
   const data = node.data as ChatInputData
   const outputVar = data.outputVariable as OutputPortVariable
-
-  // 如果没有定义 outputVariable.id，可以给个默认值
   const outputPortId = outputVar.id
-  console.log('chatInputFactory input:', data.inputValue)
-  // console.log('chatInputFactory:', JSON.stringify(new HumanMessage(data.inputValue || '')))
-  writeLog(
-    context,
-    node.id,
-    outputPortId,
-    `${data.inputValue}`,
 
-  );
   return {
-    [outputPortId]: new HumanMessage(data.inputValue || ''),
-
-
+    [outputPortId]: data.inputValue || '',
   }
 }

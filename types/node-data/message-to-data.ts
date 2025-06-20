@@ -5,7 +5,7 @@ export interface MessageToDataData {
   type: string
   icon?: string
   description: string
-  inputVariable: InputPortVariable
+  inputInputVariable: InputPortVariable
   outputVariable: OutputPortVariable
   show: boolean
   saved: boolean
@@ -13,18 +13,18 @@ export interface MessageToDataData {
 export const MessageToDataLangchainName = 'MessageToData'
 
 export const messageToDataMeta: MessageToDataData = {
-  title: 'Message → Text',
+  title: 'Message To Data',
   description: 'Extract text content from a LangChain Message',
   type: MessageToDataLangchainName,
-  icon: '🧵',
-  inputVariable: {
-    name: 'message',
+  icon: 'tabler:message-2-code',
+  inputInputVariable: {
+    name: 'Message',
     allowedTypes: ['Message'],
-    forceStringify: true,
+
   } as InputPortVariable,
   outputVariable: {
-    name: 'text',
-    outputType: 'string',
+    name: 'When Done',
+    outputType: 'Data',
   } as OutputPortVariable,
   show: true,
   saved: false,

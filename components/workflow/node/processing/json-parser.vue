@@ -4,13 +4,6 @@ import type { JSONParserData } from '@/types/node-data/json-parser'
 
 import { jsonParserMeta } from '@/types/node-data/json-parser'
 
-import { createPortManager } from '~/components/workflow/useNodePorts'
-import { useVueFlow } from '@vue-flow/core'
-// 引入公共样式
-const props = defineProps({
-    id: String,
-
-})
 
 type KeyValueSchema = Record<
     string,
@@ -18,83 +11,13 @@ type KeyValueSchema = Record<
         name: string
         description: string
         type: string
+        defaultValue: any  // ✅ 要求这个字段
     }
 >
 
-const currentNode = ref<{ id: string, data?: JSONParserData }>()
+const props = defineProps<{ id: string }>()
+const currentNode = ref<{ id: string, data: JSONParserData } | null>(null)
 
-
-const languageModelVariableRef = ref<HTMLElement | null>(null)
-const inputMessageVariableRef = ref<HTMLElement | null>(null)
-
-const structuredOutputVariableRef = ref<HTMLElement | null>(null)
-const dataFrameOutputVariableRef = ref<HTMLElement | null>(null)
-
-const { addInputPort, addOutputPort } = createPortManager()
-const { nodes, edges } = storeToRefs(useWorkflowStore())
-onMounted(async () => {
-    const node = nodes.value.find(node => node.id === props.id)
-    if (!node) {
-        return
-    }
-
-    // 初始化 data
-    node.data = {
-        ..._.cloneDeep(jsonParserMeta),
-        ..._.cloneDeep(node.data), // ✅ 已有字段优先级更高，会覆盖默认值
-    } as JSONParserData
-
-    currentNode.value = node
-
-    await nextTick() // 等待 DOM 渲染完毕
-    // ✅ 给每个字段位置添加 Input Port
-
-
-    if (inputMessageVariableRef.value && !node.data.saved) {
-        currentNode.value.data!.inputMessageVariable.id = nanoLowercaseAlphanumericId(10)
-        addInputPort(props.id!, currentNode.value.data!.inputMessageVariable.id, 'aquamarine', inputMessageVariableRef.value.offsetTop + inputMessageVariableRef.value.clientHeight / 2)
-    }
-
-
-
-    if (structuredOutputVariableRef.value && !node.data.saved) {
-        currentNode.value.data!.structuredOutputVariable.id = nanoLowercaseAlphanumericId(10)
-        addOutputPort(props.id!, currentNode.value.data!.structuredOutputVariable.id, 'pink', structuredOutputVariableRef.value.offsetTop + structuredOutputVariableRef.value.clientHeight / 2)
-    }
-
-
-
-
-})
-
-
-
-watch(edges, () => {
-
-    if (!currentNode.value?.data) {
-        return
-    }
-
-
-
-    currentNode.value.data.inputMessageVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.inputMessageVariable.id)
-}, { deep: true, immediate: true })
-
-const { onNodeClick } = useVueFlow()
-onNodeClick((event) => {
-
-
-})
-
-
-
-const methods = ref([
-
-    { id: 'get', name: 'GET' },
-    { id: 'post', name: 'POST' },
-
-
-])
 
 const outputSchemaIsOpen = ref(false)
 const outputSchemaClonedData = ref<KeyValueSchema>({})
@@ -102,12 +25,12 @@ const saveoutputSchema = () => {
     if (!currentNode.value) {
         return
     }
-    currentNode.value.data!.outputSchema.value = outputSchemaClonedData.value
+    currentNode.value.data!.outputSchemaInputVariable.value = outputSchemaClonedData.value
     outputSchemaIsOpen.value = false
 }
 watch(outputSchemaIsOpen, (val) => {
     if (val) {
-        outputSchemaClonedData.value = currentNode.value?.data?.outputSchema.value || []
+        outputSchemaClonedData.value = currentNode.value?.data?.outputSchemaInputVariable.value || []
     } else {
         outputSchemaClonedData.value = {}
     }
@@ -117,24 +40,22 @@ watch(outputSchemaIsOpen, (val) => {
 
 </script>
 
+
+
 <template>
+
     <div>
-        <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card   focus:border focus: border-card">
+        <WorkflowBaseNode v-model:currentNode="currentNode" :id="props.id" :meta="jsonParserMeta" @not-found="() => { }">
+            <template #content v-if="currentNode && currentNode.data">
 
-            <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
-            <CardContent class="text-white space-y-8 -mt-8  flex-1 nodrag nopan cursor-auto ">
-                <Separator class="my-5" />
-
-
-
-
-                <div ref="inputMessageVariableRef">
+                <div>
                     <div class="flex flex-row items-center space-x-2">
-                        <p>Input Message</p>
+                        <p>{{ currentNode.data.inputMessageInputVariable.name }} </p>
                         <NuxtIcon name="clarity:info-line" size="20" />
                     </div>
                     <div class="w-full  mt-5">
-                        <EditTextDialog class="w-full" :disabled="currentNode.data.inputMessageVariable.connected" :model-value="currentNode.data.inputMessageVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.inputMessageVariable.value = val" />
+                        <EditTextDialog v-model:input-variable="currentNode.data.inputMessageInputVariable" />
+
                     </div>
                 </div>
 
@@ -142,36 +63,26 @@ watch(outputSchemaIsOpen, (val) => {
 
                 <div>
                     <div class="flex flex-row items-center space-x-2">
-                        <p>Output Schema<span class="text-red-500">*</span></p>
+                        <p>{{ currentNode.data.outputSchemaInputVariable.name }}<span class="text-red-500">*</span></p>
                         <NuxtIcon name="clarity:info-line" size="20" />
                     </div>
                     <div class="w-full  mt-5">
-                        <Button :disabled="currentNode.data.outputSchema.connected" variant="outline" class="w-full" @click.stop="outputSchemaIsOpen = true">
+                        <Button :disabled="currentNode.data.outputSchemaInputVariable.connected" variant="outline" class="w-full" @click.stop="outputSchemaIsOpen = true">
                             <NuxtIcon name="mdi-light:table" size="20" />
                             Open Table
                         </Button>
                     </div>
                 </div>
 
+            </template>
 
-            </CardContent>
+            <template #footer v-if="currentNode && currentNode.data">
+                <NodeCardOutputFooter v-model:output-variable="currentNode.data.structuredOutputVariable" />
 
-            <div ref="structuredOutputVariableRef" class="bg-card   py-2 pl-5 pr-10  flex items-center justify-center">
-                <div class="w-full h-full   flex items-center  justify-between">
-                    <NuxtIcon v-if="currentNode.data.structuredOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.structuredOutputVariable.show = false" />
-
-                    <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.structuredOutputVariable.show = true" />
-
-                    <div class="  ">
-                        Structured Data
-                    </div>
-                </div>
-            </div>
-
-        </Card>
-
+            </template>
+        </WorkflowBaseNode>
         <Dialog v-model:open="outputSchemaIsOpen">
-            <DialogContent class="dark  flex flex-col text-white w-full !max-w-7xl h-[80vh]">
+            <DialogContent @interact-outside.prevent @pointer-down-outside.prevent @focus-outside.prevent class="dark  flex flex-col text-white w-full !max-w-7xl h-[80vh]">
                 <DialogHeader class="shrink-0">
                     <DialogTitle>
                         <div class="flex flex-row items-center space-x-2">
@@ -196,5 +107,6 @@ watch(outputSchemaIsOpen, (val) => {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+
     </div>
 </template>

@@ -1,81 +1,71 @@
-import type { BuildContext, FlowNode, InputPortVariable } from '~/types/workflow'
-import type { MessageHistoryData } from '~/types/node-data/message-history'
+import type { BuildContext, LangFlowNode, InputPortVariable } from '~/types/workflow'
+import type { MessageHistoryData } from '@/types/node-data/message-history'
 import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
-// import { RunnableLambda } from '@langchain/core/runnables'
 import {
   AIMessage,
   HumanMessage,
   SystemMessage,
   BaseMessage,
 } from '@langchain/core/messages'
+
+/**
+ * 格式化消息数组为可读字符串，每条最多500字符
+ */
 function formatMessagesToString(messages: BaseMessage[]): string {
   return messages
     .map((msg) => {
-      let role = 'unknown';
-      if (msg instanceof HumanMessage) role = 'Human';
-      else if (msg instanceof AIMessage) role = 'AI';
-      else if (msg instanceof SystemMessage) role = 'System';
+      let role = 'unknown'
+      if (msg instanceof HumanMessage) role = 'Human'
+      else if (msg instanceof AIMessage) role = 'AI'
+      else if (msg instanceof SystemMessage) role = 'System'
 
-      // 获取消息内容
-      let content = typeof msg.content === 'string' ? msg.content : String(msg.content);
-
-      // 截断内容至最多 200 个字符
+      let content = typeof msg.content === 'string' ? msg.content : String(msg.content)
       if (content.length > 500) {
-        content = content.slice(0, 500) + '...';
+        content = content.slice(0, 500) + '...'
       }
-
-      return `${role}: ${content}`;
+      return `${role}: ${content}`
     })
-    .join('\n');
+    .join('\n')
 }
 
-export async function messageHistoryFactory(node: FlowNode, context: BuildContext) {
+/**
+ * MessageHistory 节点工厂函数
+ */
+export async function messageHistoryFactory(
+  node: LangFlowNode,
+  context: BuildContext
+) {
   const data = node.data as MessageHistoryData
   const {
     maxMessages,
     memoryInputVariable,
     messageOutputVariable,
-    dataOutputVariable,
-    dataframeOutputVariable,
+    dataOutputVariable
   } = data
 
-  // const memory = await getMemory(context, memoryInputVariable,m)
-
+  // 1. 解析 memory 输入变量
   const inputValues = await resolveInputVariables(context, [memoryInputVariable])
-  const memory = inputValues[memoryInputVariable.name] as any
-  // console.log('messageHistoryFactory', memory)
-  // await memory.clear()
+  const memory = inputValues[memoryInputVariable.id] as { getMessages: () => Promise<BaseMessage[]> }
 
-  // console.log('messageHistoryFactory', memory)
+  // 2. 获取历史消息
   let messages: BaseMessage[] = []
   try {
     messages = await memory.getMessages()
-    // const formattedText = formatMessagesToString(messages)
-    // console.log('messageHistoryFactory 1 ', formattedText)
-    // 如果设置了 maxMessages，则截取最后的 maxMessages 条消息
+    // 如有 maxMessages 参数，仅保留最近 N 条
     if (typeof maxMessages === 'number' && maxMessages > 0) {
-      messages = messages.slice(-maxMessages);
+      messages = messages.slice(-maxMessages)
     }
-    // const formattedText = formatMessagesToString(messages)
-    // console.log('messageHistoryFactory', formattedText)
   } catch (e) {
-    console.error('MessageHistory 错误:', e)
+    console.error('MessageHistoryFactory 错误:', e)
   }
 
-  // console.log('messageHistoryFactory', messages)
+  // 3. 格式化字符串形式，写日志
   const formattedText = formatMessagesToString(messages)
-  writeLog(
-    context,
-    node.id,
-    messageOutputVariable.id,
-    formattedText,
+  // writeLog(context, node.id, messageOutputVariable.id, formattedText)
 
-  )
-  // console.log('messageHistoryFactory 2', formattedText)
-
+  // 4. 返回原始数组与字符串结果
   return {
-    [messageOutputVariable.id]: formattedText,
-    [dataOutputVariable.id]: formattedText,
-    [dataframeOutputVariable.id]: formattedText,
+    [messageOutputVariable.id]: messages,
+    [dataOutputVariable.id]: formattedText
   }
 }

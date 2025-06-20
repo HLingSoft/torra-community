@@ -1,4 +1,6 @@
-import type { OutputPortVariable } from '~/types/workflow'
+import type { OutputPortVariable, KeyValueSchema } from '~/types/workflow'
+
+
 
 export interface APIInputData {
     type: string
@@ -6,9 +8,9 @@ export interface APIInputData {
     description: string
     icon?: string
 
-    inputValue: Record<string, any>
+    inputValue: KeyValueSchema
     structuredOutputVariable: OutputPortVariable
-    extraDataVariable: OutputPortVariable
+    // messageOutputVariable: OutputPortVariable
     show?: boolean
     saved?: boolean
 }
@@ -19,16 +21,13 @@ export const apiInputMeta: APIInputData = {
     type: APIInputLangchainName,
     title: 'API Input',
     description: 'Workflow entry via API, parsing data and triggering AI processes.',
-    icon: '🧠',
+    icon: 'streamline-ultimate:coding-apps-website-web-dev-api-cloud',
     inputValue: {
-    },
+    } as KeyValueSchema,
     structuredOutputVariable: {
-        name: 'structuredOutput',
-        outputType: 'Data',
+        name: 'Structured Data',
+        outputType: 'Structured Data',
     } as OutputPortVariable,
-    extraDataVariable: {
-        name: 'extraData',
-        outputType: 'Message',
-    } as OutputPortVariable,
+
     show: true,
 }

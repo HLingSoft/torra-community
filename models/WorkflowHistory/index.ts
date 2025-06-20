@@ -1,6 +1,6 @@
 import Workflow from "../Workflow"
 import User from "../User"
-import AV from "leancloud-storage"
+import AV from '~/models/fake-av' // 上面那个本地适配器
 
 import DayJS from "dayjs"
 import cn from "dayjs/locale/zh-cn.js"
@@ -28,11 +28,11 @@ export enum EnumWorkflowHistory {
 }
 
 class WorkflowHistory extends AV.Object {
-  static LEANCLOUD_CLASSNAME = "WorkflowHistory"
+  static CLASSNAME = "WorkflowHistory"
   public tempVars: Record<string, any> = {}
 
-  constructor() {
-    super()
+  constructor(initial?: any) {
+    super(WorkflowHistory.CLASSNAME, initial)
     return new Proxy(this, {
       get(target, prop: string | symbol) {
         // 如果 prop 是 symbol，直接返回默认行为
@@ -66,9 +66,7 @@ class WorkflowHistory extends AV.Object {
     })
   }
 
-  get leanCloudClassName(): string {
-    return "WorkflowHistory"
-  }
+
 
   get createdAtShort(): string {
     return `${DayJS(this.createdAt).format("MM-DD HH")}点`
@@ -167,5 +165,5 @@ class WorkflowHistory extends AV.Object {
   [key: `temp_${string}`]: any
 }
 
-AV.Object.register(WorkflowHistory, "WorkflowHistory")
+AV.Object.register(WorkflowHistory, WorkflowHistory.CLASSNAME)
 export default WorkflowHistory

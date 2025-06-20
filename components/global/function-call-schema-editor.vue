@@ -1,18 +1,20 @@
 <script setup lang="ts">
+import type { KeyValueSchema } from '~/types/workflow'
 interface KeyValueRow {
   id: number
   name: string
   description: string
+  defaultValue: any,
   type: string
   selected: boolean
   items?: KeyValueRow[]  // <--- 重点：子元素，只有 type === 'array' 时才有
 }
 
 type KeyValueTable = KeyValueRow[]
-type KeyValueObject = Record<string, { name: string, description: string; type: string }>
+type KeyValueObject = Record<string, { name: string, defaultValue: any, description: string; type: string }>
 
 const props = defineProps<{
-  modelValue: KeyValueObject
+  modelValue: KeyValueSchema
 }>()
 
 const emit = defineEmits<{
@@ -25,15 +27,17 @@ const createRow = (isSubRow = false): KeyValueRow => ({
   id: ++idCounter,
   name: '',
   description: '',
+  defaultValue: '',
   type: 'string',
   selected: false,
   ...(isSubRow ? {} : { items: [] }) // 只有主行可以有 items
 })
 
 const objectToRows = (obj: KeyValueObject): KeyValueTable => {
-  return Object.entries(obj).map(([name, { description, type }]) => ({
+  return Object.entries(obj).map(([name, { defaultValue, description, type }]) => ({
     id: ++idCounter,
     name,
+    defaultValue,
     description,
     type,
     selected: false
@@ -47,12 +51,14 @@ const getBodyObject = (inputRows: KeyValueTable): KeyValueObject => {
       if (row.type === 'array' && row.items) {
         obj[row.name] = {
           name: row.name,
+          defaultValue: row.defaultValue,
           description: row.description || '',
           type: 'array'
           // 可根据需要，把数组项转成对象，暂时不展开
         }
       } else {
         obj[row.name] = {
+          defaultValue: row.defaultValue,
           name: row.name,
           description: row.description || '',
           type: row.type
@@ -124,6 +130,7 @@ const typeList = [
               <Checkbox />
             </TableHead>
             <TableHead class="w-40">Name</TableHead>
+            <TableHead class="w-40">Default Value(Can Empty)</TableHead>
             <TableHead class="w-96">Description</TableHead>
             <TableHead class="w-40">Type</TableHead>
           </TableRow>
@@ -134,8 +141,9 @@ const typeList = [
             <TableCell>
               <Checkbox v-model="row.selected" />
             </TableCell>
-            <TableCell><Input v-model="row.name" placeholder="Field name" class=" dark" /></TableCell>
-            <TableCell><Input v-model="row.description" placeholder="Describe this field..." class=" dark" /></TableCell>
+            <TableCell><Input v-model="row.name" placeholder="Field name" class=" " /></TableCell>
+            <TableCell><Input v-model="row.defaultValue" placeholder="Set default value" class=" " /></TableCell>
+            <TableCell><Input v-model="row.description" placeholder="Describe this field..." class=" " /></TableCell>
             <TableCell>
               <Select v-model="row.type" placeholder="Type">
                 <SelectTrigger class="w-full">

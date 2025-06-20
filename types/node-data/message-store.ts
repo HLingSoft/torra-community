@@ -7,32 +7,37 @@ export interface MessageStoreData {
   icon?: string
 
   messageInputVariable: InputPortVariable
-  role: string
+  // role: string
   memoryInputVariable: InputPortVariable
 
   storedMessagesOutputVariable: OutputPortVariable
+  dataOutputVariable: OutputPortVariable
 }
 export const MessageStoreLangchainName = 'MessageStore'
 
 export const messageStoreMeta: MessageStoreData = {
   type: MessageStoreLangchainName,
   title: 'Message Store',
-  icon: '💾',
+  icon: 'streamline-plump-color:store-2-flat',
   description: 'Stores a message into external memory like Redis.',
-  role:'AI',
+  // role: 'AI',
   messageInputVariable: {
-    name: 'messageInput',
+    name: 'Message',
     allowedTypes: ['Message'],
-    forceStringify: true,
-    
+
+
   } as InputPortVariable,
   memoryInputVariable: {
-    name: 'memoryInput',
+    name: 'Memory',
     allowedTypes: ['Memory'],
-   
+
   } as InputPortVariable,
   storedMessagesOutputVariable: {
-    name: 'storedMessages',
+    name: 'Return Stored Message',
     outputType: 'Message',
+  } as OutputPortVariable,
+  dataOutputVariable: {
+    name: 'Return Data',
+    outputType: 'Data',
   } as OutputPortVariable,
 }

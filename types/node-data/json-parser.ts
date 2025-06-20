@@ -7,8 +7,8 @@ export interface JSONParserData {
     icon?: string
 
 
-    inputMessageVariable: InputPortVariable
-    outputSchema: InputPortVariable
+    inputMessageInputVariable: InputPortVariable
+    outputSchemaInputVariable: InputPortVariable
     structuredOutputVariable: OutputPortVariable
 
 
@@ -21,24 +21,24 @@ export const JsonParserLangchainName = 'JSONParser'
 export const jsonParserMeta: JSONParserData = {
     type: JsonParserLangchainName,
     title: 'JSON Parser',
-    description: 'Format a DataFrame or Data object into text using a template.',
-    icon: '🧠',
+    description: 'Converts raw text or data into structured JSON format.',
+    icon: 'si:json-line',
 
-    inputMessageVariable: {
-        name: 'inputMessage',
-        allowedTypes: ['Message'],
+    inputMessageInputVariable: {
+        name: 'Input',
+        allowedTypes: ['Data'],
         value: '',
-        forceStringify: true,
+
     } as InputPortVariable,
-    outputSchema: {
-        name: 'outputSchema',
+    outputSchemaInputVariable: {
+        name: 'Output Schema',
         value: {
 
         } as Record<string, any>,
     } as InputPortVariable,
     structuredOutputVariable: {
-        name: 'dataOutput',
-        outputType: 'Data',
+        name: 'When Done',
+        outputType: 'Structured Data',
     } as OutputPortVariable,
 
     show: true,

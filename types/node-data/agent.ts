@@ -7,12 +7,12 @@ export interface AgentData {
     description: string // 节点描述
     modelProvider: string // 模型提供者
     modelName: string // 模型名称
-    apiKeyVariable: InputPortVariable // API 变量
-    baseURLVariable: InputPortVariable // 基础 URL 变量
-
-    instructionVariable: InputPortVariable // 指令变量
-    inputVariable: InputPortVariable // 输入变量
-    toolsVariable: InputPortVariable // 工具变量
+    apiKeyInputVariable: InputPortVariable // API 变量
+    baseURLInputVariable: InputPortVariable // 基础 URL 变量
+    historyMessageInputVariable: InputPortVariable
+    instructionInputVariable: InputPortVariable // 指令变量
+    inputInputVariable: InputPortVariable // 输入变量
+    toolsInputVariable: InputPortVariable // 工具变量
     outputVariable: OutputPortVariable
     show?: boolean // 控制 UI 展示
     saved?: boolean // 是否保存
@@ -21,47 +21,52 @@ export interface AgentData {
 export const AgentLangchainName = 'Agent' // 节点类型
 
 export const agentMeta: AgentData = {
-    icon: '💬',
+    icon: 'fluent:bot-48-regular',
     title: 'Agent',
     description: `Define the agent's instructions, then enter a task to complete using tools`,
     type: AgentLangchainName,
     modelProvider: 'OpenAI',
-    modelName: 'gpt-4o-mini',
-    apiKeyVariable: {
-        name: 'apiKeyInput',
-        allowedTypes: ['Message'],
+    modelName: 'o3',
+    apiKeyInputVariable: {
+        name: 'OpenAI API Key',
+        allowedTypes: ['Data'],
         value: '',
-        defaultValue: 'sk-sXW78QiqIJCIc48ueZwg3fIlYmb2PWye22yL13mYOdPxdSiU',
-        forceStringify: true,
+        defaultValue: '',
+
     } as InputPortVariable,
-    instructionVariable: {
-        name: 'instructionInput',
-        allowedTypes: ['Message'],
+    instructionInputVariable: {
+        name: 'Agent Instruction',
+        allowedTypes: ['Data'],
         value: '',
         defaultValue: 'You are a helpful assistant that can use tools to answer questions and perform tasks.',
-        forceStringify: true,
+
     } as InputPortVariable,
-    inputVariable: {
-        name: 'inputInput',
-        allowedTypes: ['Message'],
+    inputInputVariable: {
+        name: 'Input',
+        allowedTypes: ['Data'],
         value: '',
-        forceStringify: true,
+
     } as InputPortVariable,
-    toolsVariable: {
-        name: 'toolsInput',
-        allowedTypes: ['Tool'],
-        forceStringify: false,
+    historyMessageInputVariable: {
+        name: 'History Message',
+        allowedTypes: ['Message[]'],
+
     } as InputPortVariable,
-    baseURLVariable: {
-        name: 'baseURLInput',
-        allowedTypes: ['Message'],
+    toolsInputVariable: {
+        name: 'Tools',
+        allowedTypes: ['Tools', 'Tool'],
+
+    } as InputPortVariable,
+    baseURLInputVariable: {
+        name: 'Request Base URL',
+        allowedTypes: ['Data'],
         value: '',
-        defaultValue: 'https://api.openai-proxy.org/v1',
-        forceStringify: true,
+        defaultValue: '',
+
     } as InputPortVariable,
     outputVariable: {
-        outputType: 'Message',
-        name: 'output',
+        outputType: 'Data',
+        name: 'When Done',
     } as OutputPortVariable,
     show: true,
 }

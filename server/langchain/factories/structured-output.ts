@@ -1,87 +1,81 @@
 import type { StructuredOutputData } from '@/types/node-data/structured-output'
 import type {
     BuildContext,
-    FlowNode,
+    LangFlowNode,
     InputPortVariable,
-
 } from '~/types/workflow'
-import { RunnableLambda } from '@langchain/core/runnables'
+
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers'
-import {
-    RunnableSequence,
-} from '@langchain/core/runnables'
+import { RunnableSequence } from '@langchain/core/runnables'
 import { ChatOpenAI } from '@langchain/openai'
+import type { BaseMessage } from '@langchain/core/messages'
 import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
 
-export async function structuredOutputFactory(node: FlowNode, context: BuildContext) {
+interface LanguageModel {
+    model: ChatOpenAI
+    messages: BaseMessage[]
+}
 
-    const { inputMessageVariable, languageModelVariable, outputSchema, structuredOutputVariable, dataFrameOutputVariable } = node.data as StructuredOutputData
+/**
+ * StructuredOutput 节点工厂函数
+ * @param node - LangFlowNode 类型节点
+ * @param context - DAG 运行上下文
+ */
+export async function structuredOutputFactory(
+    node: LangFlowNode,
+    context: BuildContext
+) {
+    const {
+        languageModelInputVariable,
+        outputSchemaInputVariable,
+        structuredOutputVariable,
+    } = node.data as StructuredOutputData
 
-    const variableDefs = [inputMessageVariable, languageModelVariable] as InputPortVariable[]
-    // console.log('Object.keys(outputSchema.value)', Object.keys(outputSchema.value), outputSchema.value)
-
+    // 1. 解析输入变量
+    const variableDefs = [languageModelInputVariable] as InputPortVariable[]
     const inputValues = await resolveInputVariables(context, variableDefs)
-    // console.log('structuredOutputFactory inputValues', inputValues)
-    const inputMessage = inputValues[inputMessageVariable.name]
-    const languageModel = inputValues[languageModelVariable.name] as ChatOpenAI
-    // console.log(inputMessage)
-    // console.log('structuredOutputFactory languageModel', languageModel)
-    // console.log('structuredOutputFactory', inputMessageVariable)
-    // console.log('structuredOutputFactory outputSchema.value', outputSchema.value)
+    const languageModel = inputValues[languageModelInputVariable.id] as LanguageModel
+
+    // 2. 构造 Function schema（用于 LLM function call）
     const outputFunctionSchema = {
-        name: outputSchema.name,
-        description: `   "You are an AI system designed to extract structured information from unstructured text. "
-                "Given the input_text, return a JSON object with predefined keys based on the expected structure. "
-                "Extract values accurately and format them according to the specified type "
-                "(e.g., string, integer, float, date). "
-                "If a value is missing or cannot be determined, return a default "
-                "(e.g., null, 0, or 'N/A'). "
-                "If multiple instances of the expected structure exist within the input_text, "
-                "stream each as a separate JSON object."`,
+        name: outputSchemaInputVariable.name,
+        description: `
+      You are an AI system designed to extract structured information from unstructured text.
+      Given the input_text, return a JSON object with predefined keys based on the expected structure.
+      Extract values accurately and format them according to the specified type (e.g., string, integer, float, date).
+      If a value is missing or cannot be determined, return a default (e.g., null, 0, or 'N/A').
+      If multiple instances of the expected structure exist within the input_text, stream each as a separate JSON object.
+    `,
         parameters: {
             type: 'object',
             properties: {
-                ...outputSchema.value,
+                ...outputSchemaInputVariable.value,
             },
-            required: Object.keys(outputSchema.value),
+            required: Object.keys(outputSchemaInputVariable.value),
         },
     }
-    // console.log('structuredOutputFactory outputFunctionSchema', outputFunctionSchema)
-    const llmWithFunction = languageModel.bind({
+
+    // 3. 绑定 function call 到模型
+    const llmWithFunction = (languageModel.model as ChatOpenAI).bind({
         functions: [outputFunctionSchema],
-        function_call: { name: outputSchema.name },
+        function_call: { name: outputSchemaInputVariable.name },
     })
-    // 4. 构造 runnable chain（提示 + LLM + parser）
+
+    // 4. 构造 runnable chain（LLM+结构化解析）
     const runnablePrompt = RunnableSequence.from([
-        (input: string) => input, // 简单 passthrough 输入
         llmWithFunction,
-        new JsonOutputFunctionsParser(), // 将返回 JSON 结构化
+        new JsonOutputFunctionsParser(), // 解析为 JSON
     ])
-    // console.log('structuredOutputFactory inputMessage', inputMessage)
-    const result = await runnablePrompt.invoke(inputMessage)
-    // console.log('structuredOutputFactory result', result)
 
+    // 5. 执行推理
+    const result = await runnablePrompt.invoke(languageModel.messages)
+    console.log('StructuredOutput invoke result:', result)
 
-    writeLog(
-        context,
-        node.id,
-        structuredOutputVariable.id,
-        result,
+    // 6. 日志
+    // writeLog(context, node.id, structuredOutputVariable.id, result)
 
-    )
-
-    writeLog(
-        context,
-        node.id,
-        dataFrameOutputVariable.id,
-        result,
-
-    )
-
+    // 7. 返回端口值
     return {
         [structuredOutputVariable.id]: result,
-        [dataFrameOutputVariable.id]: result,
-        default: result,
-
     }
 }

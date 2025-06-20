@@ -1,25 +1,20 @@
-import type { FlowNode, BuildContext } from '~/types/workflow'
 import type { IDGeneratorData } from '@/types/node-data/id-generator'
-import { writeLog } from '../resolveInput'
+import type {
+  BuildContext,
+  LangFlowNode
+} from '~/types/workflow'
+import { writeLog } from '../../langchain/resolveInput'
 
-
-export async function iDGeneratorFactory(node: FlowNode, context: BuildContext) {
+/** ID 生成器节点工厂函数 */
+export async function iDGeneratorFactory(
+  node: LangFlowNode,
+  context: BuildContext
+) {
   const data = node.data as IDGeneratorData
-
-  // 👇 从 data 中取出 inputValue（你在 Vue 里赋值了）
   const { inputValue, outputVariable } = data
-
-  writeLog(
-    context,
-    node.id,
-    outputVariable.id,
-    `${inputValue}`,
-
-  )
 
 
   return {
-    [outputVariable.id]: inputValue,
-
+    [outputVariable.id]: inputValue
   }
 }

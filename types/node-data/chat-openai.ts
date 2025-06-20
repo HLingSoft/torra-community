@@ -8,10 +8,11 @@ export interface ChatOpenAIData {
   modelName: string
   temperature?: number
   streaming?: boolean
-  systemMessageVariable: InputPortVariable
-  inputTextVariable: InputPortVariable
-  apiKeyVariable: InputPortVariable
-  baseURLVariable: InputPortVariable
+  systemMessageInputVariable: InputPortVariable
+  historyMessageInputVariable: InputPortVariable
+  inputTextInputVariable: InputPortVariable
+  apiKeyInputVariable: InputPortVariable
+  baseURLInputVariable: InputPortVariable
   messageOutputVariable: OutputPortVariable
   languageModelOutputVariable: OutputPortVariable
 
@@ -20,47 +21,51 @@ export interface ChatOpenAIData {
 }
 export const ChatOpenAILangchainName = 'ChatOpenAI' // 节点类型
 export const chatOpenAIMeta: ChatOpenAIData = {
-  icon: '🤖',
+  icon: 'arcticons:openai-chatgpt',
   type: ChatOpenAILangchainName,
   title: 'OpenAI',
   description: 'Generate text using OpenAI LLMs.',
-  modelName: 'gpt-4o-mini',
-  systemMessageVariable: {
-    name: 'systemMessageInput',
-    allowedTypes: ['Message'],
+  modelName: 'gpt-4o',
+  systemMessageInputVariable: {
+    name: 'System Instruction',
+    allowedTypes: ['Data'],
     value: '',
     defaultValue: 'You are a helpful assistant.',
-    forceStringify: true,
+
+  } as InputPortVariable,
+  historyMessageInputVariable: {
+    name: 'History Message',
+    allowedTypes: ['Message[]'],
+
   } as InputPortVariable,
 
-  inputTextVariable: {
-    name: 'inputTextInput',
-    allowedTypes: ['Message'],
+  inputTextInputVariable: {
+    name: 'Input',
+    allowedTypes: ['Data'],
     value: '',
-    forceStringify: true,
+
   } as InputPortVariable,
-  apiKeyVariable: {
-    name: 'apiKeyInput',
-    allowedTypes: ['Message'],
+  apiKeyInputVariable: {
+    name: 'OpenAI API Key',
+    allowedTypes: ['Data'],
     value: '',
-    defaultValue: 'sk-sXW78QiqIJCIc48ueZwg3fIlYmb2PWye22yL13mYOdPxdSiU',
-    forceStringify: true,
+    defaultValue: '',
+
   } as InputPortVariable,
-  baseURLVariable: {
-    name: 'baseURLInput',
-    allowedTypes: ['Message'],
+  baseURLInputVariable: {
+    name: 'Request Base URL',
+    allowedTypes: ['Data'],
     value: '',
-    defaultValue: 'https://api.openai-proxy.org/v1',
-    forceStringify: true,
+    defaultValue: '',
+
   } as InputPortVariable,
   messageOutputVariable: {
-    outputType: 'Message',
-
-    name: 'messageOutput',
+    outputType: 'Data',
+    name: 'Return Data',
   } as OutputPortVariable,
   languageModelOutputVariable: {
     outputType: 'LanguageModel',
-    name: 'languageModelOutput',
+    name: 'Return Language Model',
 
   } as OutputPortVariable,
 

@@ -4,171 +4,68 @@ import type { UpstashRedisChatMemoryData } from '@/types/node-data/memory-redis'
 
 import { upstashRedisChatMemoryMeta } from '@/types/node-data/memory-redis'
 
-import { createPortManager } from '~/components/workflow/useNodePorts'
-import { useVueFlow } from '@vue-flow/core'
-// 引入公共样式
-const props = defineProps({
-  id: String,
 
-})
+const props = defineProps<{ id: string }>()
+const currentNode = ref<{ id: string, data: UpstashRedisChatMemoryData } | null>(null)
 
-const currentNode = ref<{ id: string, data?: UpstashRedisChatMemoryData }>()
-
-
-const tokenVariableRef = ref<HTMLElement | null>(null)
-const urlRef = ref<HTMLElement | null>(null)
-const sessionIDVariableRef = ref<HTMLElement | null>(null)
-const memoryOutputVariableRef = ref<HTMLElement | null>(null)
-
-
-const { addInputPort, addOutputPort, updateNodePosition } = createPortManager()
-const { nodes, edges, currentWorkflow } = storeToRefs(useWorkflowStore())
-onMounted(async () => {
-  await until(currentWorkflow).toBeTruthy()
-  const node = nodes.value.find(node => node.id === props.id)
-  if (!node) {
-    return
-  }
-
-  // 初始化 data
-  node.data = {
-    ..._.cloneDeep(upstashRedisChatMemoryMeta),
-    ..._.cloneDeep(node.data), // ✅ 已有字段优先级更高，会覆盖默认值
-  } as UpstashRedisChatMemoryData
-
-  currentNode.value = node
-
-  await nextTick() // 等待 DOM 渲染完毕
-  // ✅ 给每个字段位置添加 Input Port
-
-  // if (currentWorkflow.value) {
-  //   node.data.sessionId = currentWorkflow.value.objectId
-  // }
-  if (sessionIDVariableRef.value) {
-    if (!currentNode.value.data?.sessionIdVariable.id) {
-      currentNode.value.data!.sessionIdVariable.id = nanoLowercaseAlphanumericId(10)
-      addInputPort(props.id!, currentNode.value.data!.sessionIdVariable.id, 'aquamarine', sessionIDVariableRef.value.offsetTop + sessionIDVariableRef.value.clientHeight / 2)
-    } else {
-      updateNodePosition(currentNode.value.data!.sessionIdVariable.id, sessionIDVariableRef.value.offsetTop + sessionIDVariableRef.value.clientHeight / 2)
-    }
-
-  }
-  if (tokenVariableRef.value) {
-    if (!node.data.saved) {
-      currentNode.value.data!.tokenVariable.id = nanoLowercaseAlphanumericId(10)
-      addInputPort(props.id!, currentNode.value.data!.tokenVariable.id, 'aquamarine', tokenVariableRef.value.offsetTop + tokenVariableRef.value.clientHeight / 2)
-    } else {
-      updateNodePosition(currentNode.value.data!.tokenVariable.id, tokenVariableRef.value.offsetTop + tokenVariableRef.value.clientHeight / 2)
-    }
-
-  }
-
-
-
-  if (urlRef.value) {
-    if (!node.data.saved) {
-      currentNode.value.data!.urlVariable.id = nanoLowercaseAlphanumericId(10)
-      addInputPort(props.id!, currentNode.value.data!.urlVariable.id, 'aquamarine', urlRef.value.offsetTop + urlRef.value.clientHeight / 2)
-    } else {
-      updateNodePosition(currentNode.value.data!.urlVariable.id, urlRef.value.offsetTop + urlRef.value.clientHeight / 2)
-    }
-
-  }
-
-
-  // ✅ 添加输出端口，通常靠底部（Message 区域）
-  if (memoryOutputVariableRef.value) {
-    if (!node.data.saved) {
-      currentNode.value.data!.memoryOutputVariable.id = nanoLowercaseAlphanumericId(10)
-      addOutputPort(props.id!, currentNode.value.data!.memoryOutputVariable.id, 'pink', memoryOutputVariableRef.value.offsetTop + memoryOutputVariableRef.value.clientHeight / 2)
-    } else {
-      updateNodePosition(currentNode.value.data!.memoryOutputVariable.id, memoryOutputVariableRef.value.offsetTop + memoryOutputVariableRef.value.clientHeight / 2)
-    }
-
-  }
-
-
-})
-
-watch(edges, () => {
-
-  if (!currentNode.value?.data) {
-    return
-  }
-
-  currentNode.value.data.sessionIdVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.sessionIdVariable.id)
-  currentNode.value.data.tokenVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.tokenVariable.id)
-  currentNode.value.data.urlVariable.connected = edges.value.some(edge => edge.target === currentNode.value!.data!.urlVariable.id)
-}, { deep: true, immediate: true })
-
-const { onNodeClick } = useVueFlow()
-onNodeClick((event) => {
-
-
-})
 
 
 
 </script>
 
+
+
 <template>
-  <Card v-if="currentNode && currentNode.data" class="!pb-0 w-96 text-white bg-background  rounded-lg  flex flex-col focus:outline-none  focus:shadow-lg focus:shadow-card   focus:border focus: border-card">
 
-    <NodeCardHeader v-if="id" :nodeData="currentNode.data" :id="id" />
-    <CardContent class="text-white space-y-8 -mt-8  flex-1 nodrag nopan cursor-auto ">
-      <Separator class="my-5" />
-
+  <div>
+    <WorkflowBaseNode v-model:currentNode="currentNode" :id="props.id" :meta="upstashRedisChatMemoryMeta" @not-found="() => { }">
+      <template #content v-if="currentNode && currentNode.data">
 
 
 
-      <div ref="sessionIDVariableRef">
-        <div class="flex flex-row items-center space-x-2">
-          <p>Session ID<span class="text-red-500">*</span></p>
-          <NuxtIcon name="clarity:info-line" size="20" />
+        <div ref="sessionIDVariableRef">
+          <div class="flex flex-row items-center space-x-2">
+            <p>{{ currentNode.data.sessionIdInputVariable.name }}<span class="text-red-500">*</span></p>
+            <NuxtIcon name="clarity:info-line" size="20" />
+          </div>
+          <div class="w-full  mt-5">
+
+            <GlobalVariablePopover v-model:input-variable="currentNode.data.sessionIdInputVariable" />
+          </div>
         </div>
-        <div class="w-full  mt-5">
-          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.sessionIdVariable.connected" :model-value="currentNode.data.sessionIdVariable.value || ''" @save="(val) => currentNode!.data!.sessionIdVariable.value = val">
-          </GlobalVariablePopover>
+
+
+        <div ref="tokenVariableRef">
+          <div class="flex flex-row items-center space-x-2">
+            <p>{{ currentNode.data.urlInputVariable.name }}<span class="text-red-500">*</span></p>
+            <NuxtIcon name="clarity:info-line" size="20" />
+          </div>
+          <div class="w-full  mt-5">
+
+            <GlobalVariablePopover v-bind:input-variable="currentNode.data.urlInputVariable" />
+          </div>
         </div>
-      </div>
 
+        <div>
+          <div class="flex flex-row items-center space-x-2">
+            <p>{{ currentNode.data.tokenInputVariable.name }}</p>
+            <NuxtIcon name="clarity:info-line" size="20" />
+          </div>
+          <div class="w-full  mt-5">
+            <GlobalVariablePopover v-model:input-variable="currentNode.data.tokenInputVariable" />
 
-      <div ref="tokenVariableRef">
-        <div class="flex flex-row items-center space-x-2">
-          <p>Upstash Redis URL<span class="text-red-500">*</span></p>
-          <NuxtIcon name="clarity:info-line" size="20" />
+          </div>
         </div>
-        <div class="w-full  mt-5">
-          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.urlVariable.connected" :model-value="currentNode.data.urlVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.urlVariable.value = val">
-          </GlobalVariablePopover>
-        </div>
-      </div>
+      </template>
 
-      <div ref="urlRef">
-        <div class="flex flex-row items-center space-x-2">
-          <p>Upstash Redis Token</p>
-          <NuxtIcon name="clarity:info-line" size="20" />
-        </div>
-        <div class="w-full  mt-5">
-          <GlobalVariablePopover class="w-full" :disabled="currentNode.data.tokenVariable.connected" :model-value="currentNode.data.tokenVariable.value || ''" placeholder="Typing something" @save="(val) => currentNode!.data!.tokenVariable.value = val">
-          </GlobalVariablePopover>
-        </div>
-      </div>
+      <template #footer v-if="currentNode && currentNode.data">
 
 
-    </CardContent>
+        <NodeCardOutputFooter v-model:output-variable="currentNode.data.memoryOutputVariable" />
 
-    <div ref="memoryOutputVariableRef" class="bg-card   py-2 pl-5 pr-10  flex items-center justify-center">
-      <div class="w-full h-full   flex items-center  justify-between">
-        <NuxtIcon v-if="currentNode.data.memoryOutputVariable.show" name="lets-icons:view-duotone" size="24" class="cursor-pointer" @click="currentNode.data.memoryOutputVariable.show = false" />
 
-        <NuxtIcon v-else name="lets-icons:view-hide-duotone" size="24" class="cursor-pointer" @click="currentNode.data.memoryOutputVariable.show = true" />
+      </template>
+    </WorkflowBaseNode>
 
-        <div class="  ">
-          Memory
-        </div>
-      </div>
-    </div>
-
-  </Card>
+  </div>
 </template>

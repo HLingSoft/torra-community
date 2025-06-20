@@ -1,89 +1,79 @@
-
+import type { LangFlowNode, BuildContext } from '~/types/workflow'
 import type { AgentData } from '@/types/node-data/agent'
-import type { BuildContext, FlowNode } from '~/types/workflow'
-import { resolveInputVariables, wrapRunnable } from '../../langchain/resolveInput'
+import { resolveInputVariables, wrapRunnable, writeLog } from '../../langchain/resolveInput'
 import { ChatOpenAI } from '@langchain/openai'
 import { createReactAgent } from '@langchain/langgraph/prebuilt'
 import { RunnableLambda } from '@langchain/core/runnables'
 
-
-export async function agentFactory(node: FlowNode, context: BuildContext) {
+export async function agentFactory(node: LangFlowNode, context: BuildContext) {
+    /* ---------- 1. 解析输入 ---------- */
     const data = node.data as AgentData
-    const {
-        modelName,
-        apiKeyVariable,
-        baseURLVariable,
-        inputVariable,
-        instructionVariable,
-        toolsVariable,
-        outputVariable,
-    } = data
+    // console.log('Agent Node Data:')
 
-    const inputValues = await resolveInputVariables(context, [
-        inputVariable,
-        instructionVariable,
-        apiKeyVariable,
-        baseURLVariable,
-        toolsVariable,
-    ])
+    const variables = [
+        data.inputInputVariable,
+        data.instructionInputVariable,
+        data.historyMessageInputVariable,  // 新增
+        data.apiKeyInputVariable,
+        data.baseURLInputVariable,
+        data.toolsInputVariable,
+    ]
 
-    const tools = Array.isArray(inputValues[toolsVariable.name])
-        ? inputValues[toolsVariable.name]
-        : [inputValues[toolsVariable.name]]
+    const v = await resolveInputVariables(context, variables)
 
-    // console.log('🧠 agentFactory tools:', tools)
-
-    const baseURL = inputValues[baseURLVariable.name]
-    const apiKey = inputValues[apiKeyVariable.name]
-    const question = inputValues[inputVariable.name]
-    console.log('🧠 agentFactory question:', question)
-    const instruction = inputValues[instructionVariable.name]
-
-    // const toolDescriptions = tools.map((t: StructuredTool) => t.description || '').join('\n\n')
-    // console.log('🧠 agentFactory toolDescriptions:', toolDescriptions)
-
-    const agent = createReactAgent({
-        llm: new ChatOpenAI({ modelName: modelName || 'gpt-4.1', apiKey, configuration: { baseURL } }),
-        tools,
-        // stateSchema: MyStateSchema,
-    })
-    //   你可以通过工具从 LeanCloud 查询数据。
-    const prompt = `${instruction}\n\n` // ❗ 仅保留用户定义部分
-    // console.log('🧠 agentFactory prompt:', prompt)
-    // const agentChain1 = RunnableSequence.from([agent, parser]);
+    const toolsRaw = v[data.toolsInputVariable.id]
+    const tools = (Array.isArray(toolsRaw) ? toolsRaw : [toolsRaw]).filter(Boolean).flat()
 
 
+    const baseURL = v[data.baseURLInputVariable.id]
+    const apiKey = v[data.apiKeyInputVariable.id]
+    const question = v[data.inputInputVariable.id]
 
-    const agentChain = RunnableLambda.from(async () => {
+    const instruction = v[data.instructionInputVariable.id]
+    // const historyMsg = v[data.historyMessageInputVariable.id] as BaseMessage[]
+
+
+    /* ---------- 2. 创建延迟执行的 Agent Runnable ---------- */
+    const agentRunnable = RunnableLambda.from(async () => {
+        const agent = createReactAgent({
+            llm: new ChatOpenAI({
+                modelName: data.modelName,
+                apiKey,
+                configuration: { baseURL },
+
+            }),
+            tools,
+        })
+
         const messages = [
-            { role: 'system', content: prompt },
+            ...(instruction ? [{ role: 'system', content: instruction }] : []),
+            // ...(Array.isArray(historyMsg) ? historyMsg : (historyMsg ? [historyMsg] : [])),
             { role: 'user', content: question },
         ]
 
+
         const result = await agent.invoke({ messages })
-        // console.log('🧠 agentFactory result:', result)
-        const final = result.messages?.at(-1)?.content ?? '无返回'
-        // console.log(node.id, '🧠 agentFactory final:', final)
-        return final
+        // console.log('Agent Result:', result.messages)
+        const finalResult = result.messages?.at(-1)?.content ?? '无返回'
+
+
+
+        return finalResult
     })
 
+    /* ---------- 3. 包装延迟执行并返回 ---------- */
+    const wrapped = wrapRunnable(
+        agentRunnable,
+        node.id,
+        context.onRunnableElapsed,
+        {
+            context,
+            portId: data.outputVariable.id,
+            logFormat: res => JSON.parse(JSON.stringify({ type: 'agent', data: res }))
+        }
+    )
 
     return {
-        [outputVariable.id]: wrapRunnable(
-            agentChain,                // runnable
-            node.id,              // nodeId
-            context.onRunnableElapsed, // 回调（可能是 undefined）
-            {
-                context,
-                portId: outputVariable.id,
-                logFormat: (res) => {
-                    return {
-                        type: 'agent',
-                        data: res,
-                    }
-                }
-            }
-        ),
-
+        [data.outputVariable.id]: wrapped,
     }
 }

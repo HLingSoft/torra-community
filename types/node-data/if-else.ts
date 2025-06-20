@@ -1,5 +1,10 @@
 import type { OutputPortVariable, InputPortVariable } from '~/types/workflow'
 
+export enum MatchType {
+    String = 'String',
+    Boolean = 'Boolean'
+}
+
 export interface IfElseData {
     type: string // 节点类型
     title: string // 节点标题
@@ -7,10 +12,10 @@ export interface IfElseData {
     description: string // 节点描述
     textInputVariable: InputPortVariable // 输入变量
     matchType: string // 匹配类型
-    matchTextVariable: InputPortVariable // 匹配文本变量
+    matchTextInputVariable: InputPortVariable // 匹配文本变量
     operator: string // 操作符
     caseSensitive: boolean // 是否区分大小写
-    messageVariable: InputPortVariable // 消息变量
+    messageInputVariable: InputPortVariable // 消息变量
     trueOutputVariable: OutputPortVariable
     falseOutputVariable: OutputPortVariable
     show?: boolean // 控制 UI 展示
@@ -20,41 +25,41 @@ export interface IfElseData {
 export const IfElseDataLangchainName = 'IfElse' // 节点类型
 
 export const ifElseMeta: IfElseData = {
-    icon: '💬',
+    icon: 'tabler:logic-buffer',
     title: 'If-Else',
     description: 'Routes an input message to a corresponding output based on text comparison.',
     type: IfElseDataLangchainName,
 
     textInputVariable: {
 
-        name: 'textInput',
-        allowedTypes: ['Message'],
+        name: 'Input',
+        allowedTypes: ['Data'],
         value: '',
-        forceStringify: true,
+
     } as InputPortVariable,
-    matchType: 'String',
-    matchTextVariable: {
-        name: 'matchText',
-        allowedTypes: ['Message'],
+    matchType: MatchType.String,
+    matchTextInputVariable: {
+        name: 'Match Text',
+        allowedTypes: ['Data'],
         value: '',
-        forceStringify: true,
+
     } as InputPortVariable,
     operator: 'equals',
-    messageVariable: {
-        name: 'message',
-        allowedTypes: ['Message'],
+    messageInputVariable: {
+        name: 'Data',
+        allowedTypes: ['Data'],
         value: '',
         defaultValue: '',
-        forceStringify: true,
+
     } as InputPortVariable,
     trueOutputVariable: {
-        outputType: 'Message',
-        name: 'output-true',
-         
+        outputType: 'Data',
+        name: 'If True ',
+
     } as OutputPortVariable,
     falseOutputVariable: {
-        outputType: 'Message',
-        name: 'output-false',
+        outputType: 'Data',
+        name: 'If False  ',
     } as OutputPortVariable,
     caseSensitive: false,
     show: true,
