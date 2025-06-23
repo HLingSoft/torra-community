@@ -54,10 +54,16 @@ useHead({
                 </ul>
               </div>
             </div>
+            <div class="mt-10">
+              <div class="mockup-code ">
+                <pre data-prefix="$"><code>npx create-torra-app my-app</code></pre>
+              </div>
 
 
+            </div>
           </div>
         </div>
+
         <div class="flex flex-wrap   gap-5">
           <Card class="bg-background/50  max-w-sm">
             <CardHeader>

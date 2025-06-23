@@ -17,7 +17,7 @@
 - 🗂 本地存储（无云端依赖）
 - 🛠 快速部署与原型开发
 - 🔓 社区驱动，欢迎贡献
-- ✅ 支持主流大模型（如 OpenAI、Google、DeepSeek、通义千问等）
+- ✅ 支持主流大模型（如 OpenAI、Anthropic、Google、DeepSeek、通义千问等）
 - ✅ 支持多种数据源（MySQL、PostgreSQL、MongoDB、SQLite、Redis、Elasticsearch）
 - ✅ 支持多种数据格式（CSV、JSON、XML、YAML 等）
 - ✅ 支持数据清洗、转换、分析与可视化

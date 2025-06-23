@@ -17,7 +17,7 @@ When using, modifying, or distributing this software, **you must retain the attr
 - 🗂 Local storage (no cloud dependency)
 - 🛠 Fast deployment and prototyping
 - 🔓 Community-driven and open to contributions
-- Supports major LLMs (OpenAI, Google, DeepSeek, Qwen, etc.)
+- Supports major LLMs (OpenAI, Anthropic, Google, DeepSeek, Qwen, etc.)
 - Supports multiple data sources (MySQL, PostgreSQL, MongoDB, SQLite, Redis, Elasticsearch)
 - Supports various data formats (CSV, JSON, XML, YAML)
 - Supports comprehensive data operations (cleaning, transforming, analysis, visualization)

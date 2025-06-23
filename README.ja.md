@@ -17,7 +17,7 @@
 - 🗂 ローカルストレージ対応（クラウド依存なし）
 - 🛠 高速なデプロイ & プロトタイピング
 - 🔓 コミュニティ主導、貢献歓迎
-- ✅ 主要な LLM（OpenAI、Google、DeepSeek、Qwen など）に対応
+- ✅ 主要な LLM（OpenAI、Anthropic、Google、DeepSeek、Qwen など）に対応
 - ✅ 多様なデータソース（MySQL、PostgreSQL、MongoDB、SQLite、Redis、Elasticsearch）をサポート
 - ✅ CSV、JSON、XML、YAML などの形式をサポート
 - ✅ データクリーニング、変換、分析、可視化をサポート
