@@ -7,6 +7,9 @@ Torra Community Edition is an open-source visual agent and workflow editor built
 This edition is free to use, modify, and extend.  
 When using, modifying, or distributing this software, **you must retain the attribution and copyright of the original authors, the Torra Team.**
 
+![Torra Screenshot](https://file.web.hlingsoft.com/26NbxPHeTGXNCO23MhsEXb5yE82VUo6d/screenshot.png)
+
+
 ---
 
 ## ✨ Features

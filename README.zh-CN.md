@@ -7,6 +7,8 @@
 本版本可自由使用、修改与扩展。  
 在使用、修改或分发本软件时，**必须保留原作者 Torra 团队的署名与版权信息。**
 
+![Torra Screenshot](https://file.web.hlingsoft.com/26NbxPHeTGXNCO23MhsEXb5yE82VUo6d/screenshot.png)
+
 ---
 
 ## ✨ 功能亮点

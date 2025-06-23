@@ -7,6 +7,8 @@
 このエディションは、無料で使用・改変・拡張できます。  
 ご利用・改変・再配布される際は、**必ずオリジナル著作者である Torra チームの著作権表記を保持してください。**
 
+![Torra Screenshot](https://file.web.hlingsoft.com/26NbxPHeTGXNCO23MhsEXb5yE82VUo6d/screenshot.png)
+
 ---
 
 ## ✨ 特長
