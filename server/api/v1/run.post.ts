@@ -25,6 +25,7 @@ export default defineEventHandler(async (event) => {
 
 
     const body = await readBody(event)
+    console.log('API 请求体:', body)
     const { workflow, input } = body
 
     if (!workflow || !input) {

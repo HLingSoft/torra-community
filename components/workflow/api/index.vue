@@ -38,7 +38,7 @@ onMounted(async () => {
   }
   //找到 workflow 的 nodes 里面有没有APIInputLangchainName的节点，作为 API 的入口
   const apiInputNode = currentWorkflow.value!.nodes.find((node) => {
-    
+
     return node.data.type === APIInputLangchainName
   })
   if (!apiInputNode) {
@@ -47,7 +47,7 @@ onMounted(async () => {
   }
   const inputValue = (apiInputNode.data as APIInputData).inputValue as KeyValueSchema || {}
 
-  
+
   // 如果没有 inputValue 就提示
   if (!inputValue || Object.keys(inputValue).length === 0) {
     useToast('请至少添加一个输入参数')
@@ -67,7 +67,7 @@ onMounted(async () => {
   currentWorkflow.value!.apiSchema = apiSchema
 
   await currentWorkflow.value!.save()
- 
+
 })
 
 const { copy } = useClipboard()
@@ -150,6 +150,7 @@ const run = async () => {
       }
     }
 
+
     isRunning.value = true
     runResult.value = ''
     executionTime.value = '' // ⏱️ 清空时间显示
@@ -163,7 +164,10 @@ const run = async () => {
         'X-User-ID': `${user.value?.objectId}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        workflow: currentWorkflow.value?.toJSON(),
+        input: requestBody,
+      }),
     })
 
     const endTime = Date.now()
@@ -179,7 +183,7 @@ const run = async () => {
       : `${seconds}秒`
 
     const json = await res.json()
-     
+
     if (!res.ok) {
       runResult.value = `❌ API执行失败：${json.error || '未知错误'}`
       return
@@ -194,7 +198,7 @@ const run = async () => {
         }
       }
     } else {
-     
+
       runResult.value = json.output
       // 批量渲染统计面板
       if (json.logs && Array.isArray(json.logs)) {
