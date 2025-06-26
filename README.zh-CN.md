@@ -2,7 +2,7 @@
 
 🌐 [English](./README.md) | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
 
-**Torra 社区版** 是一个开源的可视化 AI 智能体与工作流构建器，灵感来源于 **Coze** 和 **Langflow**，但完全基于 **Vue + TypeScript** 构建。
+**Torra 社区版** 是一个开源的可视化 AI 智能体与工作流构建器，灵感来源于 **Coze** 和 **Langflow**，但完全基于 **Vue3 + TypeScript** 构建。
 
 与 Coze（闭源）和 Langflow（React + Python）不同，Torra 使用 **Nuxt3**、**VueFlow**、**Tailwind CSS v4**、**Shadcn UI** 和 **LangChain.js** 打造，为开发者和团队提供现代化、高性能的体验。
 

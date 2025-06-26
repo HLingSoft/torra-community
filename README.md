@@ -2,7 +2,7 @@
 
 🌐 [English](./README.md) | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
 
-**Torra Community Edition** is an open-source visual editor for building AI agents and workflows — inspired by **Coze** and **Langflow**, but built entirely with **Vue + TypeScript**.
+**Torra Community Edition** is an open-source visual editor for building AI agents and workflows — inspired by **Coze** and **Langflow**, but built entirely with **Vue3 + TypeScript**.
 
 Unlike Coze (closed-source) and Langflow (React + Python), Torra is built with **Nuxt3**, **VueFlow**, **Tailwind CSS v4**, **Shadcn UI**, and **LangChain.js** — providing a modern, high-performance experience for developers and teams.
 

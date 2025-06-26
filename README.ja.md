@@ -2,7 +2,7 @@
 
 🌐 [English](./README.md) | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
 
-**Torra コミュニティ版** は、AI エージェントとワークフローを構築するためのオープンソースのビジュアルエディタです。**Coze** や **Langflow** にインスパイアされ、**Vue + TypeScript** によって完全に構築されています。
+**Torra コミュニティ版** は、AI エージェントとワークフローを構築するためのオープンソースのビジュアルエディタです。**Coze** や **Langflow** にインスパイアされ、**Vue3 + TypeScript** によって完全に構築されています。
 
 Coze（クローズドソース）や Langflow（React + Python）とは異なり、Torra は **Nuxt3**、**VueFlow**、**Tailwind CSS v4**、**Shadcn UI**、**LangChain.js** を使用し、開発者とチームにモダンで高性能な体験を提供します。
 
