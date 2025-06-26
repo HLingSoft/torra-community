@@ -16,10 +16,12 @@ export type WSMessage =
 export interface WSExecuteRunMessage {
   namespace: 'execute'
   type: 'run'
-  workflow: Workflow
+  workflow: Workflow // 建议替换为 WorkflowJSON
   input: {
     message: string
-  }
+  },
+  userId: string
+  workflowId: string
 }
 export interface LogNode {
   nodeId: string
@@ -60,6 +62,7 @@ export interface WSErrorMessage {
   message: string
   stack?: string
 }
+
 
 
 export type ServerMessage = WSExecuteProgressMessage | WSExecuteDoneMessage | WSErrorMessage

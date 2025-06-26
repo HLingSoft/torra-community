@@ -1,6 +1,6 @@
 import type { TextOutputData } from '@/types/node-data/text-output'
 import type { BuildContext, LangFlowNode, InputPortVariable, NodeFactory, OutputPortVariable } from '~/types/workflow'
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLogs } from '../utils'
 
 /**
  * TextOutput 节点工厂函数
@@ -18,15 +18,14 @@ export const textOutputFactory: NodeFactory = async (
   const outputVar = data.outputVariable as OutputPortVariable
   const outputPortId = outputVar.id
 
-  // 写日志
-  // writeLog(
-  //   context,
-  //   node.id,
-  //   outputPortId,
-  //   inputValue
-  // )
-
-  // console.log('TextOutputFactory inputValue:', inputValue)
+  // 记录日志
+  writeLogs(context, node.id, node.data.title, node.data.type, {
+    [outputPortId]: {
+      content: inputValue,
+      outputPort: data.outputVariable,
+      elapsed: 0, // 这里可以计算实际耗时
+    },
+  })
 
   return {
     [outputPortId]: inputValue,

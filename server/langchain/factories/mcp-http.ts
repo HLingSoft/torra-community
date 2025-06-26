@@ -4,7 +4,7 @@
 import type { LangFlowNode, BuildContext, InputPortVariable, OutputPortVariable } from '~/types/workflow'
 import type { MCPHttpData } from '@/types/node-data/mcp-http'
 
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLogs } from '../utils'
 import { StructuredTool } from 'langchain/tools'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
@@ -62,9 +62,7 @@ function ensureZodSchema(schema: any) {
 async function fetchMCPTools(
     url: string,
     token: string,
-    context: BuildContext,
-    node: LangFlowNode,
-    outputVariable: OutputPortVariable
+
 ) {
     const client = new Client({ name: 'mcp-http', version: '1.0.0' })
     const headers: Record<string, string> = {}
@@ -95,6 +93,7 @@ async function fetchMCPTools(
  * MCP-HTTP 工厂函数（LangFlow专用签名）
  */
 export async function mcpHttpFactory(node: LangFlowNode, context: BuildContext) {
+    const t0 = performance.now()
     const data = node.data as MCPHttpData
     const { urlInputVariable, tokenInputVariable, outputVariable } = data
 
@@ -107,10 +106,24 @@ export async function mcpHttpFactory(node: LangFlowNode, context: BuildContext) 
     const token = inputVals[tokenInputVariable.id]
 
     // 2. 拉取 MCP 工具（返回 StructuredTool[]，只在真正用时才调用 _call）
-    const result = await fetchMCPTools(url, token, context, node, outputVariable)
-
-
-    // 3. 返回端口映射
+    const result = await fetchMCPTools(url, token)
+    const elapsed = performance.now() - t0
+    // 3. 写入日志（只记录工具名和描述，避免内容太大）
+    writeLogs(
+        context,
+        node.id,
+        node.data.title,
+        node.data.type,
+        {
+            [outputVariable.id]: {
+                content: result,
+                outputPort: outputVariable,
+                elapsed
+            }
+        },
+        elapsed
+    )
+    // 4. 返回端口映射
     return {
         [outputVariable.id]: result
     }

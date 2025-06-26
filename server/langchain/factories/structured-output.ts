@@ -9,7 +9,7 @@ import { JsonOutputFunctionsParser } from 'langchain/output_parsers'
 import { RunnableSequence } from '@langchain/core/runnables'
 import { ChatOpenAI } from '@langchain/openai'
 import type { BaseMessage } from '@langchain/core/messages'
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLogs } from '../utils'
 
 interface LanguageModel {
     model: ChatOpenAI
@@ -25,6 +25,7 @@ export async function structuredOutputFactory(
     node: LangFlowNode,
     context: BuildContext
 ) {
+    const t0 = performance.now()
     const {
         languageModelInputVariable,
         outputSchemaInputVariable,
@@ -69,10 +70,18 @@ export async function structuredOutputFactory(
 
     // 5. 执行推理
     const result = await runnablePrompt.invoke(languageModel.messages)
-    console.log('StructuredOutput invoke result:', result)
+    // console.log('StructuredOutput invoke result:', result)
 
     // 6. 日志
-    // writeLog(context, node.id, structuredOutputVariable.id, result)
+    const elapsed = performance.now() - t0
+
+    writeLogs(context, node.id, node.data.title, node.data.type, {
+        [structuredOutputVariable.id]: {
+            content: result,
+            outputPort: structuredOutputVariable,
+            elapsed, // 这里可以计算实际耗时
+        },
+    }, elapsed)
 
     // 7. 返回端口值
     return {

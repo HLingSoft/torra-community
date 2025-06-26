@@ -2,45 +2,27 @@ import type { JSONParserData } from '@/types/node-data/json-parser'
 import type {
     BuildContext,
     LangFlowNode,
-    InputPortVariable
 } from '~/types/workflow'
 
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLogs } from '../utils'
 import { jsonrepair } from 'jsonrepair'
 import { z, ZodTypeAny } from 'zod'
 
-/**
- * 根据定义构建 Zod 校验器
- */
 function buildZodSchema(schemaDef: Record<string, string>) {
     const shape: Record<string, ZodTypeAny> = {}
     for (const [key, type] of Object.entries(schemaDef)) {
         switch (type) {
-            case 'string':
-                shape[key] = z.string()
-                break
-            case 'number':
-                shape[key] = z.number()
-                break
-            case 'boolean':
-                shape[key] = z.boolean()
-                break
-            case 'array':
-                shape[key] = z.array(z.any())
-                break
-            case 'object':
-                shape[key] = z.record(z.any())
-                break
-            default:
-                shape[key] = z.any()
+            case 'string': shape[key] = z.string(); break
+            case 'number': shape[key] = z.number(); break
+            case 'boolean': shape[key] = z.boolean(); break
+            case 'array': shape[key] = z.array(z.any()); break
+            case 'object': shape[key] = z.record(z.any()); break
+            default: shape[key] = z.any()
         }
     }
     return z.object(shape)
 }
 
-/**
- * 尝试提取 JSON 结构（容错）
- */
 function extractJsonLike(input: string): string {
     let cleaned = input.replace(/```json|```/gi, '').trim()
     const likelyKeyValueOnly = !cleaned.includes('{') && !cleaned.includes('[')
@@ -50,9 +32,6 @@ function extractJsonLike(input: string): string {
     return cleaned
 }
 
-/**
- * JSON 解析器节点工厂函数
- */
 export async function jsonParserFactory(
     node: LangFlowNode,
     context: BuildContext
@@ -63,8 +42,8 @@ export async function jsonParserFactory(
         structuredOutputVariable
     } = node.data as JSONParserData
 
-    const variableDefs = [inputMessageInputVariable] as InputPortVariable[]
-    const inputValues = await resolveInputVariables(context, variableDefs)
+    const t0 = performance.now()
+    const inputValues = await resolveInputVariables(context, [inputMessageInputVariable])
     const inputMessage = inputValues[inputMessageInputVariable.id]
 
     let result: any
@@ -80,9 +59,24 @@ export async function jsonParserFactory(
         result = { error: true, message: err.message }
     }
 
+    const elapsed = performance.now() - t0
 
+    writeLogs(
+        context,
+        node.id,
+        node.data.title,
+        node.data.type,
+        {
+            [structuredOutputVariable.id]: {
+                content: result,
+                outputPort: structuredOutputVariable,
+                elapsed,
+            },
+        },
+        elapsed
+    )
 
     return {
-        [structuredOutputVariable.id]: result
+        [structuredOutputVariable.id]: result,
     }
 }

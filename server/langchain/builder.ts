@@ -53,7 +53,7 @@ import type {
   BuildContext,
   DAGRunResult
 } from '~/types/workflow'
-import { toJsonSafe, collectLoopBodyNodes } from '~/server/langchain/resolveInput'
+import { collectLoopBodyNodes, contextLogsToSteps } from './utils'
 import { initFactories, nodeFactoryMap } from './factories'
 import { ChatInputData } from '@/types/node-data/chat-input'
 
@@ -152,6 +152,8 @@ export async function executeDAG(
   json: LangFlowJson,
   inputMessage: string,
   runType: 'loop' | 'chat' | 'api' = 'chat',
+  userId: string,
+  workflowId: string,
   opts: ExecuteDAGOptions & {
     maxLoopIterations?: number
     onRunnableElapsed?: (nodeId: string, ms: number) => void
@@ -161,21 +163,24 @@ export async function executeDAG(
 ): Promise<DAGRunResult> {
 
   const ctx: BuildContext = {
+    userId,
+    workflowId,
     logs: {},
     resolvedInput: {},
     results: opts.results ?? {},
     json,
     onRunnableElapsed: opts.onRunnableElapsed,
   }
-  const dagSteps: DAGStepInfo[] = []
-
+  // const dagSteps: DAGStepInfo[] = []
+  let allowList: Set<string> = new Set<string>();
   try {
     // 构建节点字典、邻接表
     const nodes: Record<string, LangFlowNode> = Object.fromEntries(json.nodes.map(n => [n.id, n]))
     const { out: outAdj, inp: inAdj } = buildAdj(json.edges)
 
+
     // --------- 第一步：用无向BFS找到所有入口节点可达节点（弱连通分量） -----------
-    let allowList: Set<string>;
+
     if (opts.customNodeIds && opts.customNodeIds.length > 0) {
       allowList = new Set(opts.customNodeIds)
     } else {
@@ -209,18 +214,9 @@ export async function executeDAG(
     }
 
 
-
-    // console.log('🔍 Weakly connected component (allowList):', runType, Array.from(allowList))
-
-    // console.log('🔍 Weakly connected component (nodes):', json.nodes.filter(n => allowList.has(n.id)).map(n => n.id))
-    // console.log('🔍 Weakly connected component (edges):', json.edges.filter(e => allowList.has(e.source) && allowList.has(e.target)).map(e => `${e.source} -> ${e.target}`))
-
     // --------- 第二步：拓扑排序方式依赖执行 -----------
     const { out: topoOut, inDegree } = buildAdjForTopo(json.edges, allowList, nodes)
 
-
-    // 备份最初的入度表 —— 以后每轮 Loop 要用
-    // const inDegreeOrig = { ...inDegree }   // ← “顶部” 就在这里
 
 
     // 初始化：入度为0的节点入队（所有依赖都满足，可以执行）
@@ -234,7 +230,7 @@ export async function executeDAG(
 
     // const loopCount: Record<string, number> = {}
 
-    const total = allowList.size
+    // const total = allowList.size
 
     // 跳过分支（IfElse等用到）
     const skip = new Set<string>()
@@ -264,7 +260,9 @@ export async function executeDAG(
 
       const node = nodes[id]
 
-
+      // if (node.data.type === 'Loop') {
+      //   console.log('>>> Loop node 进入主队列:', id, 'inDegree=', inDegree[id]);
+      // }
 
       // 对入口节点赋值 inputMessage
       if (isStartNode(json, id, runType)) {
@@ -284,57 +282,32 @@ export async function executeDAG(
       if (Object.keys(rInput).length === 0 && isStartNode(json, id, runType)) rInput[DEFAULT_HANDLE] = inputMessage
       ctx.resolvedInput = rInput
 
-      const t0 = performance.now()
+
+
+
 
 
       let output: any
       let error: string | undefined
-      let elapsed = 0
+
       try {
-        // console.log(`🟡 factory for type [${node.data.type}]:`, nodeFactoryMap[node.data.type]);
+
         const fac = nodeFactoryMap[node.data.type]
         if (!fac) throw new Error(`Factory not found for ${node.data.type}`)
-        console.log('节点', node.id, '类型', node.data.type, 'title', node.data.title, '开始执行')
+
         output = await fac(node as any, ctx)
-        // console.log('节点', node.id, '类型', node.data.type, '执行完成，输出:', output)
+
       } catch (e) {
-        // console.error('节点', node.id, '类型', node.data.type, '执行失败:', e)
+
         error = (e instanceof Error ? e.message : String(e))
         output = { error }
       }
-      elapsed = performance.now() - t0
+
       ctx.results[id] = output
-      ctx.logs[id] = { elapsed }
+
       executed.add(id)
 
 
-      // 日志
-      const dagStep: DAGStepInfo = {
-        index: dagSteps.length + 1,
-        total,
-        nodeId: id,
-        nodeTitle: node.data.title,
-        type: node.data.type,
-        output: toJsonSafe(output),
-        elapsed,
-        elapsedStr: elapsed < 1000 ? `${elapsed.toFixed(1)}ms` : `${(elapsed / 1000).toFixed(2)}s`,
-        ...(error ? { error } : {})
-      }
-      dagSteps.push(dagStep)
-      opts.onStep?.(dagStep)
-
-      if (error) {
-        // 直接终止整个流程（如果你想整个失败就停下，不继续后面节点）
-        return {
-          statusCode: 500,
-          results: ctx.results,
-          logs: dagSteps,
-          output: `❌ 节点[${id}][${node.data.type}]执行失败: ${error}`,
-          errorNodeId: id,
-          errorType: node.data.type,
-          errorMessage: error
-        }
-      }
 
 
       // ----------- IfElse 节点，剪掉未命中的分支 -----------
@@ -372,37 +345,16 @@ export async function executeDAG(
 
 
     }
-
-    // 计算最终输出
-    // 优先取 TextOutput、ChatOutput 等终端节点；否则最后一个主链节点
-    let finalOutput: any = undefined
-    const terminalTypes = ['TextOutput', 'ChatOutput']
-    let lastTerminalNode = dagSteps.slice().reverse().find(s => terminalTypes.includes(s.type))
-    if (lastTerminalNode) {
-      const lastResult = ctx.results[lastTerminalNode.nodeId]
-      if (lastResult && 'default' in lastResult) {
-        finalOutput = lastResult.default
-      } else if (lastResult && typeof lastResult === 'object' && Object.keys(lastResult).length > 0) {
-        finalOutput = lastResult[Object.keys(lastResult)[0]]
-      } else {
-        finalOutput = lastResult
-      }
-    } else if (dagSteps.length > 0) {
-      const lastResult = ctx.results[dagSteps[dagSteps.length - 1].nodeId]
-      if (lastResult && 'default' in lastResult) {
-        finalOutput = lastResult.default
-      } else if (lastResult && typeof lastResult === 'object' && Object.keys(lastResult).length > 0) {
-        finalOutput = lastResult[Object.keys(lastResult)[0]]
-      } else {
-        finalOutput = lastResult
-      }
-    }
+    const finalOutput = resolveFinalOutput(executed, ctx, nodes)
+    console.log('🔄 Final output:', finalOutput)
 
 
+    // console.dir(steps, { depth: null, colors: true })
     return {
       statusCode: 200,
       results: ctx.results,
-      logs: dagSteps,
+
+      logs: contextLogsToSteps(ctx, allowList.size),
       output: finalOutput
     }
   } catch (error) {
@@ -411,9 +363,35 @@ export async function executeDAG(
     return {
       statusCode: 500,
       results: ctx.results,
-      logs: dagSteps,
-      output: '❌执行失败:' + (error instanceof Error ? error.message : String(error)),
+      // logs: dagSteps,
+      logs: contextLogsToSteps(ctx, allowList.size),
+      output: '❌ API执行失败:' + (error instanceof Error ? error.message : String(error)),
     }
   }
 }
 
+
+function resolveFinalOutput(
+  executed: Set<string>,
+  ctx: BuildContext,
+  nodes: Record<string, LangFlowNode>
+): any {
+  const terminalTypes = ['TextOutput', 'ChatOutput']
+  const executedList = Array.from(executed)
+
+  const lastTerminalId = executedList.slice().reverse().find(id => {
+    const node = nodes[id]
+    return node && terminalTypes.includes(node.data.type)
+  })
+
+  const lastId = lastTerminalId ?? executedList.at(-1)
+  const lastResult = lastId ? ctx.results[lastId] : undefined
+
+  if (lastResult && 'default' in lastResult) {
+    return lastResult.default
+  } else if (lastResult && typeof lastResult === 'object' && Object.keys(lastResult).length > 0) {
+    return lastResult[Object.keys(lastResult)[0]]
+  } else {
+    return lastResult
+  }
+}

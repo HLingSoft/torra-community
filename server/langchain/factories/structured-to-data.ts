@@ -2,13 +2,14 @@ import type { StructuredToDataData } from '@/types/node-data/structured-to-data'
 import type { BuildContext, LangFlowNode, InputPortVariable, NodeFactory, OutputPortVariable } from '~/types/workflow'
 
 
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLogs } from '../utils'
 
 
 export const structuredToDataFactory: NodeFactory = async (
     node: LangFlowNode,
     context: BuildContext
 ) => {
+    const t0 = performance.now()
     const data = node.data as StructuredToDataData
 
 
@@ -19,14 +20,14 @@ export const structuredToDataFactory: NodeFactory = async (
     const outputPortId = outputVar.id
     // 如果已经是字符串就直接用，否则转字符串
     const outputStr = typeof inputValue === "string" ? inputValue : JSON.stringify(inputValue)
-
-    // 写入日志
-    // writeLog(
-    //     context,
-    //     node.id,
-    //     outputPortId,
-    //     inputValue,
-    // )
+    const elapsed = performance.now() - t0
+    writeLogs(context, node.id, node.data.title, node.data.type, {
+        [outputPortId]: {
+            content: outputStr,
+            outputPort: data.outputVariable,
+            elapsed, // 这里可以计算实际耗时
+        },
+    }, elapsed)
 
 
     return {

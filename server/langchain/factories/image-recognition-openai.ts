@@ -2,10 +2,11 @@ import type {
     BuildContext,
     LangFlowNode,
     NodeFactory,
-    InputPortVariable
+    InputPortVariable,
+    OutputPortVariable
 } from '~/types/workflow'
 import type { ImageRecognitionOpenAIData } from '~/types/node-data/image-recognition-openai'
-import { resolveInputVariables, writeLog, wrapRunnable } from '../resolveInput'
+import { resolveInputVariables, writeLogs, wrapRunnable } from '../utils'
 import { ChatOpenAI } from '@langchain/openai'
 import { HumanMessage } from '@langchain/core/messages'
 import { RunnableLambda } from '@langchain/core/runnables'
@@ -25,6 +26,7 @@ function normalizeImageInputs(
     if (!imageData) return [];
     const arr = Array.isArray(imageData) ? imageData : [imageData];
     const sliced = arr.slice(0, maxImages);
+
 
 
     return sliced.map(img => {
@@ -78,7 +80,7 @@ export const imageRecognitionOpenAIFactory: NodeFactory = async (
         model: "gpt-4-vision-preview",
         openAIApiKey: inputValues[apiKeyInputVariable.id],
         configuration: {
-            baseURL: inputValues[baseURLInputVariable.id] || 'https://api.openai.com/v1',
+            baseURL: inputValues[baseURLInputVariable.id]
         }
     });
 
@@ -100,82 +102,135 @@ export const imageRecognitionOpenAIFactory: NodeFactory = async (
         const res = await chat.call([message])
         return res.content
     })
-    // console.log(res.content);
+
 
 
 
     // 4. 返回结果
+
     const wrapped = wrapRunnable(
         imageRecognitionChain,
         node.id,
+        node.data.title,
+        node.data.type,
         context.onRunnableElapsed,
         {
             context,
             portId: outputVariable.id,
-            logFormat: res => ({
-                type: "openai image recognition",
-                data: res
-            })
+            logFormat: res => ({ type: 'openai-image-recognition', data: res }),
+            outputPort: outputVariable,
         }
     )
 
 
     //5. 创建工具实例
-    const tool = new ImageRecognitionTool(
-        node.id, // <--- 直接传 node.id 作为第一个参数
-        imageData, // 传入图片数据
-        {
-            apiKey: inputValues[apiKeyInputVariable.id],
-            baseURL: inputValues[baseURLInputVariable.id] || 'https://api.openai.com/v1',
-        },
+    const tool = new ImageRecognitionTool({
+        context,
+        nodeId: node.id,
+        portId: outputVariable.id,
+        outputPort: outputVariable,
+        apiKey: inputValues[apiKeyInputVariable.id],
+        baseURL: inputValues[baseURLInputVariable.id],
+        imageData: imageData,
+        title: node.data.title,
+        type: node.data.type,
+    });
 
-
-    );
     return {
         [outputVariable.id]: wrapped,
         [toolOutputVariable.id]: tool
     };
 }
 
-
 class ImageRecognitionTool extends StructuredTool {
     name: string;
     description: string;
-    schema: z.ZodObject<any>; // 必须加 schema
+    schema: z.ZodObject<any>;
 
+    private context?: BuildContext;
+    private nodeId: string;
+    private portId: string;
+    private outputPort: OutputPortVariable;
+    private apiKey: string;
+    private baseURL: string;
+    private imageData?: string | string[];
+    private title: string;
+    private type: string;
 
-    constructor(
-        private id: string,
-        private imageData: string | string[],
-        private modelParams: { apiKey: string; baseURL: string },
-    ) {
+    constructor(config: {
+        context?: BuildContext;
+        nodeId: string;
+        portId: string;
+        outputPort: OutputPortVariable;
+        apiKey: string;
+        baseURL: string;
+        imageData?: string | string[];
+        title: string; // ✅ 新增
+        type: string;  // ✅ 新增
+    }) {
         super();
-        this.name = `image-recognition-${id}`;
-        this.description = "使用 OpenAI 视觉模型识别图片内容。参数：imageData（图片url或base64），instruction（可选）";
+        this.name = `image-recognition-${config.nodeId}`;
+        this.description =
+            "使用 OpenAI 视觉模型识别图片内容。参数：imageData（图片url或base64），instruction（可选）";
         this.schema = z.object({
-            imageData: z.string().optional().describe("图片url或base64"),
+            imageData: z.string().describe("图片url或base64"),
             instruction: z.string().describe("识别指令"),
         });
+
+        this.context = config.context;
+        this.nodeId = config.nodeId;
+        this.portId = config.portId;
+        this.outputPort = config.outputPort;
+        this.apiKey = config.apiKey;
+        this.baseURL = config.baseURL
+        this.imageData = config.imageData;
+        this.title = config.title;
+        this.type = config.type;
     }
 
-    async _call(inputs: { imageData: string | string[]; instruction?: string }) {
+    async _call(inputs: { imageData?: string | string[]; instruction?: string }) {
         const chat = new ChatOpenAI({
             model: "gpt-4-vision-preview",
-            openAIApiKey: this.modelParams.apiKey,
-            configuration: { baseURL: this.modelParams.baseURL },
+            openAIApiKey: this.apiKey,
+            configuration: { baseURL: this.baseURL },
         });
-        //如果 imageData 有连接线或者有值，则优先使用this.imageData。否则将使用 agent 的输入
-        const imageContents = normalizeImageInputs(this.imageData ?? inputs.imageData, 5);
+
+        const t0 = performance.now();
+
+        const imageContents = normalizeImageInputs(
+            this.imageData ?? inputs.imageData ?? [],
+            5
+        );
 
         const message = new HumanMessage({
             content: [
                 { type: "text", text: inputs.instruction || "请描述这张图片：" },
                 ...imageContents,
-            ]
+            ],
         });
 
         const res = await chat.call([message]);
+        const result = res.content;
+        const elapsed = performance.now() - t0;
 
-        return res.content;
+        // ✅ 使用传入的 title 和 type 写日志
+        if (this.context) {
+            writeLogs(
+                this.context,
+                this.nodeId,
+                this.title,
+                this.type,
+                {
+                    [this.portId]: {
+                        content: result,
+                        outputPort: this.outputPort,
+                        elapsed,
+                    },
+                },
+                elapsed
+            );
+        }
+
+        return result;
     }
 }

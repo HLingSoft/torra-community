@@ -1,6 +1,6 @@
 import type { BuildContext, LangFlowNode, InputPortVariable } from '~/types/workflow'
 import type { MessageHistoryData } from '@/types/node-data/message-history'
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLogs } from '../utils'
 import {
   AIMessage,
   HumanMessage,
@@ -8,9 +8,6 @@ import {
   BaseMessage,
 } from '@langchain/core/messages'
 
-/**
- * 格式化消息数组为可读字符串，每条最多500字符
- */
 function formatMessagesToString(messages: BaseMessage[]): string {
   return messages
     .map((msg) => {
@@ -28,9 +25,6 @@ function formatMessagesToString(messages: BaseMessage[]): string {
     .join('\n')
 }
 
-/**
- * MessageHistory 节点工厂函数
- */
 export async function messageHistoryFactory(
   node: LangFlowNode,
   context: BuildContext
@@ -43,15 +37,14 @@ export async function messageHistoryFactory(
     dataOutputVariable
   } = data
 
-  // 1. 解析 memory 输入变量
+  const t0 = performance.now()
+
   const inputValues = await resolveInputVariables(context, [memoryInputVariable])
   const memory = inputValues[memoryInputVariable.id] as { getMessages: () => Promise<BaseMessage[]> }
 
-  // 2. 获取历史消息
   let messages: BaseMessage[] = []
   try {
     messages = await memory.getMessages()
-    // 如有 maxMessages 参数，仅保留最近 N 条
     if (typeof maxMessages === 'number' && maxMessages > 0) {
       messages = messages.slice(-maxMessages)
     }
@@ -59,11 +52,31 @@ export async function messageHistoryFactory(
     console.error('MessageHistoryFactory 错误:', e)
   }
 
-  // 3. 格式化字符串形式，写日志
   const formattedText = formatMessagesToString(messages)
-  // writeLog(context, node.id, messageOutputVariable.id, formattedText)
 
-  // 4. 返回原始数组与字符串结果
+  const elapsed = performance.now() - t0
+
+  // ✅ 结构化写日志
+  writeLogs(
+    context,
+    node.id,
+    data.title,
+    data.type,
+    {
+      [messageOutputVariable.id]: {
+        content: messages,
+        outputPort: messageOutputVariable,
+        elapsed
+      },
+      [dataOutputVariable.id]: {
+        content: formattedText,
+        outputPort: dataOutputVariable,
+        elapsed
+      }
+    },
+    elapsed
+  )
+
   return {
     [messageOutputVariable.id]: messages,
     [dataOutputVariable.id]: formattedText

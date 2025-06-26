@@ -1,10 +1,9 @@
 import { RunnableLambda } from '@langchain/core/runnables'
 import type { LangFlowNode, BuildContext } from '~/types/workflow'
-import { resolveInputVariables, wrapRunnable } from '../../langchain/resolveInput'
+import { resolveInputVariables, wrapRunnable } from '../utils'
 import type { APIRequestData } from '~/types/node-data/api-request'
 
 export async function apiRequestFactory(node: LangFlowNode, context: BuildContext) {
-    /* ---------- 1. 类型与变量准备 ---------- */
     const data = node.data as APIRequestData
     const {
         methodType,
@@ -12,10 +11,8 @@ export async function apiRequestFactory(node: LangFlowNode, context: BuildContex
         bodyInputVariable,
         tokenInputVariable,
         dataOutputVariable,
-
     } = data
 
-    /* ---------- 2. 解析 URL、Body 和 Token ---------- */
     const inputValues = await resolveInputVariables(context, [
         urlInputVariable,
         bodyInputVariable,
@@ -27,7 +24,6 @@ export async function apiRequestFactory(node: LangFlowNode, context: BuildContex
     const token = inputValues[tokenInputVariable.id]
     const method = methodType.toLowerCase()
 
-    /* ---------- 3. 构造 API 请求 runnable ---------- */
     const requestChain = RunnableLambda.from(async () => {
         try {
             const headers: HeadersInit = {
@@ -47,7 +43,6 @@ export async function apiRequestFactory(node: LangFlowNode, context: BuildContex
             const res = await fetch(url, options)
             if (!res.ok) {
                 const errorText = await res.text()
-
                 return {
                     raw: {
                         error: `HTTP ${res.status} ${res.statusText}`,
@@ -55,11 +50,10 @@ export async function apiRequestFactory(node: LangFlowNode, context: BuildContex
                     }
                 }
             }
-            //  const result = await res.json()
+
             const result = await res.text()
             return {
                 raw: result,
-
             }
 
         } catch (err: any) {
@@ -70,23 +64,22 @@ export async function apiRequestFactory(node: LangFlowNode, context: BuildContex
         }
     })
 
-    /* ---------- 4. 包装延迟执行对象 ---------- */
-    const wrappedRaw = wrapRunnable(
+    const wrapped = wrapRunnable(
         requestChain.pipe(r => r.raw ?? ''),
         node.id,
+        data.title, // 节点标题
+        data.type,  // 节点类型
         context.onRunnableElapsed,
         {
             context,
             portId: dataOutputVariable.id,
-            logFormat: res => ({ type: 'api-request Chain', data: res }),
-        },
+            outputPort: dataOutputVariable, // ✅ 输出端口传入
+            logFormat: res => ({ type: 'api-request', data: res }),
+        }
     )
 
 
-
-    /* ---------- 5. 返回封装结果 ---------- */
     return {
-        [dataOutputVariable.id]: wrappedRaw,
-
+        [dataOutputVariable.id]: wrapped,
     }
 }

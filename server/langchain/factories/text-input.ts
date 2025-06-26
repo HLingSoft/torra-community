@@ -1,8 +1,7 @@
 import type { TextInputData } from '@/types/node-data/text-input'
-import type { BuildContext, LangFlowNode, InputPortVariable, NodeFactory, OutputPortVariable } from '~/types/workflow'
+import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~/types/workflow'
 
-import { HumanMessage } from '@langchain/core/messages'
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLogs } from '../utils'
 
 /**
  * TextInput 节点工厂函数
@@ -20,13 +19,14 @@ export const textInputFactory: NodeFactory = async (
   const outputVar = data.outputVariable as OutputPortVariable
   const outputPortId = outputVar.id
 
-  // 写入日志
-  // writeLog(
-  //   context,
-  //   node.id,
-  //   outputPortId,
-  //   inputValue,
-  // )
+  // 记录日志
+  writeLogs(context, node.id, node.data.title, node.data.type, {
+    [outputPortId]: {
+      content: inputValue,
+      outputPort: data.outputVariable,
+      elapsed: 0, // 这里可以计算实际耗时
+    },
+  })
 
   // 输出为 HumanMessage
   return {

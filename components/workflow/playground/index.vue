@@ -102,20 +102,25 @@ const sendMessage = () => {
   //开发环境下使用本地 服务器连接
   //生产环境下使用云端 服务器连接
 
-  ws = new WebSocket('ws://localhost:3001')
-
+  if (process.env.NODE_ENV === 'production') {
+    // ws = new 服务器连接('wss://workflow.allaicg.cn')
+    ws = new WebSocket('wss://askpro.aliyun.hlingsoft.com')
+  } else {
+    ws = new WebSocket('ws://localhost:3001')
+  }
 
   const msgIndexMap = new Map<string, number>()
 
   ws.onopen = () => {
     console.log('🟢 服务器连接 connected')
     assistantMessages.value = []
-    console.log('发送工作流执行请求', props.workflow)
     ws?.send(JSON.stringify({
       namespace: 'execute',
       type: 'run',
       workflow: props.workflow,
       input: { message: input },
+      userId: user.value?.objectId,
+      workflowId: props.workflow.objectId,
     }))
     msgIndexMap.clear()
   }
@@ -136,7 +141,7 @@ const sendMessage = () => {
 
 
       // const text = `✅ [${step.index}/${step.total}] ${step.type} (${step.nodeId}) — <span style="color: #4ade80">${label}</span>`
-      const text = `✅ [${step.index}/${step.total}] ${step.type} (${step.nodeId}) — ${formatStepLabel(step, false)}`
+      const text = `✅ [${step.index}/${step.total}]  ${step.nodeTitle} ${step.nodeType} (${step.nodeId}) — ${formatStepLabel(step, false)}`
       // console.log('text', text)
 
       // 若已存在该 nodeId，对应位置直接替换

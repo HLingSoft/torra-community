@@ -25,7 +25,7 @@ export const chatOpenAIMeta: ChatOpenAIData = {
   type: ChatOpenAILangchainName,
   title: 'OpenAI',
   description: 'Generate text using OpenAI LLMs.',
-  modelName: 'gpt-4o',
+  modelName: 'o3',
   systemMessageInputVariable: {
     name: 'System Instruction',
     allowedTypes: ['Data'],

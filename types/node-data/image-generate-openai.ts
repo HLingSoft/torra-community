@@ -16,7 +16,7 @@ export interface ImageGenerateOpenAIData {
 
 
     base64ImageOutputVariable: OutputPortVariable
-
+    // urlOutputVariable: OutputPortVariable // 可选的URL输出变量
     toolOutputVariable: OutputPortVariable // 可选的工具输出变量
     show: boolean
     saved: boolean
@@ -52,7 +52,10 @@ export const imageGenerateOpenAIMeta: ImageGenerateOpenAIData = {
         name: 'Return Base64 Image',
         outputType: 'Base64',
     } as OutputPortVariable,
-
+    // urlOutputVariable: {
+    //     name: 'Return Image URL',
+    //     outputType: 'Data',
+    // } as OutputPortVariable,
     toolOutputVariable: {
         name: 'As Tool',
         outputType: 'Tool',

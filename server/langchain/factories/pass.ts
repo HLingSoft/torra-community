@@ -1,7 +1,7 @@
 import type { PassData } from '@/types/node-data/pass'
 import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~/types/workflow'
 
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLogs } from '../utils'
 
 /**
  * Pass 节点工厂函数
@@ -19,15 +19,23 @@ export const passFactory: NodeFactory = async (
     const outputVar = data.outputVariable as OutputPortVariable
     const outputPortId = outputVar.id
 
-    // 写入日志
-    // writeLog(
-    //     context,
-    //     node.id,
-    //     outputPortId,
-    //     inputValue,
-    // )
 
-    // 输出为 HumanMessage
+    writeLogs(
+        context,
+        node.id,
+        data.title,
+        data.type,
+        {
+            [outputPortId]: {
+                content: inputValue,
+                outputPort: outputVar,
+                elapsed: 0
+            }
+        },
+        0
+    )
+
+
     return {
         [outputPortId]: inputValue,
     }

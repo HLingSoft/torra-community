@@ -2,18 +2,19 @@ import type { ChatOpenAIData } from '@/types/node-data/chat-openai'
 import type {
   BuildContext,
   LangFlowNode,
-  InputPortVariable,
-  OutputPortVariable
+  InputPortVariable
 } from '~/types/workflow'
 
 import { ChatOpenAI } from '@langchain/openai'
 import {
   resolveInputVariables,
-  wrapRunnable
-} from '../../langchain/resolveInput'
+  wrapRunnable,
+  writeLogs
+} from '../utils'
 import { RunnableLambda } from '@langchain/core/runnables'
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 import type { BaseMessage } from '@langchain/core/messages'
+import { SafeRunCollectorHandler } from '../../langchain/safeRunCollectorHandler'
 
 interface LanguageModel {
   model: ChatOpenAI
@@ -25,6 +26,7 @@ export async function chatOpenAIFactory(
   node: LangFlowNode,
   context: BuildContext
 ) {
+
   const data = node.data as ChatOpenAIData
   const {
     modelName,
@@ -48,18 +50,18 @@ export async function chatOpenAIFactory(
   ]
 
   const inputValues = await resolveInputVariables(context, variableDefs)
-  // console.log('ChatOpenAI 节点解析的输入变量:', inputValues)
-
+  const baseURL = inputValues[baseURLInputVariable.id] || ''
+  const collector = new SafeRunCollectorHandler(context.userId, context.workflowId)
   const model = new ChatOpenAI({
     modelName,
     temperature,
     streaming,
     openAIApiKey: inputValues[apiKeyInputVariable.id],
     configuration: {
-      baseURL: inputValues[baseURLInputVariable.id]
-    }
+      baseURL
+    },
+    callbacks: [collector]
   })
-
 
   const messages = [
     new SystemMessage(inputValues[systemMessageInputVariable.id]),
@@ -67,26 +69,37 @@ export async function chatOpenAIFactory(
       ? inputValues[historyMessageInputVariable.id]
       : []),
     new HumanMessage(inputValues[inputTextInputVariable.id] || '')
+  ] as BaseMessage[]
 
-  ]
+  // console.log('[ChatOpenAI] messages =', messages)
 
   const chain = RunnableLambda.from(async (_input, options) => {
     const resultMessage = await model.invoke(messages, options)
-
     return resultMessage.content
   })
 
   const messagePortId = messageOutputVariable.id
   const lmPortId = languageModelOutputVariable.id
 
-  const wrapped = wrapRunnable(chain, node.id, context.onRunnableElapsed, {
+  // ✅ 写入语言模型结构输出日志（立即可用的）
+  writeLogs(context, node.id, data.title, data.type, {
+    [lmPortId]: {
+      content: {
+        model,
+        messages: messages.map(msg => msg.content)
+      },
+      outputPort: languageModelOutputVariable,
+      elapsed: 0
+    }
+  }, 0)
+
+  // ✅ 包装 message 返回值（异步执行）
+  const wrapped = wrapRunnable(chain, node.id, data.title, data.type, context.onRunnableElapsed, {
     context,
     portId: messagePortId,
-
-    logFormat: res => ({
-      type: 'openai chat',
-      data: res
-    })
+    logFormat: res => ({ type: 'chat-message', data: res }),
+    collector,
+    outputPort: messageOutputVariable
   })
 
   return {

@@ -3,9 +3,9 @@ import { nanoid } from 'nanoid'
 
 import { StructuredTool } from 'langchain/tools'
 import type { LangFlowNode, BuildContext } from '~/types/workflow'
-import type { APIToolData } from '~/types/node-data/api-tool'
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
-
+import { type APIToolData, apiToolMeta } from '~/types/node-data/api-tool'
+import { resolveInputVariables, writeLogs } from '../utils'
+import type { OutputPortVariable } from '~/types/workflow'
 /** 字段定义结构 */
 type FieldDef = {
     key: string
@@ -68,8 +68,12 @@ class HttpRequestTool extends StructuredTool<any> {
     private context: BuildContext
     private nodeId: string
     private portId: string
+    private outputPort: OutputPortVariable
+    private readonly type = apiToolMeta.type
+    private readonly title = apiToolMeta.title
 
-    constructor({ name, description, url, method, token, schema, context, nodeId, portId }: {
+
+    constructor({ name, description, url, method, token, schema, context, nodeId, portId, outputPort }: {
         name: string
         description: string
         url: string
@@ -79,6 +83,7 @@ class HttpRequestTool extends StructuredTool<any> {
         context: BuildContext
         nodeId: string
         portId: string
+        outputPort: OutputPortVariable
     }) {
         super()
         this.name = name
@@ -90,47 +95,53 @@ class HttpRequestTool extends StructuredTool<any> {
         this.context = context
         this.nodeId = nodeId
         this.portId = portId
+        this.outputPort = outputPort
     }
 
+
     async _call(input: any): Promise<string> {
-        const { context, nodeId, portId, name, url, method } = this
-        let parsed: any
+        const { context, nodeId, portId, url, method } = this
+        const t0 = performance.now()
+        let result = ''
+        let error: string | undefined
 
         try {
-            parsed = this.schema.parse(input)
-            // writeLog(context, nodeId, name, portId, `[${name}] 调用输入: ${JSON.stringify(parsed)}`)
-        } catch (e: any) {
-            // writeLog(context, nodeId, name, portId, `[${name}] 输入校验失败: ${e?.message || e}`)
-            throw e
-        }
+            const parsed = this.schema.parse(input)
 
-        const headers: HeadersInit = { 'Content-Type': 'application/json' }
-        if (this.token) headers['Authorization'] = `Bearer ${this.token}`
+            const headers: HeadersInit = { 'Content-Type': 'application/json' }
+            if (this.token) headers['Authorization'] = `Bearer ${this.token}`
 
-        const options: RequestInit = { method, headers }
-        if (method !== 'GET') options.body = JSON.stringify(parsed)
+            const options: RequestInit = { method, headers }
+            if (method !== 'GET') options.body = JSON.stringify(parsed)
 
-        try {
             const response = await fetch(this.url, options)
             if (!response.ok) {
-                const text = await response.text()
-                return `Error ${response.status}: ${text}`
-            }
-
-            const contentType = response.headers.get('content-type') || ''
-            if (contentType.includes('application/json')) {
-                const json = await response.json()
-
-                return JSON.stringify(json, null, 2)
+                result = `Error ${response.status}: ${await response.text()}`
             } else {
-                const text = (await response.text()).trim()
-
-                return text
+                const contentType = response.headers.get('content-type') || ''
+                result = contentType.includes('application/json')
+                    ? JSON.stringify(await response.json(), null, 2)
+                    : (await response.text()).trim()
             }
         } catch (err: any) {
-
-            return `Request failed: ${err.message || err}`
+            error = err?.message || String(err)
+            result = `Request failed: ${error}`
         }
+
+        const elapsed = performance.now() - t0
+
+
+        // ✅ 正确结构化写入日志
+        writeLogs(context, nodeId, this.title, this.type, {
+            [portId]: {
+                content: "fetch url, result:" + result,
+                outputPort: this.outputPort,
+                elapsed,
+
+            }
+        }, elapsed)
+
+        return result
     }
 }
 
@@ -174,6 +185,7 @@ export async function apiToolFactory(node: LangFlowNode, context: BuildContext) 
         context,
         nodeId: node.id,
         portId: toolOutputVariable.id,
+        outputPort: toolOutputVariable,
     })
 
     return {

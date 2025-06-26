@@ -13,6 +13,7 @@ const { setExecutionTime } = useNodeExecutionStats()
 const { currentWorkflow, executionErrorNodeIds } = storeToRefs(useWorkflowStore())
 const open = defineModel<boolean>('open')
 const tokenInputRef = ref<{ input: HTMLInputElement } | null>(null)
+const { user } = storeToRefs(useUserStore())
 
 interface APISchemaField {
   name: string
@@ -32,7 +33,7 @@ function formatStepLabel(step: any, showTimeIcon: boolean) {
 onMounted(async () => {
   await until(currentWorkflow).toBeTruthy()
   if (currentWorkflow.value && !currentWorkflow.value.token) {
-    currentWorkflow.value.token = `askpro-${nanoid(32)}`
+    currentWorkflow.value.token = `torra-${nanoid(32)}`
 
   }
   //找到 workflow 的 nodes 里面有没有APIInputLangchainName的节点，作为 API 的入口
@@ -46,7 +47,7 @@ onMounted(async () => {
   }
   const inputValue = (apiInputNode.data as APIInputData).inputValue as KeyValueSchema || {}
 
-  console.log('inputValue', inputValue)
+  
   // 如果没有 inputValue 就提示
   if (!inputValue || Object.keys(inputValue).length === 0) {
     useToast('请至少添加一个输入参数')
@@ -88,7 +89,7 @@ const refreshToken = async () => {
 
   if (confirmed) {
     // 执行退出逻辑
-    currentWorkflow.value!.token = `askpro-${nanoid(32)}`
+    currentWorkflow.value!.token = `torra-${nanoid(32)}`
     await currentWorkflow.value!.save()
     useToast('Token Refreshed')
     const el = tokenInputRef.value?.input
@@ -106,7 +107,7 @@ const curlCode = ref('')
 watch(
   () => [currentWorkflow.value?.apiSchema, currentWorkflow.value?.token],
   ([schemaRaw]) => {
-    // console.log('schemaRaw', schemaRaw,currentWorkflow.value?.token)
+
     const fields = schemaRaw as KeyValueSchema || {}
     const jsonBody: Record<string, any> = {}
     for (const [, v] of Object.entries(fields)) {
@@ -121,8 +122,9 @@ watch(
 
     const prettyJson = JSON.stringify(jsonBody, null, 2)
 
-    curlCode.value = `curl -X POST https://api.allaicg.cn/api/v1/run \\
+    curlCode.value = `curl -X POST http://localhost:3000/api/v1/run \\
 -H 'Authorization: Bearer ${currentWorkflow.value?.token}' \\
+-H 'X-User-ID:${user.value?.objectId}' \\
 -H 'Content-Type: application/json' \\
 -d '${prettyJson}'`
 
@@ -158,6 +160,7 @@ const run = async () => {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
+        'X-User-ID': `${user.value?.objectId}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(requestBody),

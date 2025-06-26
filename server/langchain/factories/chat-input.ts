@@ -5,7 +5,7 @@ import type {
   NodeFactory,
   OutputPortVariable,
 } from '~/types/workflow'
-
+import { writeLogs } from '../utils'
 
 /**
  * ChatInput 节点工厂函数
@@ -19,8 +19,18 @@ export const chatInputFactory: NodeFactory = async (
   const data = node.data as ChatInputData
   const outputVar = data.outputVariable as OutputPortVariable
   const outputPortId = outputVar.id
+  const inputValue = data.inputValue || ''
+
+  // ✅ 标准结构化日志写入
+  writeLogs(context, node.id, data.title, data.type, {
+    [outputPortId]: {
+      content: inputValue,
+      outputPort: outputVar,
+      elapsed: 0,
+    }
+  }, 0)
 
   return {
-    [outputPortId]: data.inputValue || '',
+    [outputPortId]: inputValue,
   }
 }

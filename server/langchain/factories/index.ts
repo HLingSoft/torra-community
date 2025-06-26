@@ -165,6 +165,7 @@ export const initFactories = () => {
   nodeFactoryMap[imageGenerateOpenAIMeta.type] = imageGenerateOpenAIFactory
 
 
+
   nodeFactoryMap[urlMeta.type] = urlFactory
   nodeFactoryMap[combineDataMeta.type] = combineDataFactory
 

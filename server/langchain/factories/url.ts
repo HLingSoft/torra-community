@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio'
 import type { URLData } from '@/types/node-data/url'
 import type { BuildContext, LangFlowNode, NodeFactory } from '~/types/workflow'
-import { writeLog, resolveInputVariables, wrapRunnable } from '../resolveInput'
+import { resolveInputVariables, wrapRunnable } from '../utils'
 import { RunnableLambda } from "@langchain/core/runnables";
 async function fetchWithTimeout(url: string, timeoutMs = 10000) {
     const controller = new AbortController()
@@ -86,13 +86,7 @@ export const urlFactory: NodeFactory = async (
     const preventOutside = true
     const format = 'Text'
     const visited = new Set<string>()
-    // const docs = await fetchUrlRecursive(
-    //     inputUrl,
-    //     maxDepth,
-    //     visited,
-    //     { maxDepth, preventOutside, format },
-    //     rootDomain
-    // )
+
 
 
 
@@ -113,18 +107,17 @@ export const urlFactory: NodeFactory = async (
 
 
 
-    // 用 wrapRunnable 进行封装
     const wrapped = wrapRunnable(
         urlFetchRunnable,
         node.id,
+        node.data.title,
+        node.data.type,
         context.onRunnableElapsed,
         {
             context,
             portId: outputVariable.id,
-            logFormat: res => ({
-                type: "url-fetch",
-                data: res,
-            }),
+            logFormat: res => ({ type: 'url-fetch', data: res }),
+            outputPort: outputVariable, // 输出端口
         }
     )
 

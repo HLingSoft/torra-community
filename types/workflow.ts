@@ -27,15 +27,6 @@ export interface DAGContext {
   results: Record<string, unknown>
 }
 
-// export interface DAGStepInfo {
-//   nodeId: string
-//   nodeType: string
-//   output: unknown
-//   startTime: number
-//   endTime: number
-//   duration: number
-// }
-
 export interface ExecuteDAGOptions {
   onStep?: (step: DAGStepInfo) => void
   maxLoopIterations?: number
@@ -46,11 +37,16 @@ export interface DAGStepInfo {
   total: number
   nodeId: string
   nodeTitle: string
-  type: string
-  output: any
-  // outputPreview: string
-  elapsed: number
-  elapsedStr: string
+  nodeType: string
+  ports: {
+    portId: string
+    elapsed: number
+    elapsedStr: string
+    content: any
+    timestamp: number
+  }[]
+  error?: string
+  elapsed: number // 当前节点总耗时
 }
 
 export interface InputPortVariable {
@@ -60,7 +56,7 @@ export interface InputPortVariable {
   connected: boolean
   allowedTypes: string[]
   defaultValue?: any
-  // forceStringify?: boolean // 是否强制转成字符串
+
 
 }
 
@@ -85,6 +81,14 @@ export type KeyValueSchema = Record<
     value?: any
   }
 >
+
+
+export interface PortLog {
+  content: any
+  outputPort: OutputPortVariable // 输出端口
+  elapsed?: number // 耗时，单位毫秒
+}
+
 export interface DAGRunResult {
   statusCode: number
   results: Record<string, any>
@@ -94,9 +98,12 @@ export interface DAGRunResult {
   errorType?: string
   errorMessage?: string
 }
-// export type BuildContext = Record<string, any>
+
 export type NodeResultsMap = Record<string, Record<string, any>>
 export interface BuildContext {
+  userId: string
+  workflowId: string
+
   logs: NodeResultsMap,
   resolvedInput: Record<string, any>
   results: NodeResultsMap

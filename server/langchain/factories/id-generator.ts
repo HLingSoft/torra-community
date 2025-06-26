@@ -3,7 +3,7 @@ import type {
   BuildContext,
   LangFlowNode
 } from '~/types/workflow'
-import { writeLog } from '../../langchain/resolveInput'
+import { writeLogs } from '../utils'
 
 /** ID 生成器节点工厂函数 */
 export async function iDGeneratorFactory(
@@ -13,6 +13,14 @@ export async function iDGeneratorFactory(
   const data = node.data as IDGeneratorData
   const { inputValue, outputVariable } = data
 
+  // ✅ 写入结构化日志
+  writeLogs(context, node.id, data.title, data.type, {
+    [outputVariable.id]: {
+      content: inputValue,
+      outputPort: outputVariable,
+      elapsed: 0,
+    }
+  }, 0)
 
   return {
     [outputVariable.id]: inputValue

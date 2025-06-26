@@ -2,10 +2,11 @@ import type {
     BuildContext,
     LangFlowNode,
     NodeFactory,
-    InputPortVariable
+    InputPortVariable,
+    OutputPortVariable
 } from '~/types/workflow'
 import type { ImageGenerateOpenAIData } from '~/types/node-data/image-generate-openai'
-import { resolveInputVariables, writeLog, wrapRunnable } from '../resolveInput'
+import { resolveInputVariables, writeLogs, wrapRunnable } from '../utils'
 import { RunnableLambda } from "@langchain/core/runnables";
 
 import { StructuredTool } from "langchain/tools";
@@ -55,10 +56,11 @@ export const imageGenerateOpenAIFactory: NodeFactory = async (
         return await tool.invoke(prompt);
     });
 
-    // 用 wrapRunnable 包装，支持 pipeline 自动调用、日志
     const wrappedBase64 = wrapRunnable(
         imageGenerateChain,
         node.id,
+        node.data.title,
+        node.data.type,
         context.onRunnableElapsed,
         {
             context,
@@ -66,10 +68,10 @@ export const imageGenerateOpenAIFactory: NodeFactory = async (
             logFormat: res => ({
                 type: "openai-image-base64",
                 data: res
-            })
+            }),
+            outputPort: base64ImageOutputVariable // ✅ 关键：结构化日志需要包含 outputPort
         }
-    );
-
+    )
 
     const customTool = new DallEImageGenerateTool({
         apiKey: inputValues[apiKeyInputVariable.id],
@@ -77,10 +79,14 @@ export const imageGenerateOpenAIFactory: NodeFactory = async (
         size,
         style,
         quality,
-    });
+    }, context,
+        node.id,
+        node.data.title,
+        node.data.type,
+        toolOutputVariable.id,
+        toolOutputVariable);
     return {
         [base64ImageOutputVariable.id]: wrappedBase64,
-
         [toolOutputVariable.id]: customTool
     };
 }
@@ -96,11 +102,17 @@ class DallEImageGenerateTool extends StructuredTool {
 
     constructor(private modelParams: {
         apiKey: string; baseUrl: string; size: "1024x1024" | "1792x1024" | "1024x1792"; style: "natural" | "vivid"; quality: "standard" | "hd"
-    }) {
+    }, private context?: BuildContext,
+        private nodeId?: string,
+        private title?: string,
+        private type?: string,
+        private portId?: string,
+        private outputPort?: OutputPortVariable) {
         super();
     }
 
     async _call(inputs: { prompt: string }) {
+        const t0 = performance.now()
         const wrapper = new DallEAPIWrapper({
             n: 1,
             model: "dall-e-3",
@@ -112,6 +124,28 @@ class DallEImageGenerateTool extends StructuredTool {
             dallEResponseFormat: 'url',
         });
         const result = await wrapper.invoke(inputs.prompt);
+        // console.log('DALL·E Image Generation Result:', result);
+
+        const elapsed = performance.now() - t0
+
+
+        if (this.context && this.nodeId && this.portId && this.outputPort) {
+            writeLogs(
+                this.context,
+                this.nodeId,
+                this.title || 'DALL·E Image Generation',
+                this.type || 'image-generate-openai',
+                {
+                    [this.portId]: {
+                        content: result,
+                        outputPort: this.outputPort,
+                        elapsed
+                    }
+                },
+                elapsed,
+
+            )
+        }
 
         return result
     }

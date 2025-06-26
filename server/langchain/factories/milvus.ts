@@ -1,7 +1,7 @@
 import type { LangFlowNode, BuildContext } from '~/types/workflow'
 import type { MilvusData } from '@/types/node-data/milvus'
 
-import { resolveInputVariables, wrapRunnable, writeLog } from '../../langchain/resolveInput'
+import { resolveInputVariables, wrapRunnable } from '../utils'
 import { RunnableLambda } from '@langchain/core/runnables'
 import { Milvus } from '@langchain/community/vectorstores/milvus'
 import type { MilvusLibArgs } from '@langchain/community/vectorstores/milvus'
@@ -89,19 +89,21 @@ export async function milvusFactory(node: LangFlowNode, context: BuildContext) {
   const wrapped = wrapRunnable(
     searchRunnable,
     node.id,
+    data.title,
+    data.type,
     context.onRunnableElapsed,
     {
       context,
       portId: data.outputPortVariable.id,
+      logFormat: res => ({
+        type: 'milvus',
+        collection: collectionName,
+        query,
+        result: res
+      }),
+      outputPort: data.outputPortVariable
     }
   )
-
-  // writeLog(
-  //   context,
-  //   node.id,
-  //   data.outputPortVariable.id,
-  //   `Milvus collection: ${collectionName}, URL: ${url}`,
-  // )
 
   return {
     [data.outputPortVariable.id]: wrapped,

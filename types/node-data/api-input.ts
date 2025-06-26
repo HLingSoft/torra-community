@@ -28,6 +28,9 @@ export const apiInputMeta: APIInputData = {
         name: 'Structured Data',
         outputType: 'Structured Data',
     } as OutputPortVariable,
-
+    // messageOutputVariable: {
+    //     name: 'When Done',
+    //     outputType: 'Data',
+    // } as OutputPortVariable,
     show: true,
 }

@@ -1,7 +1,7 @@
 import type { LangFlowNode, BuildContext } from '~/types/workflow'
 import type { IfElseData } from '@/types/node-data/if-else'
 import { MatchType } from '@/types/node-data/if-else'
-import { resolveInputVariables, writeLog } from '../resolveInput'
+import { resolveInputVariables, writeLogs } from '../utils'
 import { InputPortVariable } from '~/types/workflow'
 
 export const ifElseFactory = async (node: LangFlowNode, context: BuildContext) => {
@@ -17,9 +17,8 @@ export const ifElseFactory = async (node: LangFlowNode, context: BuildContext) =
     falseOutputVariable,
   } = data
 
-  console.log(`[IfElse] Node ${node.id} ${node.data.title} started`, matchType)
-  // -------- 解析输入 --------
-  // 只在字符串模式下才传 matchTextInputVariable
+  const t0 = performance.now()
+
   const inputVars = [
     textInputVariable,
     messageInputVariable,
@@ -28,17 +27,10 @@ export const ifElseFactory = async (node: LangFlowNode, context: BuildContext) =
 
   const inputVals = await resolveInputVariables(context, inputVars)
 
-  // 取输入值
   const textInput = String(inputVals[textInputVariable.id] ?? '')
   const matchText = String(inputVals[matchTextInputVariable?.id] ?? '')
   const message = inputVals[messageInputVariable.id] ?? ''
 
-  // -------- 判断类型 --------
-  if (matchType !== MatchType.String && matchType !== MatchType.Boolean) {
-    throw new Error(`[IfElse] Unsupported matchType: ${matchType}`)
-  }
-
-  // -------- 执行比较 --------
   const norm = (s: string) => (caseSensitive ? s : s.toLowerCase())
 
   const applyString = () => {
@@ -64,10 +56,27 @@ export const ifElseFactory = async (node: LangFlowNode, context: BuildContext) =
   }
 
   const passed = matchType === MatchType.String ? applyString() : applyBoolean()
+  const elapsed = performance.now() - t0
 
-  return {
+  const result = {
     [trueOutputVariable.id]: passed ? message : undefined,
     [falseOutputVariable.id]: passed ? undefined : message,
-    default: passed, // executor 依此剪枝
+    default: passed
   }
+
+  // ✅ 写结构化日志
+  writeLogs(context, node.id, data.title, data.type, {
+    [trueOutputVariable.id]: {
+      content: result[trueOutputVariable.id],
+      outputPort: trueOutputVariable,
+      elapsed
+    },
+    [falseOutputVariable.id]: {
+      content: result[falseOutputVariable.id],
+      outputPort: falseOutputVariable,
+      elapsed
+    }
+  }, elapsed)
+
+  return result
 }

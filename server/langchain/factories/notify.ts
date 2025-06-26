@@ -1,7 +1,7 @@
 import type { NotifyData } from '@/types/node-data/notify'
 import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~/types/workflow'
 
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLogs } from '../utils'
 import { createRedisClient } from '~/server/utils/redis'
 
 export const notifyFactory: NodeFactory = async (
@@ -38,6 +38,22 @@ export const notifyFactory: NodeFactory = async (
 
     // 关闭连接
     redisPub.quit()
+
+    // ✅ 写日志
+    writeLogs(
+        context,
+        node.id,
+        data.title,
+        data.type,
+        {
+            [data.outputVariable.id]: {
+                content: notifyValue,
+                outputPort: data.outputVariable,
+                elapsed: 0
+            }
+        },
+        0
+    )
 
     return {
         [data.outputVariable.id]: notifyValue

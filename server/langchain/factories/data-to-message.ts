@@ -5,10 +5,11 @@ import type {
     InputPortVariable
 } from '~/types/workflow'
 import type { DataToMessageData } from '@/types/node-data/data-to-message'
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLogs } from '../utils'
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages'
+
 /**
- * MessageToData 节点工厂函数
+ * DataToMessage 节点工厂函数（立即执行 + 写日志）
  */
 export const dataToMessageFactory: NodeFactory = async (
     node: LangFlowNode,
@@ -18,25 +19,32 @@ export const dataToMessageFactory: NodeFactory = async (
 
     const variableDefs = [inputInputVariable] as InputPortVariable[]
     const inputValues = await resolveInputVariables(context, variableDefs)
-    const message = inputValues[inputInputVariable.id]
+    const inputText = inputValues[inputInputVariable.id]
 
-    let storedMessage: HumanMessage | AIMessage | undefined = undefined;
+    let storedMessage
 
-
-
-    if (role === 'Human') {
-        storedMessage = new HumanMessage(message)
-
-    } else if (role === 'System') {
-        storedMessage = new SystemMessage(message)
-
-
-    } else if (role === 'AI') {
-        storedMessage = new AIMessage(message)
-
+    switch (role) {
+        case 'Human':
+            storedMessage = new HumanMessage(inputText)
+            break
+        case 'System':
+            storedMessage = new SystemMessage(inputText)
+            break
+        case 'AI':
+            storedMessage = new AIMessage(inputText)
+            break
+        default:
+            storedMessage = new HumanMessage(inputText)
     }
 
-
+    // ✅ 写日志（elapsed 为 0）
+    writeLogs(context, node.id, node.data.title, node.data.type, {
+        [outputVariable.id]: {
+            content: storedMessage,
+            outputPort: outputVariable,
+            elapsed: 0
+        }
+    }, 0)
 
     return {
         [outputVariable.id]: storedMessage

@@ -1,6 +1,6 @@
 import type { LangFlowNode, BuildContext } from '~/types/workflow'
 import type { OpenAIEmbeddingsData } from '@/types/node-data/openai-embeddings'
-import { resolveInputVariables, writeLog } from '../../langchain/resolveInput'
+import { resolveInputVariables, writeLogs } from '../utils'
 import { OpenAIEmbeddings } from '@langchain/openai'
 
 /**
@@ -24,12 +24,20 @@ export async function openAIEmbeddingsFactory(node: LangFlowNode, context: Build
     configuration: { baseURL },
   })
 
-  // writeLog(
-  //   context,
-  //   node.id,
-  //   outputVariable.id,
-  //   `OpenAIEmbeddings ${modelName} 初始化成功`,
-  // )
+  writeLogs(
+    context,
+    node.id,
+    data.title,
+    data.type,
+    {
+      [outputVariable.id]: {
+        content: `OpenAIEmbeddings ${modelName} 初始化成功`,
+        outputPort: outputVariable,
+        elapsed: 0
+      }
+    },
+    0
+  )
 
   return {
     [outputVariable.id]: embeddings,
