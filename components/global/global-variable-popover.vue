@@ -93,7 +93,7 @@ watch(edges, () => {
 }, { immediate: true })
 
 onUnmounted(() => {
-  console.log('Unmounting global variable popover')
+  // console.log('Unmounting global variable popover')
   if (inputVariableRef.value && targetHandleUUID.value) {
     const index = edges.value.findIndex(edge => edge.targetHandle === targetHandleUUID.value)
     if (index !== -1) {

@@ -38,7 +38,7 @@ onMounted(async () => {
   }
   //找到 workflow 的 nodes 里面有没有APIInputLangchainName的节点，作为 API 的入口
   const apiInputNode = currentWorkflow.value!.nodes.find((node) => {
-    // console.log('node.data.type', node.data.type, APIInputLangchainName)
+    
     return node.data.type === APIInputLangchainName
   })
   if (!apiInputNode) {
@@ -67,7 +67,7 @@ onMounted(async () => {
   currentWorkflow.value!.apiSchema = apiSchema
 
   await currentWorkflow.value!.save()
-  // useToast('工作流已保存')
+ 
 })
 
 const { copy } = useClipboard()
@@ -179,7 +179,7 @@ const run = async () => {
       : `${seconds}秒`
 
     const json = await res.json()
-    console.log('API Response:', json)
+     
     if (!res.ok) {
       runResult.value = `❌ API执行失败：${json.error || '未知错误'}`
       return
@@ -194,7 +194,7 @@ const run = async () => {
         }
       }
     } else {
-      // console.error('API执行错误', json.output)
+     
       runResult.value = json.output
       // 批量渲染统计面板
       if (json.logs && Array.isArray(json.logs)) {
