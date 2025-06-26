@@ -27,6 +27,7 @@ export async function chatOpenAIFactory(
   context: BuildContext
 ) {
 
+  const t0 = performance.now()
   const data = node.data as ChatOpenAIData
   const {
     modelName,
@@ -81,27 +82,28 @@ export async function chatOpenAIFactory(
   const messagePortId = messageOutputVariable.id
   const lmPortId = languageModelOutputVariable.id
 
+
+
+  // ✅ 包装 message 返回值（异步执行）
+  const wrapped = wrapRunnable(chain, node.id, {
+    context,
+    portId: messagePortId,
+    logFormat: res => ({ type: 'chat-openai-message', data: res }),
+    outputPort: messageOutputVariable
+  })
+
+  const elapsed = performance.now() - t0
   // ✅ 写入语言模型结构输出日志（立即可用的）
   writeLogs(context, node.id, data.title, data.type, {
     [lmPortId]: {
       content: {
         model,
-        messages: messages.map(msg => msg.content)
+        messages: messages.map(msg => msg.content).slice(0, 200) + '...' // 限制输出长度
       },
       outputPort: languageModelOutputVariable,
-      elapsed: 0
+      elapsed: elapsed
     }
-  }, 0)
-
-  // ✅ 包装 message 返回值（异步执行）
-  const wrapped = wrapRunnable(chain, node.id, data.title, data.type, context.onRunnableElapsed, {
-    context,
-    portId: messagePortId,
-    logFormat: res => ({ type: 'chat-message', data: res }),
-    collector,
-    outputPort: messageOutputVariable
-  })
-
+  }, elapsed)
   return {
     [messagePortId]: wrapped,
     [lmPortId]: {

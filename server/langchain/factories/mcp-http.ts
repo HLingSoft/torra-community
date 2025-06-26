@@ -1,7 +1,7 @@
 /* ────────────────────────────────────────────────
    nodes/mcpHttpFactory.ts
 ───────────────────────────────────────────────── */
-import type { LangFlowNode, BuildContext, InputPortVariable, OutputPortVariable } from '~/types/workflow'
+import type { LangFlowNode, BuildContext, InputPortVariable } from '~/types/workflow'
 import type { MCPHttpData } from '@/types/node-data/mcp-http'
 
 import { resolveInputVariables, writeLogs } from '../utils'
@@ -9,6 +9,7 @@ import { StructuredTool } from 'langchain/tools'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 import { z } from 'zod'
+import { useJSONStringify } from '~/composables'
 
 /** JsonSchema转ZodSchema，支持基础类型、数组、对象、指针等 */
 function jsonSchemaToZod(schema: any) {
@@ -58,42 +59,45 @@ function ensureZodSchema(schema: any) {
     }
 }
 
-/** 真正访问 MCP 并返回工具数组（延迟调用 Tool._call） */
-async function fetchMCPTools(
-    url: string,
-    token: string,
+// /** 真正访问 MCP 并返回工具数组（延迟调用 Tool._call） */
+// async function fetchMCPTools(
+//     url: string,
+//     token: string,
 
-) {
-    const client = new Client({ name: 'mcp-http', version: '1.0.0' })
-    const headers: Record<string, string> = {}
-    if (token) headers.Authorization = `Bearer ${token}`
+// ) {
+//     const client = new Client({ name: 'mcp-http', version: '1.0.0' })
+//     const headers: Record<string, string> = {}
+//     if (token) headers.Authorization = `Bearer ${token}`
 
-    const transport = new StreamableHTTPClientTransport(new URL(url), {
-        requestInit: { headers },
-    })
-    await client.connect(transport)
-    const list = (await client.listTools()).tools ?? []
+//     const transport = new StreamableHTTPClientTransport(new URL(url), {
+//         requestInit: { headers },
+//     })
+//     await client.connect(transport)
+//     const list = (await client.listTools()).tools ?? []
+//     console.log(`[MCP-HTTP] 调用工具  ：`, list.map(tool => tool.name).join(', '))
 
-    return list.map(toolInfo => {
-        const zodSchema = ensureZodSchema(toolInfo.inputSchema ?? {})
-        return new (class extends StructuredTool<typeof zodSchema> {
-            name = toolInfo.name
-            description = toolInfo.description ?? 'MCP Tool'
-            schema = zodSchema
-            async _call(args: z.infer<typeof zodSchema>) {
-                const result = await client.callTool({ name: toolInfo.name, arguments: args })
+//     return list.map(toolInfo => {
+//         const zodSchema = ensureZodSchema(toolInfo.inputSchema ?? {})
+//         return new (class extends StructuredTool<typeof zodSchema> {
+//             name = toolInfo.name
+//             description = toolInfo.description ?? 'MCP Tool'
+//             schema = zodSchema
+//             async _call(args: z.infer<typeof zodSchema>) {
+//                 const result = await client.callTool({ name: toolInfo.name, arguments: args })
 
-                return (result.content as any[])?.[0]?.text ?? '无返回内容'
-            }
-        })()
-    })
-}
+
+//                 return (result.content as any[])?.[0]?.text ?? '无返回内容'
+//             }
+//         })()
+//     })
+// }
 
 /**
  * MCP-HTTP 工厂函数（LangFlow专用签名）
  */
 export async function mcpHttpFactory(node: LangFlowNode, context: BuildContext) {
     const t0 = performance.now()
+
     const data = node.data as MCPHttpData
     const { urlInputVariable, tokenInputVariable, outputVariable } = data
 
@@ -106,7 +110,41 @@ export async function mcpHttpFactory(node: LangFlowNode, context: BuildContext) 
     const token = inputVals[tokenInputVariable.id]
 
     // 2. 拉取 MCP 工具（返回 StructuredTool[]，只在真正用时才调用 _call）
-    const result = await fetchMCPTools(url, token)
+    const client = new Client({ name: 'mcp-http', version: '1.0.0' })
+    const headers: Record<string, string> = {}
+    if (token) headers.Authorization = `Bearer ${token}`
+
+    const transport = new StreamableHTTPClientTransport(new URL(url), {
+        requestInit: { headers },
+    })
+    await client.connect(transport)
+    const list = (await client.listTools()).tools ?? []
+
+    const result = list.map(toolInfo => {
+        const zodSchema = ensureZodSchema(toolInfo.inputSchema ?? {})
+        return new (class extends StructuredTool<typeof zodSchema> {
+            name = toolInfo.name
+            description = toolInfo.description ?? 'MCP Tool'
+            schema = zodSchema
+            async _call(args: z.infer<typeof zodSchema>) {
+                const toolT0 = performance.now()
+                const result = await client.callTool({ name: toolInfo.name, arguments: args })
+
+                const existingLog = context.logs?.[node.id]?.[outputVariable.id]
+                existingLog.content.runResult.push({
+                    name: toolInfo.name,
+                    description: toolInfo.description ?? 'MCP Tool',
+                    args: useJSONStringify(args),
+                    result: useJSONStringify(result.content).slice(0, 200) + '...',
+                    elapsed: performance.now() - toolT0,
+                })
+
+                return (result.content as any[])?.[0]?.text ?? '无返回内容'
+            }
+        })()
+    })
+
+
     const elapsed = performance.now() - t0
     // 3. 写入日志（只记录工具名和描述，避免内容太大）
     writeLogs(
@@ -116,7 +154,13 @@ export async function mcpHttpFactory(node: LangFlowNode, context: BuildContext) 
         node.data.type,
         {
             [outputVariable.id]: {
-                content: result,
+                content: {
+                    tools: result.map(tool => ({
+                        name: tool.name,
+                        description: tool.description,
+                    })),
+                    runResult: []
+                },
                 outputPort: outputVariable,
                 elapsed
             }

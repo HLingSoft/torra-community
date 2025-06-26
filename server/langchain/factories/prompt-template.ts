@@ -14,6 +14,8 @@ import { resolveInputVariables, writeLogs } from '../utils'
  * @param context - DAG 运行上下文
  */
 export async function promptTemplateFactory(node: LangFlowNode, context: BuildContext) {
+
+  const t0 = performance.now()
   const data = node.data as PromptTemplateData
 
   // 取出所有输入变量定义
@@ -44,6 +46,8 @@ export async function promptTemplateFactory(node: LangFlowNode, context: BuildCo
   // 输出端口 id
   const outputPortId = data.outputVariable.id
 
+  const elapsed = performance.now() - t0
+
   writeLogs(
     context,
     node.id,
@@ -51,12 +55,17 @@ export async function promptTemplateFactory(node: LangFlowNode, context: BuildCo
     data.type,
     {
       [outputPortId]: {
-        content: finalPrompt.value,
+        content: finalPrompt.value.slice(0, 100) + '...',
         outputPort: data.outputVariable,
-        elapsed: 0
+        elapsed
+      },
+      [data.promptOutputVariable.id]: {
+        content: '',
+        outputPort: data.promptOutputVariable,
+        elapsed
       }
     },
-    0
+    elapsed
   )
 
   // 按端口返回

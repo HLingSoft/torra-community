@@ -8,6 +8,7 @@ export const notifyFactory: NodeFactory = async (
     node: LangFlowNode,
     context: BuildContext
 ) => {
+    const t0 = performance.now()
     const data = node.data as any
     const inputValues = await resolveInputVariables(context, [data.nameInputVariable, data.valueInputVariable])
     const notifyName = inputValues[data.nameInputVariable.id] as string
@@ -38,7 +39,7 @@ export const notifyFactory: NodeFactory = async (
 
     // 关闭连接
     redisPub.quit()
-
+    const elapsed = performance.now() - t0
     // ✅ 写日志
     writeLogs(
         context,
@@ -49,10 +50,10 @@ export const notifyFactory: NodeFactory = async (
             [data.outputVariable.id]: {
                 content: notifyValue,
                 outputPort: data.outputVariable,
-                elapsed: 0
+                elapsed
             }
         },
-        0
+        elapsed
     )
 
     return {

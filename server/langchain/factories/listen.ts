@@ -11,6 +11,8 @@ export const listenFactory: NodeFactory = async (
     node: LangFlowNode,
     context: BuildContext
 ) => {
+
+    const t0 = performance.now()
     const data = node.data as ListenData
     const inputValues = await resolveInputVariables(context, [data.nameInputVariable])
     const listenName = inputValues[data.nameInputVariable.id] as string
@@ -25,7 +27,7 @@ export const listenFactory: NodeFactory = async (
     const redisSub = createRedisClient()
     const TIMEOUT_MS = 600 * 1000 // 600秒
 
-    const t0 = performance.now()
+
 
     return new Promise((resolve, reject) => {
         const handler = (chan: string, message: string) => {

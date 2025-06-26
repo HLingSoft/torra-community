@@ -8,7 +8,7 @@ export interface MilvusData {
   description: string
 
   collectionNameInputVariable: InputPortVariable
-  // collectionDatabaseInputVariable: InputPortVariable
+
   connectionURIInputVariable: InputPortVariable
   tokenInputVariable: InputPortVariable
 

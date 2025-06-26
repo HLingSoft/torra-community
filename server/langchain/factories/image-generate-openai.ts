@@ -6,7 +6,7 @@ import type {
     OutputPortVariable
 } from '~/types/workflow'
 import type { ImageGenerateOpenAIData } from '~/types/node-data/image-generate-openai'
-import { resolveInputVariables, writeLogs, wrapRunnable } from '../utils'
+import { resolveInputVariables, writeLogs, wrapRunnable, updatePortLog } from '../utils'
 import { RunnableLambda } from "@langchain/core/runnables";
 
 import { StructuredTool } from "langchain/tools";
@@ -18,14 +18,14 @@ export const imageGenerateOpenAIFactory: NodeFactory = async (
     node: LangFlowNode,
     context: BuildContext
 ) => {
-    // console.log('imageGenerateOpenAIFactory', node.id, context);
+    const t0 = performance.now();
     const {
         userInputInputVariable,
         apiKeyInputVariable,
         baseURLInputVariable,
         toolOutputVariable,
         base64ImageOutputVariable,
-        // urlOutputVariable,
+
         style,
         quality,
         size
@@ -59,15 +59,16 @@ export const imageGenerateOpenAIFactory: NodeFactory = async (
     const wrappedBase64 = wrapRunnable(
         imageGenerateChain,
         node.id,
-        node.data.title,
-        node.data.type,
-        context.onRunnableElapsed,
+
+
         {
             context,
             portId: base64ImageOutputVariable.id,
             logFormat: res => ({
                 type: "openai-image-base64",
-                data: res
+                size: res.length,                // base64 字符串长度
+                preview: res.slice(0, 100) + '...(略)',  // 前100字符作为预览
+
             }),
             outputPort: base64ImageOutputVariable // ✅ 关键：结构化日志需要包含 outputPort
         }
@@ -81,10 +82,25 @@ export const imageGenerateOpenAIFactory: NodeFactory = async (
         quality,
     }, context,
         node.id,
-        node.data.title,
-        node.data.type,
         toolOutputVariable.id,
-        toolOutputVariable);
+    );
+
+    const elapsed = performance.now() - t0;
+    // ✅ 写入结构化日志
+    writeLogs(context, node.id, node.data.title, node.data.type, {
+        [base64ImageOutputVariable.id]: {
+            content: 'DALL·E Image Base64 Output',
+            outputPort: base64ImageOutputVariable,
+            elapsed
+        },
+        [toolOutputVariable.id]: {
+            content: 'DALL·E Image Generation Tool',
+            outputPort: toolOutputVariable,
+            elapsed
+        }
+    }, elapsed);
+
+
     return {
         [base64ImageOutputVariable.id]: wrappedBase64,
         [toolOutputVariable.id]: customTool
@@ -102,12 +118,10 @@ class DallEImageGenerateTool extends StructuredTool {
 
     constructor(private modelParams: {
         apiKey: string; baseUrl: string; size: "1024x1024" | "1792x1024" | "1024x1792"; style: "natural" | "vivid"; quality: "standard" | "hd"
-    }, private context?: BuildContext,
-        private nodeId?: string,
-        private title?: string,
-        private type?: string,
-        private portId?: string,
-        private outputPort?: OutputPortVariable) {
+    }, private context: BuildContext,
+        private nodeId: string,
+
+        private portId: string) {
         super();
     }
 
@@ -124,28 +138,11 @@ class DallEImageGenerateTool extends StructuredTool {
             dallEResponseFormat: 'url',
         });
         const result = await wrapper.invoke(inputs.prompt);
-        // console.log('DALL·E Image Generation Result:', result);
-
         const elapsed = performance.now() - t0
-
-
-        if (this.context && this.nodeId && this.portId && this.outputPort) {
-            writeLogs(
-                this.context,
-                this.nodeId,
-                this.title || 'DALL·E Image Generation',
-                this.type || 'image-generate-openai',
-                {
-                    [this.portId]: {
-                        content: result,
-                        outputPort: this.outputPort,
-                        elapsed
-                    }
-                },
-                elapsed,
-
-            )
-        }
+        updatePortLog(this.context, this.nodeId, this.portId, {
+            content: result,
+            elapsed
+        })
 
         return result
     }

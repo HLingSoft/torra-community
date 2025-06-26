@@ -3,10 +3,12 @@ import type { OpenAIEmbeddingsData } from '@/types/node-data/openai-embeddings'
 import { resolveInputVariables, writeLogs } from '../utils'
 import { OpenAIEmbeddings } from '@langchain/openai'
 
+
 /**
  * OpenAIEmbeddings 节点工厂函数
  */
 export async function openAIEmbeddingsFactory(node: LangFlowNode, context: BuildContext) {
+  const t0 = performance.now()
   const data = node.data as OpenAIEmbeddingsData
   const { modelName, apiKeyInputVariable, baseURLInputVariable, outputVariable } = data
 
@@ -22,7 +24,10 @@ export async function openAIEmbeddingsFactory(node: LangFlowNode, context: Build
     stripNewLines: true,
     dimensions: 1536,
     configuration: { baseURL },
+
+
   })
+  const elapsed = performance.now() - t0
 
   writeLogs(
     context,
@@ -33,10 +38,10 @@ export async function openAIEmbeddingsFactory(node: LangFlowNode, context: Build
       [outputVariable.id]: {
         content: `OpenAIEmbeddings ${modelName} 初始化成功`,
         outputPort: outputVariable,
-        elapsed: 0
+        elapsed
       }
     },
-    0
+    elapsed
   )
 
   return {

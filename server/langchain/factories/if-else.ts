@@ -5,6 +5,8 @@ import { resolveInputVariables, writeLogs } from '../utils'
 import { InputPortVariable } from '~/types/workflow'
 
 export const ifElseFactory = async (node: LangFlowNode, context: BuildContext) => {
+
+  const t0 = performance.now()
   const data = node.data as IfElseData
   const {
     textInputVariable,
@@ -17,7 +19,6 @@ export const ifElseFactory = async (node: LangFlowNode, context: BuildContext) =
     falseOutputVariable,
   } = data
 
-  const t0 = performance.now()
 
   const inputVars = [
     textInputVariable,
@@ -66,14 +67,15 @@ export const ifElseFactory = async (node: LangFlowNode, context: BuildContext) =
 
   // ✅ 写结构化日志
   writeLogs(context, node.id, data.title, data.type, {
-    [trueOutputVariable.id]: {
-      content: result[trueOutputVariable.id],
-      outputPort: trueOutputVariable,
-      elapsed
-    },
-    [falseOutputVariable.id]: {
-      content: result[falseOutputVariable.id],
-      outputPort: falseOutputVariable,
+
+    default: {
+      content: {
+        passthrough: message,
+        passed,
+        branch: passed ? 'if-true' : 'if-false'
+      },
+
+      outputPort: passed ? trueOutputVariable : falseOutputVariable,
       elapsed
     }
   }, elapsed)

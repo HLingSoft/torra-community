@@ -12,6 +12,8 @@ import { executeDAG } from '~/server/langchain/builder'
 import { LangFlowJson, DAGStepInfo } from '~/types/workflow'
 import type { WebSocket } from 'ws'
 import * as _ from 'lodash-es'
+import { useJSONStringify } from '~/composables'
+// import { generateLangFlowJSONFromVueFlow } from '~/server/langchain/transformer'
 
 export default defineNitroPlugin(() => {
   if (process.env.NODE_ENV === 'prerender') {
@@ -24,24 +26,24 @@ export default defineNitroPlugin(() => {
   wss.on('connection', (ws: WebSocket) => {
     ws.on('message', async (raw: WebSocket.Data) => {
       try {
-        const msg: WSExecuteRunMessage = JSON.parse(raw.toString())
+        const msg: WSMessage = JSON.parse(raw.toString())
+        // console.log('📩 Received message:', msg)
 
         if (isWithNamespace(msg) && msg.namespace === 'execute' && msg.type === 'run') {
-
+          const runMsg = msg as WSExecuteRunMessage
           const langflowJson: LangFlowJson = {
-            nodes: _.cloneDeep(msg.workflow.nodes),
-            edges: _.cloneDeep(msg.workflow.edges)
+            nodes: _.cloneDeep(runMsg.workflow.nodes),
+            edges: _.cloneDeep(runMsg.workflow.edges)
           }
 
-
-          const res = await executeDAG(langflowJson, msg.input.message, 'chat', {
+          const res = await executeDAG(langflowJson, runMsg.input.message, 'chat', msg.userId, msg.workflowId, {
             onStep: (step: DAGStepInfo) => {
               const progressMsg: WSExecuteProgressMessage = {
                 namespace: 'execute',
                 type: 'progress',
                 data: step,
               }
-              ws.send(JSON.stringify(progressMsg))
+              ws.send(useJSONStringify(progressMsg))
             },
           })
 
@@ -53,14 +55,15 @@ export default defineNitroPlugin(() => {
               output: res.output,
               logs: res.logs,
               statusCode: res.statusCode,
-              results: res.results,
+
               errorNodeId: res.errorNodeId,
               errorType: res.errorType,
               errorMessage: res.errorMessage,
 
             },
           }
-          ws.send(JSON.stringify(doneMsg))
+
+          ws.send(useJSONStringify(doneMsg))
         }
       }
       catch (e: any) {
@@ -69,7 +72,7 @@ export default defineNitroPlugin(() => {
           message: e.message,
           stack: e.stack,
         }
-        ws.send(JSON.stringify(errorMsg))
+        ws.send(useJSONStringify(errorMsg))
       }
     })
 

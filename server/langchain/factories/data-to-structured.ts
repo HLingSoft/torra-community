@@ -12,6 +12,7 @@ export const dataToStructuredFactory: NodeFactory = async (
     node: LangFlowNode,
     context: BuildContext
 ) => {
+    const t0 = performance.now()
     const data = node.data as DataToStructuredData
 
     const inputValues = await resolveInputVariables(context, [data.dataInputVariable])
@@ -31,15 +32,15 @@ export const dataToStructuredFactory: NodeFactory = async (
             output = inputValue
         }
     }
-
+    const elapsed = performance.now() - t0
     // ✅ 写入结构化日志
     writeLogs(context, node.id, node.data.title, node.data.type, {
         [outputPortId]: {
             content: output,
             outputPort: outputVar,
-            elapsed: 0,
+            elapsed,
         }
-    }, 0)
+    }, elapsed)
 
     return {
         [outputPortId]: output,

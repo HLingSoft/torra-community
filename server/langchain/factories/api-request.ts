@@ -1,9 +1,10 @@
 import { RunnableLambda } from '@langchain/core/runnables'
 import type { LangFlowNode, BuildContext } from '~/types/workflow'
-import { resolveInputVariables, wrapRunnable } from '../utils'
+import { resolveInputVariables, wrapRunnable, writeLogs } from '../utils'
 import type { APIRequestData } from '~/types/node-data/api-request'
 
 export async function apiRequestFactory(node: LangFlowNode, context: BuildContext) {
+    const t0 = performance.now()
     const data = node.data as APIRequestData
     const {
         methodType,
@@ -67,9 +68,7 @@ export async function apiRequestFactory(node: LangFlowNode, context: BuildContex
     const wrapped = wrapRunnable(
         requestChain.pipe(r => r.raw ?? ''),
         node.id,
-        data.title, // 节点标题
-        data.type,  // 节点类型
-        context.onRunnableElapsed,
+
         {
             context,
             portId: dataOutputVariable.id,
@@ -77,7 +76,14 @@ export async function apiRequestFactory(node: LangFlowNode, context: BuildContex
             logFormat: res => ({ type: 'api-request', data: res }),
         }
     )
-
+    const elapsed = performance.now() - t0
+    writeLogs(context, node.id, data.title, data.type, {
+        [data.dataOutputVariable.id]: {
+            content: '',
+            outputPort: data.dataOutputVariable,
+            elapsed: elapsed,
+        }
+    }, elapsed)
 
     return {
         [dataOutputVariable.id]: wrapped,

@@ -87,6 +87,7 @@ export interface PortLog {
   content: any
   outputPort: OutputPortVariable // 输出端口
   elapsed?: number // 耗时，单位毫秒
+  timestamp?: number // 日志时间戳，单位毫秒
 }
 
 export interface DAGRunResult {

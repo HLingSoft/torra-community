@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio'
 import type { URLData } from '@/types/node-data/url'
 import type { BuildContext, LangFlowNode, NodeFactory } from '~/types/workflow'
-import { resolveInputVariables, wrapRunnable } from '../utils'
+import { resolveInputVariables, wrapRunnable, writeLogs } from '../utils'
 import { RunnableLambda } from "@langchain/core/runnables";
 async function fetchWithTimeout(url: string, timeoutMs = 10000) {
     const controller = new AbortController()
@@ -70,6 +70,7 @@ export const urlFactory: NodeFactory = async (
     node: LangFlowNode,
     context: BuildContext
 ) => {
+    const t0 = performance.now()
     const {
         maxDepth = 1,
         urlInputVariable,
@@ -110,17 +111,23 @@ export const urlFactory: NodeFactory = async (
     const wrapped = wrapRunnable(
         urlFetchRunnable,
         node.id,
-        node.data.title,
-        node.data.type,
-        context.onRunnableElapsed,
         {
             context,
             portId: outputVariable.id,
-            logFormat: res => ({ type: 'url-fetch', data: res }),
+            logFormat: res => ({ type: 'url-fetch', name: `Fetched ${visited.size} URLs`, data: res }),
             outputPort: outputVariable, // 输出端口
         }
     )
 
+    const elapsed = performance.now() - t0
+    // 写入日志
+    writeLogs(context, node.id, node.data.title, node.data.type, {
+        [outputVariable.id]: {
+            content: `Fetched ${visited.size} URLs`,
+            outputPort: outputVariable,
+            elapsed, // 这里可以计算实际耗时
+        },
+    }, elapsed)
     return {
         [outputVariable.id]: wrapped
     }

@@ -15,6 +15,7 @@ export async function filterDataFactory(
     node: LangFlowNode,
     context: BuildContext
 ) {
+    const t0 = performance.now()
     const data = node.data as FilterData
     const {
         inputInputVariable,
@@ -49,14 +50,19 @@ export async function filterDataFactory(
 
     result = inputObj?.[filterKey]
 
+    const elapsed = performance.now() - t0
     // ✅ 写入结构化日志
     writeLogs(context, node.id, node.data.title, node.data.type, {
         [outputVariable.id]: {
-            content: result,
+            content: {
+                input: inputRaw,
+                filterKey,
+                result,
+            },
             outputPort: outputVariable,
-            elapsed: 0,
+            elapsed,
         }
-    }, 0)
+    }, elapsed)
 
     return {
         [outputVariable.id]: result

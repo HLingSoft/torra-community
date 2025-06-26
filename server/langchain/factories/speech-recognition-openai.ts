@@ -3,7 +3,7 @@ import { StructuredTool } from "langchain/tools";
 import { z } from "zod";
 import type { LangFlowNode, BuildContext, OutputPortVariable } from '~/types/workflow'
 import type { SpeechRecognitionOpenAIData } from '@/types/node-data/speech-recognition-openai'
-import { resolveInputVariables, writeLogs, wrapRunnable } from '../utils'
+import { resolveInputVariables, writeLogs, wrapRunnable, updatePortLog } from '../utils'
 import { OpenAIClient, toFile } from "@langchain/openai";
 
 /** 判断是否 http(s) url */
@@ -44,6 +44,7 @@ export const speechRecognitionOpenAIFactory = async (
     node: LangFlowNode,
     context: BuildContext
 ) => {
+    const t0 = performance.now();
     const {
         apiKeyInputVariable,
         baseURLInputVariable,
@@ -85,20 +86,21 @@ export const speechRecognitionOpenAIFactory = async (
         const text = resp.text;
         const elapsed = performance.now() - t0;
 
-        writeLogs(
+        // 更新日志
+        updatePortLog(
             context,
             node.id,
-            title ?? "OpenAI Speech Recognition",
-            type ?? "speech-recognition-openai",
+            outputVariable.id,
             {
-                [outputVariable.id]: {
-                    content: text,
-                    outputPort: outputVariable,
-                    elapsed
-                }
+                content: {
+                    type: "openai-asr",
+                    data: text.slice(0, 100) + '...',
+                },
+
+                elapsed
             },
-            elapsed
-        );
+        )
+
 
         return text;
     });
@@ -106,9 +108,7 @@ export const speechRecognitionOpenAIFactory = async (
     const wrapped = wrapRunnable(
         asrChain,
         node.id,
-        title,
-        type,
-        context.onRunnableElapsed,
+
         {
             context,
             portId: outputVariable.id,
@@ -130,6 +130,27 @@ export const speechRecognitionOpenAIFactory = async (
         outputVariable,
         title,
         type
+    );
+
+    const elapsed = performance.now() - t0;
+    writeLogs(
+        context,
+        node.id,
+        title ?? "OpenAI Whisper ASR",
+        type ?? "speech-recognition-openai",
+        {
+            [outputVariable.id]: {
+                content: "OpenAI Whisper ASR Output",
+                outputPort: outputVariable,
+                elapsed
+            },
+            [toolOutputVariable.id]: {
+                content: "OpenAI Whisper ASR Tool",
+                outputPort: toolOutputVariable,
+                elapsed
+            }
+        },
+        elapsed
     );
 
     return {

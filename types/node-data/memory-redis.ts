@@ -31,14 +31,14 @@ export const upstashRedisChatMemoryMeta: UpstashRedisChatMemoryData = {
         name: 'Upstash Redis URL',
         allowedTypes: ['Data'],
         value: '',
-        defaultValue: '',
+        defaultValue: 'https://fluent-dodo-23157.upstash.io',
 
     } as InputPortVariable,
     tokenInputVariable: {
         name: 'Upstash Redis Token',
         allowedTypes: ['Data'],
         value: '',
-        defaultValue: '',
+        defaultValue: 'AVp1AAIjcDE4YTM3ZjA5NjMzNTc0MDVmODIzZmViZDM3NzMxYTg5MXAxMA',
 
     } as InputPortVariable,
 

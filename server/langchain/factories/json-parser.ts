@@ -36,13 +36,15 @@ export async function jsonParserFactory(
     node: LangFlowNode,
     context: BuildContext
 ) {
+
+    const t0 = performance.now()
     const {
         inputMessageInputVariable,
         outputSchemaInputVariable,
         structuredOutputVariable
     } = node.data as JSONParserData
 
-    const t0 = performance.now()
+
     const inputValues = await resolveInputVariables(context, [inputMessageInputVariable])
     const inputMessage = inputValues[inputMessageInputVariable.id]
 

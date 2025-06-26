@@ -1,13 +1,14 @@
 import type { LangFlowNode, BuildContext } from '~/types/workflow'
 import type { MilvusData } from '@/types/node-data/milvus'
 
-import { resolveInputVariables, wrapRunnable } from '../utils'
+import { resolveInputVariables, wrapRunnable, writeLogs } from '../utils'
 import { RunnableLambda } from '@langchain/core/runnables'
 import { Milvus } from '@langchain/community/vectorstores/milvus'
 import type { MilvusLibArgs } from '@langchain/community/vectorstores/milvus'
 import type { Document } from '@langchain/core/documents'
 
 export async function milvusFactory(node: LangFlowNode, context: BuildContext) {
+  const t0 = performance.now()
   /* ---------- 1. 解析输入 ---------- */
   const data = node.data as MilvusData
 
@@ -81,7 +82,7 @@ export async function milvusFactory(node: LangFlowNode, context: BuildContext) {
     const top = filterTopRelevantDocs(raw)
 
     return top
-      .map(([doc, score]) => `${doc.pageContent}\n\n${score}`)
+      .map(([doc, score]) => `${doc.pageContent}\n`)
       .join('\n\n')
   })
 
@@ -89,9 +90,8 @@ export async function milvusFactory(node: LangFlowNode, context: BuildContext) {
   const wrapped = wrapRunnable(
     searchRunnable,
     node.id,
-    data.title,
-    data.type,
-    context.onRunnableElapsed,
+
+
     {
       context,
       portId: data.outputPortVariable.id,
@@ -104,6 +104,16 @@ export async function milvusFactory(node: LangFlowNode, context: BuildContext) {
       outputPort: data.outputPortVariable
     }
   )
+  const elapsed = performance.now() - t0
+  /* ---------- 4. 写入结构化日志 ---------- */
+
+  writeLogs(context, node.id, data.title, data.type, {
+    [data.outputPortVariable.id]: {
+      content: '',
+      outputPort: data.outputPortVariable,
+      elapsed
+    }
+  }, elapsed)
 
   return {
     [data.outputPortVariable.id]: wrapped,

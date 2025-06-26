@@ -1,32 +1,11 @@
 import type { InputPortVariable, OutputPortVariable, BuildContext, LangFlowJson, DAGStepInfo, PortLog } from '~/types/workflow'
-import type { SafeRunCollectorHandler } from './safeRunCollectorHandler'
-import { extractRunStats } from './extractRunStats'
 
+import { useJSONStringify } from '~/composables'
 
-function isPojo(value: unknown): value is Record<string, any> {
-  return typeof value === 'object' && value !== null && value.constructor === Object;
-}
-
-export function toJsonSafe<T>(input: T, seen = new WeakMap()): any {
-  if (input === null || typeof input === 'number' || typeof input === 'boolean' || typeof input === 'string') return input
-  if (input instanceof Date) return input.toISOString()
-  if (typeof input === 'object') {
-    if (seen.has(input as any)) return '[Circular]'
-    seen.set(input as any, true)
-  }
-  if (Array.isArray(input)) return input.map(item => toJsonSafe(item, seen))
-  if (isPojo(input)) {
-    const cleaned: Record<string, any> = {}
-    for (const [k, v] of Object.entries(input)) cleaned[k] = toJsonSafe(v, seen)
-    return cleaned
-  }
-  return `[${(input as any)?.constructor?.name ?? 'Object'}]`
-}
 
 export interface WrappedRunnable<T = any> {
   invokeIfAvailable: (input?: any) => Promise<T | undefined>
-  readonly elapsed: number
-  readonly originalResult: T | undefined
+
   readonly original: { invoke: (input?: any) => Promise<T> }
 }
 
@@ -37,32 +16,20 @@ export function isWrappedRunnable(obj: any): obj is WrappedRunnable {
 export function wrapRunnable<T>(
   runnable: { invoke: (input?: any) => Promise<T> },
   nodeId: string,
-  title: string,
-  type: string,
-  onElapsed?: (id: string, ms: number) => void,
-  options?: {
-    context?: BuildContext
-    portId?: string
-    logFormat?: (res: any) => any
-    collector?: SafeRunCollectorHandler
+
+  options: {
+    context: BuildContext
+    portId: string
+    logFormat: (res: any) => any
     outputPort: OutputPortVariable
   }
 ): WrappedRunnable<T> {
-  let elapsed = -1
+
   let originalResult: T | undefined
 
-  // ✅ 初始化日志：先写入 pending 状态
-  if (options?.context && options.portId) {
-    writeLogs(options.context, nodeId, title, type, {
-      [options.portId]: {
-        content: '[Pending Execution]',
-        outputPort: options.outputPort,
-        elapsed: undefined,
-      }
-    })
-  }
-
   async function invokeIfAvailable(input?: any): Promise<T> {
+
+
     const t0 = performance.now()
     let error: string | undefined
 
@@ -73,29 +40,29 @@ export function wrapRunnable<T>(
       originalResult = { error } as any
     }
 
-    elapsed = performance.now() - t0
-    onElapsed?.(nodeId, elapsed)
+    const elapsed = performance.now() - t0
 
-    if (options?.context && options.portId) {
-      const result = options.logFormat ? options.logFormat(JSON.stringify(originalResult, null, 2)) : originalResult
-      // const runStats = options.collector ? extractRunStats(options.collector.runs) : undefined
+    const preNodeLogs = options?.context?.logs?.[nodeId] ?? {}
 
-      // const logContent = {
-      //   ...result,
-      //   ...(runStats ? { runStats } : {}),
-      //   ...(error ? { error } : {})
-      // }
+    const preElapsed = preNodeLogs.elapsed ?? 0
+
+    preNodeLogs.elapsed += preElapsed
 
 
-      // ✅ 覆盖之前的日志（现在有结果和 token 消耗）
-      writeLogs(options.context, nodeId, title, type, {
-        [options.portId]: {
-          content: result,
-          outputPort: options.outputPort,
-          elapsed,
-        }
-      }, elapsed)
-    }
+    //还需要覆盖 那个 portId 对应的content 和elapsed
+    const result = options.logFormat(useJSONStringify(originalResult).slice(0, 200) + '...')
+    updatePortLog(
+      options.context,
+      nodeId,
+      options.portId,
+      {
+        content: result,
+        elapsed: elapsed,
+        timestamp: Date.now(),
+      }
+    )
+
+
 
     return originalResult as T
   }
@@ -103,12 +70,7 @@ export function wrapRunnable<T>(
   return {
     original: runnable,
     invokeIfAvailable,
-    get elapsed() {
-      return elapsed
-    },
-    get originalResult() {
-      return originalResult
-    }
+
   }
 }
 
@@ -177,7 +139,6 @@ export function contextLogsToSteps(
   total: number
 ): DAGStepInfo[] {
   const steps: DAGStepInfo[] = []
-  // console.log('context.logs', context.logs)
 
   Object.entries(context.logs).forEach(([nodeId, nodeLog], idx) => {
     const { title, type } = nodeLog
@@ -192,7 +153,7 @@ export function contextLogsToSteps(
           elapsedStr: val.elapsed != null
             ? (val.elapsed < 1000 ? `${val.elapsed.toFixed(1)}ms` : `${(val.elapsed / 1000).toFixed(2)}s`)
             : '-',
-          content: toJsonSafe(val.content),
+          content: useJSONStringify(val.content),
           timestamp: val.timestamp ?? Date.now(),
           name: val.name ?? portId,
           outputType: val.outputType ?? 'unknown',
@@ -200,10 +161,7 @@ export function contextLogsToSteps(
 
         }
       })
-    /* ---------- 2. 把 node 自身耗时 + 所有 port 耗时 ---------- */
-    const ownElapsed = nodeLog.elapsed ?? 0
-    const portsElapsed = ports.reduce((sum, p) => sum + (p.elapsed ?? 0), 0)
-    const totalElapsed = ownElapsed + portsElapsed || -1   // 若都缺，仍给 -1
+
     steps.push({
       index: idx + 1,
       total,
@@ -211,9 +169,11 @@ export function contextLogsToSteps(
       nodeTitle: title,
       nodeType: type,
       ports,
-      elapsed: totalElapsed
+      elapsed: nodeLog.elapsed ?? -1, // 若缺省则给 -1
+      error: nodeLog.error, // 错误信息
 
     })
+
   })
 
   return steps
@@ -232,18 +192,44 @@ export function writeLogs(
   const nodeLogs = (logs[nodeId] ??= {})
   nodeLogs.title = title
   nodeLogs.type = type
-  nodeLogs.elapsed = elapsed ?? -1 // 默认值为 -1，表示未设置
+  nodeLogs.elapsed =
+    typeof elapsed === 'number'
+      ? (typeof nodeLogs.elapsed === 'number' && nodeLogs.elapsed > 0
+        ? nodeLogs.elapsed + elapsed
+        : elapsed)
+      : nodeLogs.elapsed ?? -1
+
 
   for (const portId in logsPerPort) {
     const { content, outputPort, elapsed } = logsPerPort[portId]
     nodeLogs[portId] = {
       content,
-      timestamp: Date.now(),
       name: outputPort.name,
       outputType: outputPort.outputType,
       id: outputPort.id,
+      timestamp: Date.now(),
       ...(elapsed != null ? { elapsed } : {})
+
     }
   }
-  // console.log('writeLogs', nodeId, nodeLogs)
+
+}
+
+
+export function updatePortLog(
+  context: BuildContext,
+  nodeId: string,
+  portId: string,
+  data: Partial<Pick<PortLog, 'content' | 'elapsed' | 'timestamp'>>,
+
+) {
+  const logs = (context.logs ??= {})
+  const nodeLogs = (logs[nodeId] ??= {})
+
+  const existing = nodeLogs[portId] ?? {}
+
+  nodeLogs[portId] = {
+    ...existing,
+    ...data,
+  }
 }

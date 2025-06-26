@@ -93,8 +93,8 @@ export async function loopFactory(
     node: LangFlowNode,
     context: BuildContext,
 ) {
-    // console.log('[Loop] factory →', node.id);
 
+    const t0 = performance.now()
     const {
         listDataInputVariable,
         loopItemResultInputVariable,
@@ -119,11 +119,11 @@ export async function loopFactory(
 
     /* 3. 顺序遍历列表，一次性跑完整个子流程 -------------------------------- */
     const results: any = [];
-    const t0 = performance.now()
+
 
     for (let idx = 0; idx < list.length; idx++) {
         const item = list[idx];
-        console.log(`[Loop] item ${idx + 1}/${list.length} processing…`, item);
+        // console.log(`[Loop] item ${idx + 1}/${list.length} processing…`, item);
 
 
         (context.results[node.id] ??= {})[itemOutputVariable.id] = item;

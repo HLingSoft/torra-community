@@ -1,6 +1,6 @@
 import { RunnableLambda } from '@langchain/core/runnables'
-import type { LangFlowNode, BuildContext, InputPortVariable, OutputPortVariable } from '~/types/workflow'
-import { resolveInputVariables, wrapRunnable } from '../utils'
+import type { LangFlowNode, BuildContext, } from '~/types/workflow'
+import { resolveInputVariables, wrapRunnable, writeLogs } from '../utils'
 import type { SubWorkflowData } from '~/types/node-data/sub-workflow'
 
 /**
@@ -31,11 +31,13 @@ export async function subWorkflowFactory(
 
     const url = inputValues[urlInputVariable.id]
     const token = inputValues[tokenInputVariable.id]
+    const userId = inputValues[data.userIdInputVariable.id]
 
     const requestChain = RunnableLambda.from(async () => {
         try {
             const headers: HeadersInit = { 'Content-Type': 'application/json' }
             if (token) headers['Authorization'] = `Bearer ${token}`
+            if (userId) headers['X-User-Id'] = userId
 
             const body: Record<string, any> = {}
             for (const inputVariable of bodyInputVariable) {
@@ -70,9 +72,7 @@ export async function subWorkflowFactory(
     const wrapped = wrapRunnable(
         requestChain.pipe(res => res.raw ?? res),
         node.id,
-        data.title,
-        data.type,
-        context.onRunnableElapsed,
+
         {
             context,
             portId: dataOutputVariable.id,
@@ -91,6 +91,17 @@ export async function subWorkflowFactory(
 
     // 立即执行返回结果（保持语义）
     const result = await wrapped.invokeIfAvailable()
+
+    writeLogs(context, node.id, data.title, data.type, {
+        [dataOutputVariable.id]: {
+            content: {
+                type: 'sub-workflow',
+                data: result
+            },
+            outputPort: dataOutputVariable,
+            elapsed // 这里可以计算实际耗时
+        }
+    }, elapsed)
 
     return {
         [dataOutputVariable.id]: result

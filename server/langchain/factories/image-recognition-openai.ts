@@ -6,7 +6,7 @@ import type {
     OutputPortVariable
 } from '~/types/workflow'
 import type { ImageRecognitionOpenAIData } from '~/types/node-data/image-recognition-openai'
-import { resolveInputVariables, writeLogs, wrapRunnable } from '../utils'
+import { resolveInputVariables, writeLogs, updatePortLog, wrapRunnable } from '../utils'
 import { ChatOpenAI } from '@langchain/openai'
 import { HumanMessage } from '@langchain/core/messages'
 import { RunnableLambda } from '@langchain/core/runnables'
@@ -60,6 +60,7 @@ export const imageRecognitionOpenAIFactory: NodeFactory = async (
     context: BuildContext
 ) => {
 
+    const t0 = performance.now();
     const {
         imageDataInputVariable,
         outputVariable,
@@ -80,7 +81,7 @@ export const imageRecognitionOpenAIFactory: NodeFactory = async (
         model: "gpt-4-vision-preview",
         openAIApiKey: inputValues[apiKeyInputVariable.id],
         configuration: {
-            baseURL: inputValues[baseURLInputVariable.id]
+            baseURL: inputValues[baseURLInputVariable.id] || 'https://api.openai.com/v1',
         }
     });
 
@@ -111,9 +112,6 @@ export const imageRecognitionOpenAIFactory: NodeFactory = async (
     const wrapped = wrapRunnable(
         imageRecognitionChain,
         node.id,
-        node.data.title,
-        node.data.type,
-        context.onRunnableElapsed,
         {
             context,
             portId: outputVariable.id,
@@ -124,17 +122,33 @@ export const imageRecognitionOpenAIFactory: NodeFactory = async (
 
 
     //5. 创建工具实例
+
     const tool = new ImageRecognitionTool({
         context,
         nodeId: node.id,
         portId: outputVariable.id,
-        outputPort: outputVariable,
+
         apiKey: inputValues[apiKeyInputVariable.id],
         baseURL: inputValues[baseURLInputVariable.id],
         imageData: imageData,
-        title: node.data.title,
-        type: node.data.type,
+
     });
+    const elapsed = performance.now() - t0;
+    // ✅ 写入结构化日志
+    writeLogs(context, node.id, node.data.title, node.data.type, {
+        [outputVariable.id]: {
+            content: 'OpenAI Image Recognition Output',
+            outputPort: outputVariable,
+            elapsed
+        },
+        [toolOutputVariable.id]: {
+            content: 'OpenAI Image Recognition Tool',
+            outputPort: toolOutputVariable,
+            elapsed
+        }
+    }, elapsed);
+
+
 
     return {
         [outputVariable.id]: wrapped,
@@ -147,26 +161,22 @@ class ImageRecognitionTool extends StructuredTool {
     description: string;
     schema: z.ZodObject<any>;
 
-    private context?: BuildContext;
+    private context: BuildContext;
     private nodeId: string;
     private portId: string;
-    private outputPort: OutputPortVariable;
+
     private apiKey: string;
     private baseURL: string;
     private imageData?: string | string[];
-    private title: string;
-    private type: string;
 
     constructor(config: {
-        context?: BuildContext;
+        context: BuildContext;
         nodeId: string;
         portId: string;
-        outputPort: OutputPortVariable;
         apiKey: string;
         baseURL: string;
-        imageData?: string | string[];
-        title: string; // ✅ 新增
-        type: string;  // ✅ 新增
+        imageData: string | string[];
+
     }) {
         super();
         this.name = `image-recognition-${config.nodeId}`;
@@ -180,12 +190,11 @@ class ImageRecognitionTool extends StructuredTool {
         this.context = config.context;
         this.nodeId = config.nodeId;
         this.portId = config.portId;
-        this.outputPort = config.outputPort;
+
         this.apiKey = config.apiKey;
-        this.baseURL = config.baseURL
+        this.baseURL = config.baseURL;
         this.imageData = config.imageData;
-        this.title = config.title;
-        this.type = config.type;
+
     }
 
     async _call(inputs: { imageData?: string | string[]; instruction?: string }) {
@@ -212,24 +221,11 @@ class ImageRecognitionTool extends StructuredTool {
         const res = await chat.call([message]);
         const result = res.content;
         const elapsed = performance.now() - t0;
+        updatePortLog(this.context, this.nodeId, this.portId, {
+            content: result,
+            elapsed
+        })
 
-        // ✅ 使用传入的 title 和 type 写日志
-        if (this.context) {
-            writeLogs(
-                this.context,
-                this.nodeId,
-                this.title,
-                this.type,
-                {
-                    [this.portId]: {
-                        content: result,
-                        outputPort: this.outputPort,
-                        elapsed,
-                    },
-                },
-                elapsed
-            );
-        }
 
         return result;
     }

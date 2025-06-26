@@ -10,6 +10,7 @@ export async function messageStoreFactory(
   node: LangFlowNode,
   context: BuildContext
 ) {
+  const t0 = performance.now()
   const data = node.data as MessageStoreData
   const {
     messageInputVariable,
@@ -18,7 +19,7 @@ export async function messageStoreFactory(
     dataOutputVariable
   } = data
 
-  const t0 = performance.now()
+
 
   const inputValues = await resolveInputVariables(context, [
     messageInputVariable,

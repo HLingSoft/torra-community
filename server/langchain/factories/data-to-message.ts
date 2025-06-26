@@ -15,6 +15,7 @@ export const dataToMessageFactory: NodeFactory = async (
     node: LangFlowNode,
     context: BuildContext
 ) => {
+    const t0 = performance.now()
     const { inputInputVariable, outputVariable, role } = node.data as DataToMessageData
 
     const variableDefs = [inputInputVariable] as InputPortVariable[]
@@ -37,14 +38,14 @@ export const dataToMessageFactory: NodeFactory = async (
             storedMessage = new HumanMessage(inputText)
     }
 
-    // ✅ 写日志（elapsed 为 0）
+    const elapsed = performance.now() - t0
     writeLogs(context, node.id, node.data.title, node.data.type, {
         [outputVariable.id]: {
-            content: storedMessage,
+            content: storedMessage.content,
             outputPort: outputVariable,
-            elapsed: 0
+            elapsed
         }
-    }, 0)
+    }, elapsed)
 
     return {
         [outputVariable.id]: storedMessage

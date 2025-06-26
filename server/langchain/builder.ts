@@ -228,9 +228,7 @@ export async function executeDAG(
 
     const executed = new Set<string>()
 
-    // const loopCount: Record<string, number> = {}
 
-    // const total = allowList.size
 
     // 跳过分支（IfElse等用到）
     const skip = new Set<string>()
@@ -240,17 +238,13 @@ export async function executeDAG(
         const cur = stack.pop()!
         if (skip.has(cur)) continue
         skip.add(cur)
-        /* 👇 关键：剪枝时同步踢出 allowList */
-        // allowList.delete(cur)
+
 
         Object.values(outAdj[cur] || {}).flat().forEach(e => stack.push(e.target))
       }
     }
 
 
-    // console.log('allowList（弱连通分量）:', allowList);
-    // console.log('queue 初始化:', queue);
-    // console.log('nodeMap', nodeFactoryMap)
     // ------- DAG 拓扑主循环 -----------
     while (queue.length > 0) {
       const id = queue.shift()!
@@ -260,9 +254,7 @@ export async function executeDAG(
 
       const node = nodes[id]
 
-      // if (node.data.type === 'Loop') {
-      //   console.log('>>> Loop node 进入主队列:', id, 'inDegree=', inDegree[id]);
-      // }
+
 
       // 对入口节点赋值 inputMessage
       if (isStartNode(json, id, runType)) {
@@ -304,6 +296,17 @@ export async function executeDAG(
       }
 
       ctx.results[id] = output
+      opts.onStep?.({
+        index: executed.size + 1,
+        total: allowList.size,
+        nodeId: id,
+        nodeTitle: node.data.title,
+        nodeType: node.data.type,
+        ports: [],
+        error: undefined,
+        elapsed: 0, // 这里先占位，后面会更新
+
+      } as DAGStepInfo)
 
       executed.add(id)
 

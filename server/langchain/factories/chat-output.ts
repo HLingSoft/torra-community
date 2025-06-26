@@ -15,6 +15,7 @@ export async function chatOutputFactory(
   node: LangFlowNode,
   context: BuildContext
 ) {
+  const t0 = performance.now()
   const data = node.data as ChatOutputData
   const {
     inputInputVariable,
@@ -26,14 +27,15 @@ export async function chatOutputFactory(
   const inputValue = inputValues[inputInputVariable.id]
   const outputPortId = outputVariable.id
 
+  const elapsed = performance.now() - t0
   // ✅ 写入日志：结构化
   writeLogs(context, node.id, data.title, data.type, {
     [outputPortId]: {
       content: inputValue,
       outputPort: outputVariable,
-      elapsed: 0
+      elapsed
     }
-  }, 0)
+  }, elapsed)
 
   return {
     [outputPortId]: inputValue,

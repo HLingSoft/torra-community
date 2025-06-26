@@ -9,7 +9,7 @@ import { RunnableSequence } from '@langchain/core/runnables'
 import { ChatOpenAI } from '@langchain/openai'
 import type { BaseMessage } from '@langchain/core/messages'
 import { resolveInputVariables, writeLogs } from '../utils'
-
+import { useJSONStringify } from '~/composables'
 interface LanguageModel {
     model: ChatOpenAI
     messages: BaseMessage[]
@@ -21,13 +21,15 @@ export async function listOutputFactory(
     node: LangFlowNode,
     context: BuildContext
 ) {
+
+    const t0 = performance.now()
     const {
         languageModelInputVariable,
         outputSchemaInputVariable,
         listOutputVariable,
     } = node.data as ListOutputData
 
-    const t0 = performance.now()
+
 
     const inputValues = await resolveInputVariables(context, [languageModelInputVariable])
     const languageModel = inputValues[languageModelInputVariable.id] as LanguageModel
@@ -80,7 +82,7 @@ export async function listOutputFactory(
         node.data.type,
         {
             [listOutputVariable.id]: {
-                content: outputArr,
+                content: useJSONStringify(outputArr).slice(0, 200) + '...',
                 outputPort: listOutputVariable,
                 elapsed,
             },

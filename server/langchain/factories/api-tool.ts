@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid'
 import { StructuredTool } from 'langchain/tools'
 import type { LangFlowNode, BuildContext } from '~/types/workflow'
 import { type APIToolData, apiToolMeta } from '~/types/node-data/api-tool'
-import { resolveInputVariables, writeLogs } from '../utils'
+import { resolveInputVariables, writeLogs, updatePortLog } from '../utils'
 import type { OutputPortVariable } from '~/types/workflow'
 /** 字段定义结构 */
 type FieldDef = {
@@ -68,12 +68,10 @@ class HttpRequestTool extends StructuredTool<any> {
     private context: BuildContext
     private nodeId: string
     private portId: string
-    private outputPort: OutputPortVariable
-    private readonly type = apiToolMeta.type
-    private readonly title = apiToolMeta.title
 
 
-    constructor({ name, description, url, method, token, schema, context, nodeId, portId, outputPort }: {
+
+    constructor({ name, description, url, method, token, schema, context, nodeId, portId }: {
         name: string
         description: string
         url: string
@@ -83,7 +81,6 @@ class HttpRequestTool extends StructuredTool<any> {
         context: BuildContext
         nodeId: string
         portId: string
-        outputPort: OutputPortVariable
     }) {
         super()
         this.name = name
@@ -95,13 +92,14 @@ class HttpRequestTool extends StructuredTool<any> {
         this.context = context
         this.nodeId = nodeId
         this.portId = portId
-        this.outputPort = outputPort
+
     }
 
 
     async _call(input: any): Promise<string> {
-        const { context, nodeId, portId, url, method } = this
+        const { method } = this
         const t0 = performance.now()
+
         let result = ''
         let error: string | undefined
 
@@ -130,16 +128,13 @@ class HttpRequestTool extends StructuredTool<any> {
 
         const elapsed = performance.now() - t0
 
+        updatePortLog(this.context, this.nodeId, this.portId, {
+            content: result,
+            elapsed
+        })
 
-        // ✅ 正确结构化写入日志
-        writeLogs(context, nodeId, this.title, this.type, {
-            [portId]: {
-                content: "fetch url, result:" + result,
-                outputPort: this.outputPort,
-                elapsed,
 
-            }
-        }, elapsed)
+
 
         return result
     }
@@ -147,6 +142,7 @@ class HttpRequestTool extends StructuredTool<any> {
 
 /** API Tool 节点工厂函数 */
 export async function apiToolFactory(node: LangFlowNode, context: BuildContext) {
+    const t0 = performance.now()
     const data = node.data as APIToolData
     const {
         toolNameInputVariable,
@@ -184,9 +180,20 @@ export async function apiToolFactory(node: LangFlowNode, context: BuildContext) 
         schema,
         context,
         nodeId: node.id,
-        portId: toolOutputVariable.id,
-        outputPort: toolOutputVariable,
+        portId: toolOutputVariable.id
     })
+    const elapsed = performance.now() - t0
+
+
+    // ✅ 正确结构化写入日志
+    writeLogs(context, node.id, data.title, data.type, {
+        [toolOutputVariable.id]: {
+            content: '',
+            outputPort: toolOutputVariable,
+            elapsed: elapsed,
+
+        }
+    }, elapsed)
 
     return {
         [toolOutputVariable.id]: tool,

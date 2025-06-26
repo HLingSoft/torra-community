@@ -4,7 +4,6 @@ import type { InputPortVariable } from '~/types/workflow'
 
 import { subWorkflowMeta } from '@/types/node-data/sub-workflow'
 
-
 const props = defineProps<{ id: string }>()
 const bodyInputVariables = ref<InputPortVariable[]>([])
 const variableRefs = ref<Record<string, HTMLElement | undefined>>({})
@@ -144,6 +143,18 @@ watch(bodyVariableIsOpen, () => {
                 </div>
 
 
+
+                <div ref="tokenVariableRef">
+                    <div class="flex flex-row items-center space-x-2">
+                        <p>{{ currentNode.data.userIdInputVariable.name }}</p>
+                        <NuxtIcon name="clarity:info-line" size="20" />
+                    </div>
+                    <div class="w-full  mt-5">
+                        <GlobalVariablePopover v-model:input-variable="currentNode.data.userIdInputVariable" />
+
+                    </div>
+                    <div class="mt-3 text-xs text-muted-foreground"></div>
+                </div>
 
 
 

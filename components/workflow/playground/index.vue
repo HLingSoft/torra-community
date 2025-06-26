@@ -11,13 +11,15 @@ const { setExecutionTime } = useNodeExecutionStats()
 const { currentWorkflow, executionErrorNodeIds } = storeToRefs(useWorkflowStore())
 const { user } = storeToRefs(useUserStore())
 const canUsePlayground = ref(false)
-function formatStepLabel(step: any, showTimeIcon: boolean) {
-  if (step.elapsed === -1) {
+function formatStepLabel(elapsed: number, showTimeIcon: boolean) {
+  if (elapsed === -1) {
     return '<span style="color: orange;">Pending</span>'
-  } else if (step.elapsed === -2) {
+  } else if (elapsed === -2) {
     return '<span style="color: red;">Skipped</span>'
   } else {
-    return `<span style="color: #4ade80;">${showTimeIcon ? '⏱️ 耗时：' : ''}${step.elapsedStr}</span>`  // Tailwind绿色 #4ade80
+    const rounded = parseFloat(elapsed.toFixed(2));
+    const displayValue = rounded === 0 ? 0.01 : rounded;
+    return `<span style="color: #4ade80;">${showTimeIcon ? '⏱️ 耗时：' : ''}${displayValue}</span>`  // Tailwind绿色 #4ade80
   }
 }
 onMounted(async () => {
@@ -57,11 +59,6 @@ const assistantMessages = ref<Record<string, any>>([
 ])
 
 
-// const userScroll = ref<HTMLElement | null>(null)
-// const assistantScroll = ref<HTMLElement | null>(null)
-
-// const userBottomRef = ref<HTMLElement | null>(null)
-// const assistantBottomRef = ref<HTMLElement | null>(null)
 
 const userScrollRef = ref<HTMLElement | null>(null)
 const assistantScrollRef = ref<HTMLElement | null>(null)
@@ -102,12 +99,7 @@ const sendMessage = () => {
   //开发环境下使用本地 服务器连接
   //生产环境下使用云端 服务器连接
 
-  if (process.env.NODE_ENV === 'production') {
-    // ws = new 服务器连接('wss://workflow.allaicg.cn')
-    ws = new WebSocket('wss://askpro.aliyun.hlingsoft.com')
-  } else {
-    ws = new WebSocket('ws://localhost:3001')
-  }
+  ws = new WebSocket('ws://localhost:3001')
 
   const msgIndexMap = new Map<string, number>()
 
@@ -140,11 +132,10 @@ const sendMessage = () => {
 
 
 
-      // const text = `✅ [${step.index}/${step.total}] ${step.type} (${step.nodeId}) — <span style="color: #4ade80">${label}</span>`
-      const text = `✅ [${step.index}/${step.total}]  ${step.nodeTitle} ${step.nodeType} (${step.nodeId}) — ${formatStepLabel(step, false)}`
-      // console.log('text', text)
 
-      // 若已存在该 nodeId，对应位置直接替换
+      const text = `✅ [${step.index}/${step.total}]  ${step.nodeTitle} ${step.nodeType} (${step.nodeId})`
+
+
       const key = step.nodeId
       if (msgIndexMap.has(key)) {
         assistantMessages.value[msgIndexMap.get(key)!].content = text   // 覆盖
@@ -153,24 +144,21 @@ const sendMessage = () => {
         msgIndexMap.set(key, assistantMessages.value.length - 1)
       }
 
-      // 侧边统计面板
-      setExecutionTime(step.nodeId, formatStepLabel(step, true))
-      // setExecutionTime(step.nodeId, step.elapsedStr)
+
     }
 
     if (msg.type === 'done') {
 
-      console.log('工作流执行完成', msg.data.output)
+
       messages.value.push({
         role: 'ai',
-        // content: JSON.stringify(msg.data.output, null, 2),
-        content: msg.data.output
+        content: msg.data.output.slice(0, 2000) // 截取前200字符看看效果
       })
       //
       isProgress.value = false
       ws?.close()
       const logs = msg.data.logs as DAGStepInfo[]
-      // console.log('logs', logs)
+
       const workflowRunLog = new WorkflowRunLog()
       workflowRunLog.workflow = currentWorkflow.value
       workflowRunLog.user = user.value as User
@@ -187,6 +175,12 @@ const sendMessage = () => {
         return sum
       }, 0)
       await workflowRunLog.save()
+      for (const step of logs) {
+        // 处理每个步骤的执行时间
+        setExecutionTime(step.nodeId, formatStepLabel(step.elapsed, true))
+      }
+
+
       if (msg.data.statusCode === 200) {
         isError.value = false
         assistantMessages.value.push({
@@ -255,7 +249,7 @@ const stopWS = () => {
               <Avatar>
                 <AvatarFallback>{{ msg.role === 'user' ? 'U' : index + 1 }}</AvatarFallback>
               </Avatar>
-              <!-- <div>{{ msg.content }}</div> -->
+
               <MDC :value="msg.content" class="rounded-xl p-3 bg-muted prose   text-white">
               </MDC>
             </div>
@@ -280,8 +274,7 @@ const stopWS = () => {
         <ScrollArea class="flex-1 overflow-y-auto p-4 text-white" ref="assistantScrollRef">
           <div class="space-y-4">
             <div v-for="(msg, index) in assistantMessages" :key="index" class="flex flex-row items-start gap-3">
-              <!-- <div>{{ msg.content }}</div> -->
-              <!-- <ContentRenderer :value="{ body: [{ type: 'text', value: md }] }" /> -->
+
               <MDC :value="msg.content" class="rounded-xl p-3 bg-muted prose   text-white">
               </MDC>
             </div>

@@ -19,12 +19,12 @@ export class SafeRunCollectorHandler extends BaseTracer {
     // async onToolStart(run: Run) {
     //     console.log("onToolStart", run.name, run.inputs, run.outputs);
     // }
-    async onToolEnd(run: Run) {
-        console.log("onToolEnd", run.name, run.inputs, run.outputs);
-    }
+    // async onToolEnd(run: Run) {
+    //     console.log("onToolEnd", run.name, run.inputs, run.outputs);
+    // }
     /* LLM 结束时调用 */
     async onLLMEnd(run: Run) {
-        console.log("onLLMEnd", run.name, run.inputs, run.outputs);
+        // console.log("onLLMEnd", run.name, run.inputs, run.outputs);
 
         const inputs = run.inputs;
         const usage = run.outputs?.llmOutput?.tokenUsage ?? {};

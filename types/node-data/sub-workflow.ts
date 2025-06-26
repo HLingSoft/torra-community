@@ -18,6 +18,7 @@ export interface SubWorkflowData {
 
     urlInputVariable: InputPortVariable
     tokenInputVariable: InputPortVariable
+    userIdInputVariable: InputPortVariable // 新增：用户ID输入变量
     bodyKeyValueRows?: KeyValueRow[]
     bodyInputVariable: InputPortVariable[]
     dataOutputVariable: OutputPortVariable
@@ -43,6 +44,11 @@ export const subWorkflowMeta: SubWorkflowData = {
         allowedTypes: ['Data'],
         value: '',
 
+    } as InputPortVariable,
+    userIdInputVariable: {
+        name: 'X-User-Id',
+        allowedTypes: ['Data'],
+        value: '',
     } as InputPortVariable,
 
     bodyInputVariable: [

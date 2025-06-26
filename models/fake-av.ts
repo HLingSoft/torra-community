@@ -43,6 +43,7 @@ export class AVObjectLocal {
 
     async initDB(className: string) {
         if (typeof window === 'undefined') throw new Error('只能在浏览器端使用 pouchdb-browser')
+
         if (!AVObjectLocal.dbMap[className]) {
             const mod = await import('pouchdb-browser')
             AVObjectLocal.dbMap[className] = new mod.default(className)
@@ -76,6 +77,10 @@ export class AVObjectLocal {
             _className: this._className,
             ...toPlain(this.data),
         }
+    }
+    static createWithoutData<T = any>(Cls: new (...args: any[]) => T, objectId: string): T {
+        const data = { objectId, _id: objectId }
+        return new Cls(data)
     }
     static fromJSON(obj: { _className: string, data: Plain }) {
         const Cls = AVObjectLocal.classMap[obj._className]

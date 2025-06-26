@@ -43,7 +43,7 @@ export interface WSExecuteDoneMessage {
     output: string,
     logs: DAGStepInfo[]
     statusCode: number
-    results: Record<string, any>
+    // results: Record<string, any>
     errorNodeId?: string
     errorType?: string
     errorMessage?: string

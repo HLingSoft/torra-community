@@ -5,6 +5,7 @@ import { UpstashRedisChatMessageHistory } from '@langchain/community/stores/mess
 import { Redis } from "@upstash/redis"
 
 export async function upstashRedisChatMemoryFactory(node: LangFlowNode, context: BuildContext) {
+    const t0 = performance.now()
     const data = node.data as UpstashRedisChatMemoryData
     const {
         urlInputVariable,
@@ -33,6 +34,7 @@ export async function upstashRedisChatMemoryFactory(node: LangFlowNode, context:
         client: new Redis({ url, token })
     })
 
+    const elapsed = performance.now() - t0
     // ✅ 结构化日志
     writeLogs(
         context,
@@ -47,10 +49,10 @@ export async function upstashRedisChatMemoryFactory(node: LangFlowNode, context:
                     sessionId
                 },
                 outputPort: memoryOutputVariable,
-                elapsed: 0
+                elapsed
             }
         },
-        0
+        elapsed
     )
 
     return {

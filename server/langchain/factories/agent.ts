@@ -1,15 +1,16 @@
 import type { LangFlowNode, BuildContext } from '~/types/workflow'
 import type { AgentData } from '@/types/node-data/agent'
-import { resolveInputVariables, wrapRunnable } from '../utils'
+import { resolveInputVariables, wrapRunnable, writeLogs } from '../utils'
 import { ChatOpenAI } from '@langchain/openai'
 import { createReactAgent } from '@langchain/langgraph/prebuilt'
 import { RunnableLambda } from '@langchain/core/runnables'
 import type { BaseMessage } from '@langchain/core/messages'
 import { SafeRunCollectorHandler } from '../safeRunCollectorHandler'
-// import { ConsoleCallbackHandler } from "langchain/callbacks";
-import { SystemMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
+
+import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 
 export async function agentFactory(node: LangFlowNode, context: BuildContext) {
+    const t0 = performance.now()
     const data = node.data as AgentData
 
     const variables = [
@@ -26,7 +27,7 @@ export async function agentFactory(node: LangFlowNode, context: BuildContext) {
     const toolsRaw = v[data.toolsInputVariable.id]
     const tools = (Array.isArray(toolsRaw) ? toolsRaw : [toolsRaw]).filter(Boolean).flat()
 
-    console.log('[🧠 Agent 工厂] 收集到的工具:', tools)
+
 
     const baseURL = v[data.baseURLInputVariable.id]
     const apiKey = v[data.apiKeyInputVariable.id]
@@ -58,7 +59,7 @@ export async function agentFactory(node: LangFlowNode, context: BuildContext) {
         ];
 
         const result = await agent.invoke({ messages }, { callbacks: [collector] })
-        // console.log('[🧠 Agent 输出 result]', result.messages)
+
 
         return result.messages?.at(-1)?.content ?? '无返回'
     })
@@ -66,17 +67,21 @@ export async function agentFactory(node: LangFlowNode, context: BuildContext) {
     const wrapped = wrapRunnable(
         agentRunnable,
         node.id,
-        data.title, // 节点名称（用于整体日志显示）
-        data.type,  // 节点类型（如 agent、api-tool 等）
-        context.onRunnableElapsed,
         {
             context,
             portId: data.outputVariable.id,
             logFormat: res => ({ type: 'agent', data: res }), // 自定义格式
-            // collector,
             outputPort: data.outputVariable, // 输出端口
         }
     )
+    const elapsed = performance.now() - t0
+    writeLogs(context, node.id, data.title, data.type, {
+        [data.outputVariable.id]: {
+            content: '',
+            outputPort: data.outputVariable,
+            elapsed: 0,
+        }
+    }, elapsed)
 
     return {
         [data.outputVariable.id]: wrapped,

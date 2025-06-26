@@ -6,7 +6,7 @@ import type {
     OutputPortVariable
 } from '~/types/workflow'
 import type { SpeechGenerateOpenAIData } from '~/types/node-data/speech-generate-openai'
-import { resolveInputVariables, wrapRunnable, writeLogs } from '../utils'
+import { resolveInputVariables, wrapRunnable, writeLogs, updatePortLog } from '../utils'
 import { RunnableLambda } from "@langchain/core/runnables";
 import { OpenAIClient } from "@langchain/openai";
 import { StructuredTool } from "langchain/tools";
@@ -16,6 +16,7 @@ export const speechGenerateOpenAIFactory: NodeFactory = async (
     node: LangFlowNode,
     context: BuildContext
 ) => {
+    const t0 = performance.now();
     const {
         userInputInputVariable,
         apiKeyInputVariable,
@@ -54,9 +55,8 @@ export const speechGenerateOpenAIFactory: NodeFactory = async (
     const wrappedBase64 = wrapRunnable(
         voiceGenerateChain,
         node.id,
-        node.data.title,
-        node.data.type,
-        context.onRunnableElapsed,
+
+
         {
             context,
             portId: base64VoiceOutputVariable.id,
@@ -77,10 +77,28 @@ export const speechGenerateOpenAIFactory: NodeFactory = async (
         context,
         node.id,
         base64VoiceOutputVariable.id,
-        base64VoiceOutputVariable,
-        title,
-        type
+
     );
+    const elapsed = performance.now() - t0;
+    writeLogs(
+        context,
+        node.id,
+        title ?? "OpenAI Voice Synthesis",
+        type ?? "speech-generate-openai",
+        {
+            [base64VoiceOutputVariable.id]: {
+                content: "OpenAI Voice Synthesis Output",
+                outputPort: base64VoiceOutputVariable,
+                elapsed
+            },
+            [toolOutputVariable.id]: {
+                content: "OpenAI Voice Generate Tool",
+                outputPort: toolOutputVariable,
+                elapsed
+            }
+        },
+        elapsed
+    )
 
     return {
         [base64VoiceOutputVariable.id]: wrappedBase64,
@@ -107,9 +125,7 @@ class OpenAIVoiceGenerateTool extends StructuredTool {
         private context: BuildContext,
         private nodeId: string,
         private portId: string,
-        private outputPort: OutputPortVariable,
-        private title?: string,
-        private type?: string
+
     ) {
         super();
     }
@@ -137,19 +153,19 @@ class OpenAIVoiceGenerateTool extends StructuredTool {
         const base64 = buffer.toString("base64");
         const elapsed = performance.now() - t0;
 
-        writeLogs(
+        updatePortLog(
             this.context,
             this.nodeId,
-            this.title ?? "OpenAI Speech Synthesis",
-            this.type ?? "speech-generate-openai",
+            this.portId,
             {
-                [this.portId]: {
-                    content: base64,
-                    outputPort: this.outputPort,
-                    elapsed,
-                }
+                content: {
+                    type: "openai-voice-base64",
+                    data: base64.slice(0, 100) + '...',
+                },
+                elapsed
             },
-            elapsed
+
+
         );
 
         return base64;

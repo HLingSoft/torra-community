@@ -9,6 +9,7 @@ export const textOutputFactory: NodeFactory = async (
   node: LangFlowNode,
   context: BuildContext
 ) => {
+  const t0 = performance.now()
   const data = node.data as TextOutputData
 
 
@@ -18,14 +19,15 @@ export const textOutputFactory: NodeFactory = async (
   const outputVar = data.outputVariable as OutputPortVariable
   const outputPortId = outputVar.id
 
+  const elapsed = performance.now() - t0
   // 记录日志
   writeLogs(context, node.id, node.data.title, node.data.type, {
     [outputPortId]: {
       content: inputValue,
       outputPort: data.outputVariable,
-      elapsed: 0, // 这里可以计算实际耗时
+      elapsed, // 这里可以计算实际耗时
     },
-  })
+  }, elapsed)
 
   return {
     [outputPortId]: inputValue,
