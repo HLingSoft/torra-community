@@ -59,7 +59,7 @@ This edition is free to use, modify, and extend.
 
 ## 🖼 More Screenshots
 
-| Screenshot 1 | Screenshot 2 | Screenshot 3 |
+| Nodes | Playground | API |
 |--------------|--------------|--------------|
 | ![1](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![2](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![3](https://file.web.hlingsoft.com/zIHhaij2H6tBbym8eap1aqar2svuQ0q7/%E6%88%AA%E5%B1%8F2025-06-26%2011.24.37.png) |
 

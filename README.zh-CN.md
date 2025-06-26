@@ -59,7 +59,7 @@
 
 ## 🖼 更多截图
 
-| 截图 1 | 截图 2 | 截图 3 |
+| Nodes | Playground | API |
 |--------|--------|--------|
 | ![1](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![2](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![3](https://file.web.hlingsoft.com/zIHhaij2H6tBbym8eap1aqar2svuQ0q7/%E6%88%AA%E5%B1%8F2025-06-26%2011.24.37.png) |
 
@@ -68,7 +68,8 @@
 ## 📱 加入社区
 
 欢迎加入 Torra 用户微信群 👇  
-![微信群二维码](https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg)
+<img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="微信群二维码" width="200" />
+
 
 ---
 
