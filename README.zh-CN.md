@@ -8,7 +8,7 @@
 
 本版本完全免费，支持自由使用、修改和扩展。
 
-![主界面截图](https://file.web.hlingsoft.com/26NbxPHeTGXNCO23MhsEXb5yE82VUo6d/screenshot.png)
+![主界面截图](https://file.web.hlingsoft.com/SN1tGlRFSFsCB2B4in87AeKxt6nGFRrY/torra_screenshot.png)
 
 ---
 

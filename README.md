@@ -8,7 +8,7 @@ Unlike Coze (closed-source) and Langflow (React + Python), Torra is built with *
 
 This edition is free to use, modify, and extend.  
 
-![Main Screenshot](https://file.web.hlingsoft.com/26NbxPHeTGXNCO23MhsEXb5yE82VUo6d/screenshot.png)
+![Main Screenshot](https://file.web.hlingsoft.com/SN1tGlRFSFsCB2B4in87AeKxt6nGFRrY/torra_screenshot.png)
 
 ---
 

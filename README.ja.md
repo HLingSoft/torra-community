@@ -8,7 +8,7 @@ Coze（クローズドソース）や Langflow（React + Python）とは異な�
 
 このエディションは無料で使用・変更・拡張が可能です。
 
-![メインスクリーンショット](https://file.web.hlingsoft.com/26NbxPHeTGXNCO23MhsEXb5yE82VUo6d/screenshot.png)
+![メインスクリーンショット](https://file.web.hlingsoft.com/SN1tGlRFSFsCB2B4in87AeKxt6nGFRrY/torra_screenshot.png)
 
 ---
 
