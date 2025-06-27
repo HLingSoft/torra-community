@@ -89,7 +89,7 @@
 
 如果你是产品经理或非技术人员，可以使用我们提供的 **一键安装包**，无需配置开发环境：
 
-👉 [📦 点击下载 Torra 环境安装包（ZIP）](https://file.web.hlingsoft.com/uixUimid1qpVoiFue5q85pUrdCgbWmlp/torra-%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85%E5%99%A8.zip)
+👉 [📦 点击下载 Torra 环境安装包（ZIP）](https://file.web.hlingsoft.com/EmsrYyS2gokhHGpL345fLdh2rOdpwxvR/torra-starter.zip)
 
 解压 ZIP 文件后：
 
