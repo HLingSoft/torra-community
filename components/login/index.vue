@@ -223,7 +223,7 @@ const signIn = async () => {
                 <CardContent>
                     <div class="grid gap-6">
                         <div class="grid gap-3">
-                            <Label for="email">手机号码</Label>
+                            <Label for="email">手机号码(任意手机号码)</Label>
                             <div class="flex flex-row items-center  space-x-5 justify-between">
                                 <Input v-model="currentLoginUser.phone" type="phone" class="w-44 !text-black" placeholder="" required />
                                 <Button :disabled="!canResend" variant="secondary" class="w-32" @click="sendVerificationCode">
@@ -233,7 +233,7 @@ const signIn = async () => {
                             </div>
                         </div>
                         <div class="grid gap-3">
-                            <Label for="smsCode">验证码</Label>
+                            <Label for="smsCode">验证码(任意6位数字)</Label>
                             <PinInput v-model="smsCode" placeholder="○" @complete="handleComplete">
                                 <PinInputGroup class="gap-1">
                                     <template v-for="(id, index) in 6" :key="id">
