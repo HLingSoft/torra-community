@@ -78,7 +78,31 @@ This edition is free to use, modify, and extend.
 
 ## ⚡ Getting Started
 
-### 🏁 Quick Start (Recommended)
+
+### 💡 For Non-Developers (No Dev Environment Required)
+
+If you're a product manager or a non-technical user, you can use our **one-click installation package** to get started without any setup:
+
+👉 [📦 Click to download the Torra Environment Installer (ZIP)](https://file.web.hlingsoft.com/qfjx27oeYEz7byY2Di1ymibBVy7LJTjw/torra-%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85.zip)
+
+After extracting the ZIP file:
+
+- **Windows users**: Double-click `start.bat`
+- **Mac users**: Right-click → Open `start.command`
+
+The script will automatically:
+
+- Install **Node.js** (if not already installed)
+- Install **pnpm**
+- Create a new **Torra** project
+- Launch the **visual editor**
+
+Your browser will open [http://localhost:3000](http://localhost:3000) automatically — and you're ready to go! ✨
+
+> ⚠️ If the script fails on first run, make sure you allow execution permissions or install [Node.js](https://nodejs.org) manually.
+
+
+### 🏁 Quick Start For Developers (Recommended)
 
 ```bash
 npx create-torra-app my-app
@@ -86,7 +110,7 @@ cd my-app
 pnpm dev
 ```
 
-### 🛠 Manual Setup
+### 🛠 Manual Setup For Developers
 
 ```bash
 npm i -g pnpm
