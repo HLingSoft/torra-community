@@ -9,6 +9,8 @@ import { useWorkflowStore } from '~/stores/workflow'
 import { APIInputLangchainName } from '~/types/node-data/api-input'
 import type { KeyValueSchema } from '~/types/workflow'
 import type { APIInputData } from '~/types/node-data/api-input'
+import Workflow from '~/models/Workflow'
+import WorkflowRunLog from '~/models/WorkflowRunLog'
 const { setExecutionTime } = useNodeExecutionStats()
 const { currentWorkflow, executionErrorNodeIds } = storeToRefs(useWorkflowStore())
 const open = defineModel<boolean>('open')
@@ -189,6 +191,21 @@ const run = async () => {
       return
     }
     if (json.statusCode === 200) {
+
+      const workflowRunLog = new WorkflowRunLog()
+      workflowRunLog.workflow = currentWorkflow.value
+      workflowRunLog.name = currentWorkflow.value?.name || '工作流运行日志'
+      workflowRunLog.logs = json.logs;
+      workflowRunLog.channel = 'api'
+      workflowRunLog.result = json.output
+      workflowRunLog.times = json.logs.reduce((sum, log) => {
+        let elapsed = log.elapsed
+        if (elapsed > 0) {
+          return sum + elapsed
+        }
+        return sum
+      }, 0)
+      await workflowRunLog.save()
 
       runResult.value = json.output
       // 批量渲染统计面板
