@@ -83,7 +83,7 @@ This edition is free to use, modify, and extend.
 
 If you're a product manager or a non-technical user, you can use our **one-click installation package** to get started without any setup:
 
-👉 [📦 Click to download the Torra Environment Installer (ZIP)](https://file.web.hlingsoft.com/AbPHFuKQjA49Ud4ID2CpYtbN5NoHGPY9/torra-starter.zip)
+👉 [📦 Click to download the Torra Environment Installer (ZIP)](https://file.web.hlingsoft.com/maO3Mw0xynoVsmeBnRXqOzLBP1kmhDsA/torra-starter.zip)
 
 After extracting the ZIP file:
 
