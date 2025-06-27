@@ -82,7 +82,7 @@ Coze（クローズドソース）や Langflow（React + Python）とは異な�
 
 プロダクトマネージャーや非技術者の方は、以下の **ワンクリック環境セットアップパッケージ** をご利用いただけます。開発環境の準備は不要です：
 
-👉 [📦 Torra 環境インストーラー（ZIP）をダウンロード](https://file.web.hlingsoft.com/EmsrYyS2gokhHGpL345fLdh2rOdpwxvR/torra-starter.zip)
+👉 [📦 Torra 環境インストーラー（ZIP）をダウンロード](https://file.web.hlingsoft.com/AbPHFuKQjA49Ud4ID2CpYtbN5NoHGPY9/torra-starter.zip)
 
 ZIP ファイルを解凍した後：
 
