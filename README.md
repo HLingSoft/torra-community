@@ -69,8 +69,9 @@ This edition is free to use, modify, and extend.
 
 ## 📱  Join our community
 
-Join our community to share ideas, get support, and collaborate with other users:
-<img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="微信群二维码" width="200" />
+Share ideas, get support, and collaborate with other users:
+
+<img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="微信群二维码" width="300" />
 
 
 

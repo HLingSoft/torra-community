@@ -72,7 +72,7 @@
 ## 📱 加入社区
 
 欢迎加入 Torra 用户微信群 👇  
-<img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="微信群二维码" width="200" />
+<img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="微信群二维码" width="300" />
 
 
 ---
