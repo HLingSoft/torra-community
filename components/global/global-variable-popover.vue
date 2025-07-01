@@ -38,14 +38,18 @@ onMounted(async () => {
   if (!userVariables.value) {
     userVariables.value = new UserWorkflowVariable()
     userVariables.value.user = user.value as User
-    userVariables.value.variables = {}
+    userVariables.value.variables = []
   }
 
-  variables.value = Object.entries(userVariables.value.variables).map(([key, value]) => ({
-    name: key,
-    value,
-  }))
+  const raw = userVariables.value.variables as { [key: string]: any }[]
 
+  variables.value = raw.map((item, index) => ({
+    id: index + 1,
+    name: String(item.name ?? ''),
+    value: String(item.value ?? ''),
+
+  }))
+  console.log(variables.value)
   nextTick(() => {
     if (inputRef.value) {
       popoverWidth.value = `${inputRef.value.offsetWidth - 12}px`
@@ -63,19 +67,30 @@ function selectVariable(variable: Record<string, any>) {
 
 // 添加变量
 const currentVariable = ref({ name: '', value: '' })
-
 function saveVariable() {
   if (!currentVariable.value.name || !currentVariable.value.value) return
 
-  if (variables.value.some(v => v.name === currentVariable.value.name)) {
+  // 检查变量名是否重复
+  const existing = userVariables.value!.variables.find(
+    (v: any) => v.name === currentVariable.value.name
+  )
+  if (existing) {
     useToast('Variable name already exists')
     return
   }
 
-  userVariables.value!.variables[currentVariable.value.name] = currentVariable.value.value
+  const newVar = {
+    name: currentVariable.value.name,
+    value: currentVariable.value.value,
+    type: 'string',
+  }
+
+
+  userVariables.value!.variables.push(newVar)
+
   userVariables.value!.save().then(() => {
     useToast('Variable saved successfully')
-    variables.value.push({ ...currentVariable.value })
+    variables.value.push({ ...newVar })
     currentVariable.value.name = ''
     currentVariable.value.value = ''
     openDialog.value = false
@@ -83,7 +98,6 @@ function saveVariable() {
     useToast('Failed to save variable')
   })
 }
-
 watch(edges, () => {
   if (inputVariableRef.value && targetHandleUUID.value) {
 
@@ -93,7 +107,7 @@ watch(edges, () => {
 }, { immediate: true })
 
 onUnmounted(() => {
-  // console.log('Unmounting global variable popover')
+  console.log('Unmounting global variable popover')
   if (inputVariableRef.value && targetHandleUUID.value) {
     const index = edges.value.findIndex(edge => edge.targetHandle === targetHandleUUID.value)
     if (index !== -1) {
