@@ -23,14 +23,18 @@ interface APISchemaField {
   type: string
   value?: any
 }
-function formatStepLabel(step: any, showTimeIcon: boolean) {
-  if (step.elapsed === -1) {
-    return '<span style="color: orange;">Pending</span>'
-  } else if (step.elapsed === -2) {
-    return '<span style="color: red;">Skipped</span>'
-  } else {
-    return `<span style="color: #4ade80;">${showTimeIcon ? '⏱️ 耗时：' : ''}${step.elapsedStr}</span>`  // Tailwind绿色 #4ade80
-  }
+function formatStepLabel(step: { elapsed: number }, showTimeIcon = false) {
+  const { elapsed } = step;
+
+  // -1 ⇒ Pending，-2 ⇒ Skipped
+  if (elapsed === -1) return '<span style="color: orange;">Pending</span>';
+  if (elapsed === -2) return '<span style="color: red;">Skipped</span>';
+
+  // ① 至少 0.1，② 保留 2 位小数并去掉多余 0
+  const val = Math.max(elapsed, 0.1);
+  const display = parseFloat(val.toFixed(2));  // 例：1.00 → 1，1.20 → 1.2
+
+  return `<span style="color:#4ade80;">${showTimeIcon ? '⏱️ 耗时：' : ''}${display}ms</span>`;
 }
 onMounted(async () => {
   await until(currentWorkflow).toBeTruthy()

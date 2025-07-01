@@ -11,16 +11,18 @@ const { setExecutionTime } = useNodeExecutionStats()
 const { currentWorkflow, executionErrorNodeIds } = storeToRefs(useWorkflowStore())
 const { user } = storeToRefs(useUserStore())
 const canUsePlayground = ref(false)
-function formatStepLabel(elapsed: number, showTimeIcon: boolean) {
-  if (elapsed === -1) {
-    return '<span style="color: orange;">Pending</span>'
-  } else if (elapsed === -2) {
-    return '<span style="color: red;">Skipped</span>'
-  } else {
-    const rounded = parseFloat(elapsed.toFixed(2));
-    const displayValue = rounded === 0 ? 0.01 : rounded;
-    return `<span style="color: #4ade80;">${showTimeIcon ? '⏱️ 耗时：' : ''}${displayValue}</span>`  // Tailwind绿色 #4ade80
-  }
+function formatStepLabel(step: { elapsed: number }, showTimeIcon = false) {
+  const { elapsed } = step;
+
+  // -1 ⇒ Pending，-2 ⇒ Skipped
+  if (elapsed === -1) return '<span style="color: orange;">Pending</span>';
+  if (elapsed === -2) return '<span style="color: red;">Skipped</span>';
+
+  // ① 至少 0.1，② 保留 2 位小数并去掉多余 0
+  const val = Math.max(elapsed, 0.1);
+  const display = parseFloat(val.toFixed(2));  // 例：1.00 → 1，1.20 → 1.2
+
+  return `<span style="color:#4ade80;">${showTimeIcon ? '⏱️ 耗时：' : ''}${display}ms</span>`;
 }
 onMounted(async () => {
   await until(currentWorkflow).toBeTruthy()
@@ -177,7 +179,7 @@ const sendMessage = () => {
       await workflowRunLog.save()
       for (const step of logs) {
         // 处理每个步骤的执行时间
-        setExecutionTime(step.nodeId, formatStepLabel(step.elapsed, true))
+        setExecutionTime(step.nodeId, formatStepLabel(step, true))
       }
 
 

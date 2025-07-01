@@ -29,10 +29,6 @@ export class SafeRunCollectorHandler extends BaseTracer {
     /* ----------- LLM 结束：写日志 ----------- */
     async onLLMEnd(run: Run) {
         const summary = extractPromptSummary(run.inputs, run.outputs);
-        console.log("[SafeRunCollectorHandler] onLLMEnd:", summary.assistantMessage)
-        console.dir(run.outputs, { depth: 6, colors: true });
-        console.dir(run.outputs?.llmOutput, { depth: 6, colors: true });
-        console.dir(run.outputs?.generations?.[0]?.[0], { depth: 4, colors: true });
 
         // 若是流式且没抽到回复，则用 buffer
         const buffered = this.tokenBuffers.get(run.id) ?? "";
