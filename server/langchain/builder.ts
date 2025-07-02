@@ -258,8 +258,13 @@ export async function executeDAG(
 
       // 对入口节点赋值 inputMessage
       if (isStartNode(json, id, runType)) {
-        if (node.data.type === 'ChatInput' && node.data.dynamicValue !== false) {
-          (node.data as ChatInputData).inputValue = inputMessage
+        if (node.data.type === 'ChatInput') {
+          if (node.data.dynamicValue) {
+            node.data.inputValue = inputMessage
+          }
+          console.log(`🔄 ChatInput node ${id} set inputValue:`, node.data.inputValue)
+          // (node.data as ChatInputData).inputValue = inputMessage
+          // console.log(`🔄 ChatInput node ${id} set inputValue:`, inputMessage)
         } else {
           node.data.inputValue = inputMessage
         }
@@ -288,7 +293,6 @@ export async function executeDAG(
         if (!fac) throw new Error(`Factory not found for ${node.data.type}`)
 
         output = await fac(node as any, ctx)
-
 
       } catch (e) {
 
