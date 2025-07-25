@@ -75,12 +75,22 @@ Unlike Coze (closed‑source) and Langflow (React + Python), Torra is powered 
 
 ---
 
-## 📱 Community & API Keys
+## 📱  Join our community
+
+Join our community to share ideas, get support, and collaborate with other users:
+<img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="微信群二维码" width="200" />
+
+
+
+---
+
+
+## 📱   API Keys
 
 Need free keys for OpenAI, Claude, DeepSeek, Keling, Jimeng, Sora, Flux, Minimax, ElevenLabs, etc.?  
 Scan and add the author on WeChat:
 
-![WeChat QR](https://file.web.hlingsoft.com/6hMSdEMQ6cCDCCWmReDNcEL63gW0UAap/WechatIMG1891.jpg)
+<img src="https://file.web.hlingsoft.com/6hMSdEMQ6cCDCCWmReDNcEL63gW0UAap/WechatIMG1891.jpg" alt="author" width="200" />
 
 ---
 
@@ -105,6 +115,8 @@ Scan and add the author on WeChat:
 npx create-torra-app my-app
 cd my-app
 pnpm dev                 # uses SQLite
+
+```
 
 #### Switch to MongoDB
 

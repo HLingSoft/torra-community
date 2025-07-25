@@ -76,11 +76,24 @@
 
 ---
 
-## 📱 社区 & API Key 领取
 
+## 📱  加入讨论社区
+
+加入我们的社区，分享想法、获取支持、与其他用户协作：
+
+<img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="微信群二维码" width="200" />
+
+
+
+---
+
+## 📱  API Key 领取
+
+
+需要 OpenAI、Claude、DeepSeek、可灵、即梦、Sora、Flux、Minimax、ElevenLabs 等平台的免费 Key？
 扫描二维码添加作者微信，备注 GitHub 用户名，即可领取各大 LLM 免费 Key：
 
-![微信二维码](https://file.web.hlingsoft.com/6hMSdEMQ6cCDCCWmReDNcEL63gW0UAap/WechatIMG1891.jpg)
+<img src="https://file.web.hlingsoft.com/6hMSdEMQ6cCDCCWmReDNcEL63gW0UAap/WechatIMG1891.jpg" alt="author" width="200" />
 
 ---
 
@@ -108,6 +121,7 @@
 npx create-torra-app my-app
 cd my-app
 pnpm dev          # 默认 SQLite
+```
 
 #### 切换到 MongoDB
 # .env

@@ -75,14 +75,8 @@ Coze（クローズドソース）や Langflow（React + Python）とは異な
 | ![Nodes](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![Play](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![API](https://file.web.hlingsoft.com/zIHhaij2H6tBbym8eap1aqar2svuQ0q7/%E6%88%AA%E5%B1%8F2025-06-26%2011.24.37.png) |
 
 ---
-
-## 📱 コミュニティ & API キー取得
-
-著者の WeChat QR をスキャンし、GitHub ユーザー名を送ると各種 LLM の無料 API キーを入手できます。
-
-![WeChat QR](https://file.web.hlingsoft.com/6hMSdEMQ6cCDCCWmReDNcEL63gW0UAap/WechatIMG1891.jpg)
-
----
+ 
+ 
 
 ## ⚙️ 必要環境
 
@@ -99,6 +93,7 @@ npx create-torra-app my-app
 cd my-app
 pnpm dev          # SQLite を使用
 
+```
 
 #### MongoDB に切り替え
 
