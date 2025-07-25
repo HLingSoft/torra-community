@@ -103,7 +103,7 @@
 - **npm ≥ 10**
 - **pnpm ≥ 10**
 
-> 建议使用 [nvm](https://github.com/nvm-sh/nvm) 管理 Node 版本。
+> 建议使用 [Volta](https://volta.sh) 管理 Node 版本
 
 ---
 
@@ -124,9 +124,13 @@ pnpm dev          # 默认 SQLite
 ```
 
 #### 切换到 MongoDB
+
+```bash
+
 # .env
 TORRA_DATASOURCE=cloud
 MONGO_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/torra
+```
 
 ## 📄 许可证
 本项目采用 MIT License，使用、修改、分发须保留原始版权及作者信息。

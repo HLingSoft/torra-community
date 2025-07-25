@@ -78,6 +78,9 @@ Unlike Coze (closed‑source) and Langflow (React + Python), Torra is powered 
 ## 📱  Join our community
 
 Join our community to share ideas, get support, and collaborate with other users:
+
+
+
 <img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="微信群二维码" width="200" />
 
 
@@ -99,6 +102,7 @@ Scan and add the author on WeChat:
 - **npm ≥ 10**
 - **pnpm ≥ 10** (recommended)
 
+Use [Volta](https://volta.sh) to manage Node versions if needed.
 ---
 
 ## ⚡ Getting Started
@@ -120,10 +124,14 @@ pnpm dev                 # uses SQLite
 
 #### Switch to MongoDB
 
+
+```bash
+
 # .env
 TORRA_DATASOURCE=cloud
-MONGO_URI=mongodb+srv://<user>:<pass>@cluster0.mongodb.net/torra
+MONGO_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/torra
 
+```
 ## 📄 License
 MIT License — please retain attribution.
 

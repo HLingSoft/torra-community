@@ -76,7 +76,7 @@ Coze（クローズドソース）や Langflow（React + Python）とは異な
 
 ---
  
- 
+
 
 ## ⚙️ 必要環境
 
@@ -84,6 +84,8 @@ Coze（クローズドソース）や Langflow（React + Python）とは異な
 - **npm ≥ 10**
 - **pnpm ≥ 10**
 
+
+> Node バージョン管理には [Volta](https://volta.sh) を推奨します。
 ---
 
 ## ⚡ クイックスタート
