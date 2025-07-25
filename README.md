@@ -32,7 +32,7 @@ Unlike Coze (closed‑source) and Langflow (React + Python), Torra is powered 
 - 🚀 Visual workflow editor (VueFlow)
 - 🎨 Modern UI (Tailwind CSS v4 + Shadcn UI)
 - 🤖 Built‑in LangChain.js integration
-- 🗂 **Pluggable storage**: SQLite for local prototyping, MongoDB for production
+- 🗂 Pluggable storage: default local **SQLite**, optional local **MongoDB**, and one‑click migration to an online MongoDB instance
 - 🔄 **Hot‑swap** local ↔ online with zero downtime
 - 🪝 FeathersJS hook pipeline on every DB operation
 - 🧠 Supports major LLMs: OpenAI, Anthropic, Google, DeepSeek, Qwen, …

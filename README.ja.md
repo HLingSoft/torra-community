@@ -34,7 +34,7 @@ Coze（クローズドソース）や Langflow（React + Python）とは異な
 - 🚀 VueFlow によるドラッグ＆ドロップ編集
 - 🎨 Tailwind CSS v4 + Shadcn UI のモダン UI
 - 🤖 LangChain.js をネイティブ統合
-- 🗂 SQLite / MongoDB ホットスワップ
+- 🗂 プラガブルストレージ: デフォルトはローカル **SQLite**、ローカル **MongoDB** へ切替可、さらにオンライン MongoDB へワンクリック移行対応
 - 🔄 ローカル ↔ クラウド データシームレス移行
 - 🪝 FeathersJS フックで認証・監査・リアルタイム拡張
 - 🧠 OpenAI・Anthropic・Google・DeepSeek・Qwen などサポート

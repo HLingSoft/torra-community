@@ -33,7 +33,7 @@
 - 🚀 **VueFlow** 可视化拖拽式节点编辑
 - 🎨 **Tailwind CSS v4 + Shadcn UI** 现代化界面
 - 🤖 原生集成 **LangChain.js**，快速调用多家 LLM
-- 🗂 **SQLite**（本地原生）与 **MongoDB**（云端扩展）热插拔
+- 🗂 存储可插拔：默认本地 **SQLite**，可切换本地 **MongoDB**，并支持一键迁移到线上 MongoDB
 - 🔄 **本地 / 在线** 数据零停机迁移
 - 🪝 **FeathersJS Hook**：鉴权、限流、审计、实时推送一步到位
 - 🧠 支持 OpenAI、Anthropic、Google、DeepSeek、Qwen 等主流大模型
