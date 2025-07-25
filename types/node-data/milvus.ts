@@ -1,5 +1,5 @@
 // 1️⃣ Milvus 节点类型定义（根据 Langflow UI 完整字段）
-import type { InputPortVariable, OutputPortVariable } from '~/types/workflow'
+import type { InputPortVariable, OutputPortVariable } from '~~/types/workflow'
 
 export interface MilvusData {
   type: string

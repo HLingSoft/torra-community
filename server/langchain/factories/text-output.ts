@@ -1,6 +1,6 @@
-import type { TextOutputData } from '@/types/node-data/text-output'
-import type { BuildContext, LangFlowNode, InputPortVariable, NodeFactory, OutputPortVariable } from '~/types/workflow'
-import { resolveInputVariables, writeLogs } from '../utils'
+import type { TextOutputData } from '~~/types/node-data/text-output'
+import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~~/types/workflow'
+import { resolveInputVariables, writeLogs, stringifyForDisplay } from '../utils'
 
 /**
  * TextOutput 节点工厂函数
@@ -15,7 +15,8 @@ export const textOutputFactory: NodeFactory = async (
 
   // 统一解析输入
   const inputValues = await resolveInputVariables(context, [data.messageInputVariable])
-  const inputValue = inputValues[data.messageInputVariable.id] as string
+  const inputValue = inputValues[data.messageInputVariable.id]
+
   const outputVar = data.outputVariable as OutputPortVariable
   const outputPortId = outputVar.id
 
@@ -30,7 +31,7 @@ export const textOutputFactory: NodeFactory = async (
   }, elapsed)
 
   return {
-    [outputPortId]: inputValue,
-    default: inputValue,
+    [outputPortId]: stringifyForDisplay(inputValue),
+    default: stringifyForDisplay(inputValue),
   }
 }

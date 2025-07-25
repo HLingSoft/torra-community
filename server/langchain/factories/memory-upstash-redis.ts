@@ -1,5 +1,5 @@
-import type { LangFlowNode, BuildContext, InputPortVariable } from '~/types/workflow'
-import type { UpstashRedisChatMemoryData } from '@/types/node-data/memory-redis'
+import type { LangFlowNode, BuildContext, InputPortVariable } from '~~/types/workflow'
+import type { UpstashRedisChatMemoryData } from '~~/types/node-data/memory-redis'
 import { resolveInputVariables, writeLogs } from '../utils'
 import { UpstashRedisChatMessageHistory } from '@langchain/community/stores/message/upstash_redis'
 import { Redis } from "@upstash/redis"

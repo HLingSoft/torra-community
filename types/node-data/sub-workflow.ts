@@ -1,4 +1,4 @@
-import type { InputPortVariable, OutputPortVariable } from '~/types/workflow'
+import type { InputPortVariable, OutputPortVariable } from '~~/types/workflow'
 export interface KeyValueRow {
     id: number
     key: string
@@ -46,7 +46,7 @@ export const subWorkflowMeta: SubWorkflowData = {
 
     } as InputPortVariable,
     userIdInputVariable: {
-        name: 'X-User-Id',
+        name: 'Torra-User-Id',
         allowedTypes: ['Data'],
         value: '',
     } as InputPortVariable,

@@ -52,10 +52,11 @@ import type {
   OutputPortVariable,
   BuildContext,
   DAGRunResult
-} from '~/types/workflow'
+} from '~~/types/workflow'
 import { collectLoopBodyNodes, contextLogsToSteps } from './utils'
 import { initFactories, nodeFactoryMap } from './factories'
-import { ChatInputData } from '@/types/node-data/chat-input'
+// import { ChatInputData } from '~~/types/node-data/chat-input'
+import { LoopData } from '~~/types/node-data/loop'
 
 initFactories()
 
@@ -152,6 +153,7 @@ export async function executeDAG(
   json: LangFlowJson,
   inputMessage: string,
   runType: 'loop' | 'chat' | 'api' = 'chat',
+  variables: Record<string, any>[],
   userId: string,
   workflowId: string,
   opts: ExecuteDAGOptions & {
@@ -164,12 +166,14 @@ export async function executeDAG(
 
   const ctx: BuildContext = {
     userId,
+    variables,
     workflowId,
     logs: {},
     resolvedInput: {},
     results: opts.results ?? {},
     json,
     onRunnableElapsed: opts.onRunnableElapsed,
+    onStep: opts.onStep, // ✅ 加入这行
   }
   // const dagSteps: DAGStepInfo[] = []
   let allowList: Set<string> = new Set<string>();
@@ -193,16 +197,19 @@ export async function executeDAG(
         .map(n => n.id);
 
       allowList = getWeaklyConnectedNodeIds(startNodeIds, json.edges);
+
       //   裁剪掉所有 loop 节点的 body（customNodeIds）
       //    这样主流程不会调度到它们
-
+      // console.log('json.nodes', json.nodes)
       json.nodes.forEach(node => {
         if (node.data.type === 'Loop') {
+          // console.log('Loop node data:', node.data)
+          const nodeData = node.data as LoopData
           const bodyNodeIds = collectLoopBodyNodes(
             json,
             node.id,
-            node.data.itemOutputVariable.id,
-            node.data.loopItemResultInputVariable.id,
+            nodeData.itemOutputVariable.id,
+            nodeData.loopItemResultInputVariable.id,
           );
           // console.log('🔄 Loop node', node.id, 'body nodes:', bodyNodeIds);
           bodyNodeIds.forEach(id => {
@@ -262,7 +269,7 @@ export async function executeDAG(
           if (node.data.dynamicValue) {
             node.data.inputValue = inputMessage
           }
-          console.log(`🔄 ChatInput node ${id} set inputValue:`, node.data.inputValue)
+          // console.log(`🔄 ChatInput node ${id} set inputValue:`, node.data.inputValue)
           // (node.data as ChatInputData).inputValue = inputMessage
           // console.log(`🔄 ChatInput node ${id} set inputValue:`, inputMessage)
         } else {
@@ -285,7 +292,7 @@ export async function executeDAG(
 
 
       let output: any
-      let error: string | undefined
+      // let error: string | undefined
 
       try {
 
@@ -296,8 +303,16 @@ export async function executeDAG(
 
       } catch (e) {
 
-        error = (e instanceof Error ? e.message : String(e))
-        output = { error }
+        const errorMessage = e instanceof Error ? e.message : String(e)
+        const detailedError = new Error(
+          `Node execution failed: [${node.data.title}] (${id}) - ${errorMessage}`
+        )
+
+        ctx.results[id] = { error: errorMessage }
+
+        console.error(`❌ Node ${id} (${node.data.title}) 执行失败:`, e)
+
+        throw detailedError
       }
 
       ctx.results[id] = output
@@ -366,14 +381,16 @@ export async function executeDAG(
       output: finalOutput
     }
   } catch (error) {
-    console.error('❌ DAG execution failed:', error)
+    // console.error('❌ DAG execution failed:', error)
     // throw error
     return {
       statusCode: 500,
       results: ctx.results,
-      // logs: dagSteps,
       logs: contextLogsToSteps(ctx, allowList.size),
-      output: '❌ API执行失败:' + (error instanceof Error ? error.message : String(error)),
+      /* 不再加前缀，直接返回报错内容 */
+      output: error instanceof Error
+        ? error.message
+        : String(error),
     }
   }
 }

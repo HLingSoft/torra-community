@@ -1,8 +1,8 @@
-import type { LangFlowNode, BuildContext } from '~/types/workflow'
-import type { MilvusData } from '@/types/node-data/milvus'
+import type { LangFlowNode, BuildContext } from '~~/types/workflow'
+import type { MilvusData } from '~~/types/node-data/milvus'
 
-import { resolveInputVariables, wrapRunnable, writeLogs } from '../utils'
-import { RunnableLambda } from '@langchain/core/runnables'
+import { resolveInputVariables, writeLogs } from '../utils'
+
 import { Milvus } from '@langchain/community/vectorstores/milvus'
 import type { MilvusLibArgs } from '@langchain/community/vectorstores/milvus'
 import type { Document } from '@langchain/core/documents'
@@ -43,80 +43,59 @@ export async function milvusFactory(node: LangFlowNode, context: BuildContext) {
   if (!embedding)
     throw new Error('Milvus 节点需要一个有效的 Embedding 实例')
 
-  /* ---------- 2. 延迟执行 Runnable ---------- */
-  const searchRunnable = RunnableLambda.from(async () => {
-    const opts: MilvusLibArgs = {
-      collectionName,
-      url,
-      ssl: true,
-      clientConfig: { address: url, token },
-      indexCreateOptions: {
-        index_type: 'IVF_FLAT',
-        metric_type: 'COSINE',
-        params: { nlist: 1024 },
-        search_params: { nprobe: 16 },
-      },
-    }
+  const opts: MilvusLibArgs = {
+    collectionName,
+    url,
+    ssl: true,
+    clientConfig: { address: url, token },
+    indexCreateOptions: {
+      index_type: 'IVF_FLAT',
+      metric_type: 'COSINE',
+      params: { nlist: 1024 },
+      search_params: { nprobe: 16 },
+    },
+  }
 
-    if (vectorField) opts.vectorField = vectorField
-    if (textField) opts.textField = textField
-    if (primaryField) opts.primaryField = primaryField
-    if (partitionKey) opts.partitionKey = partitionKey
+  if (vectorField) opts.vectorField = vectorField
+  if (textField) opts.textField = textField
+  if (primaryField) opts.primaryField = primaryField
+  if (partitionKey) opts.partitionKey = partitionKey
 
-    const store = new Milvus(embedding, opts)
+  const store = new Milvus(embedding, opts)
 
-    await store.ensureCollection()
-    await store.ensurePartition()
+  await store.ensureCollection()
+  await store.ensurePartition()
 
-    if (data.ingestDataInputVariable.connected && ingestData) {
-      const docs = JSON.parse(ingestData)
-      await store.addDocuments(docs)
-    }
+  if (data.ingestDataInputVariable.connected && ingestData) {
+    const docs = JSON.parse(ingestData)
+    await store.addDocuments(docs)
+  }
 
-    const filter =
-      partitionKey && partitionValue
-        ? `${partitionKey} == \"${partitionValue}\"`
-        : undefined
+  const filter =
+    partitionKey && partitionValue
+      ? `${partitionKey} == \"${partitionValue}\"`
+      : undefined
 
-    const raw = await store.similaritySearchWithScore(query, 30, filter)
-    const top = filterTopRelevantDocs(raw)
+  const raw = await store.similaritySearchWithScore(query, 30, filter)
+  const top = filterTopRelevantDocs(raw)
 
-    return top
-      .map(([doc, score]) => `${doc.pageContent}\n`)
-      .join('\n\n')
-  })
+  const result = top
+    .map(([doc, score]) => `${doc.pageContent}\n`)
+    .join('\n\n')
 
-  /* ---------- 3. 包装延迟执行并返回 ---------- */
-  const wrapped = wrapRunnable(
-    searchRunnable,
-    node.id,
-
-
-    {
-      context,
-      portId: data.outputPortVariable.id,
-      logFormat: res => ({
-        type: 'milvus',
-        collection: collectionName,
-        query,
-        result: res
-      }),
-      outputPort: data.outputPortVariable
-    }
-  )
   const elapsed = performance.now() - t0
   /* ---------- 4. 写入结构化日志 ---------- */
 
   writeLogs(context, node.id, data.title, data.type, {
     [data.outputPortVariable.id]: {
-      content: '',
+      content: result,
       outputPort: data.outputPortVariable,
       elapsed
     }
   }, elapsed)
 
   return {
-    [data.outputPortVariable.id]: wrapped,
+    [data.outputPortVariable.id]: result,
   }
 }
 

@@ -1,143 +1,118 @@
-# Torra コミュニティ版
+
+# Torra Community Edition
 
 🌐 [English](./README.md) | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
 
-**Torra コミュニティ版** は、AI エージェントとワークフローを構築するためのオープンソースのビジュアルエディタです。**Coze** や **Langflow** にインスパイアされ、**Vue3 + TypeScript** によって完全に構築されています。
+> **最新 Nuxt 4 で構築。すべての依存パッケージは常に最新です。**
 
-Coze（クローズドソース）や Langflow（React + Python）とは異なり、Torra は **Nuxt3**、**VueFlow**、**Tailwind CSS v4**、**Shadcn UI**、**LangChain.js** を使用し、開発者とチームにモダンで高性能な体験を提供します。
+**Torra Community Edition** は AI エージェントとワークフローを可視的に構築できるオープンソースエディタです。  
+**Coze** と **Langflow** にインスパイアされつつ、**Vue 3 + TypeScript** でゼロから実装しました。
 
-このエディションは無料で使用・変更・拡張が可能です。
-
- 
- ## 🌐 video
-[![Try it Online](https://file.web.hlingsoft.com/SN1tGlRFSFsCB2B4in87AeKxt6nGFRrY/torra_screenshot.png)](https://file.web.hlingsoft.com/70ccmgMsHhoo8TnCFBqRWhBiMXudgrem/%E9%A3%9E%E4%B9%A620250627-212754.mp4)
-
-
+Coze（クローズドソース）や Langflow（React + Python）とは異なり、Torra は **Nuxt 4**、**VueFlow**、**Tailwind CSS v4**、**Shadcn UI**、**LangChain.js**、**FeathersJS** を採用し、モダンで高速な開発体験を提供します。
 
 ---
 
-## ✨ 主な機能
+## 🌟 v0.6 の新機能
 
-- 🚀 VueFlow による視覚的なワークフローエディタ
-- 🎨 Tailwind CSS v4 + Shadcn を採用したモダンな UI
-- 🤖 LangChain.js 統合による LLM ワークフロー構築
-- 🗂 ローカルファーストストレージ（クラウドロックインなし）
-- ⚡ 素早いプロトタイピングと拡張のしやすさ
-- 🔓 完全オープンソースでコミュニティに優しい
-- 🧠 主要な LLM をサポート：OpenAI、Anthropic、Google、DeepSeek、Qwen など
-- 🗃 多様なデータソース：MySQL、PostgreSQL、MongoDB、SQLite、Redis、Elasticsearch
-- 📄 多様なデータ形式対応：CSV、JSON、XML、YAML
-- 🔧 データのクレンジング、変換、分析、可視化に対応
-- 🛢 柔軟なバックエンド：ローカルファイル、クラウド、データベース
-- 🔍 SQL、NoSQL、GraphQL でのクエリが可能
-- 🖼 テキスト、画像、音声、動画のマルチモーダルデータ対応
-- 🧪 エージェントテスト・デバッグ用 Playground 搭載
-- 🚀 ワンクリックで API 公開
-- 📊 LLM 利用のロギングと課金管理
-- 🌍 多言語 UI 対応（英語・中国語・日本語 など）
+| 機能 | 説明 |
+|------|------|
+| **SQLite & MongoDB** | ローカル SQLite と クラウド MongoDB の両方をサポート。 |
+| **ローカル ↔ クラウド 無停止切替** | `TORRA_DATASOURCE` を `local` / `cloud` に変更するだけで自動移行。 |
+| **FeathersJS フックパイプライン** | 全 CRUD 操作をカスタムフックで拡張でき、認証・レート制限・監査ログなども簡単。 |
+| **API キーハブ** | 著者の WeChat QR をスキャンし、OpenAI・可灵・即梦・Sora・Flux・Minimax・ElevenLabs などの無料キーを取得。 |
 
-### 🧩 組み込みモジュールと機能一覧
+---
 
-| モジュール    | 数量 | 機能一覧                                                                 |
-|---------------|------|--------------------------------------------------------------------------|
-| 入力          | 3    | チャット入力、テキスト入力、API 入力                                   |
-| 出力          | 2    | チャット出力、テキスト出力                                              |
-| プロンプト     | 1    | プロンプト                                                               |
-| 画像          | 2    | OpenAI 画像認識、OpenAI 画像生成                                        |
-| 音声          | 2    | OpenAI 音声認識、OpenAI 音声生成                                        |
-| データソース  | 8    | API リクエスト、API ツール、ディレクトリ、ファイル、MongoDB、SQL クエリ、URL、Webhook |
-| データ処理    | 8    | メッセージからデータ、データからメッセージ、データフィルタ、データ統合、構造化→データ、データ→構造化、JSON パーサー、ファイルを Aliyun に保存 |
-| モデル        | 5    | Ollama、Anthropic、DeepSeek、OpenAI、Google                              |
-| ベクトルストア| 1    | Milvus                                                                   |
-| 埋め込み       | 1    | OpenAI                                                                   |
-| チャット記憶   | 1    | Upstash Redis チャットメモリ                                           |
-| エージェント   | 1    | エージェント                                                             |
-| ロジック       | 5    | If-Else、Listen、Loop、Notify、Pass                                     |
-| ツール         | 5    | Baidu 検索、計算機、Google 検索、Tavily AI 検索、タイムゾーン / 位置情報  |
-| ヘルパー       | 5    | ID 生成器、メッセージ履歴、メッセージストア、構造化出力、リスト出力     |
-| MCP           | 3    | MCP HTTP ツール、MCP SSE ツール、MCP stdio ツール                        |
-| サブフロー     | 1    | ワークフロー（Workflow）                                                 |
-| プラグイン     | 0    | Comming Soon                                                                          |
+## 🌐 デモ動画
+
+[![オンライン体験](https://file.web.hlingsoft.com/SN1tGlRFSFsCB2B4in87AeKxt6nGFRrY/torra_screenshot.png)](https://file.web.hlingsoft.com/70ccmgMsHhoo8TnCFBqRWhBiMXudgrem/%E9%A3%9E%E4%B9%A620250627-212754.mp4)
+
+---
+
+## ✨ 特長
+
+- 🚀 VueFlow によるドラッグ＆ドロップ編集
+- 🎨 Tailwind CSS v4 + Shadcn UI のモダン UI
+- 🤖 LangChain.js をネイティブ統合
+- 🗂 SQLite / MongoDB ホットスワップ
+- 🔄 ローカル ↔ クラウド データシームレス移行
+- 🪝 FeathersJS フックで認証・監査・リアルタイム拡張
+- 🧠 OpenAI・Anthropic・Google・DeepSeek・Qwen などサポート
+- 🖼 テキスト・画像・音声・動画などマルチモーダル対応
+- 🧪 Playground と 1クリック API 公開
+- 📊 LLM 使用量ログ & 課金
+- 🌍 多言語 UI
+
+### 🧩 内蔵モジュール
+
+| カテゴリ | 数 | 代表機能 |
+|----------|----|----------|
+| Input | 3 | Chat Input、Text Input、API Input |
+| Output | 2 | Chat Output、Text Output |
+| Prompt | 1 | Prompt |
+| Image | 2 | OpenAI 画像認識、画像生成 |
+| Voice | 2 | OpenAI 音声認識、音声合成 |
+| Data Sources | 8 | API Request、Directory、File、MongoDB、SQL Query、URL、Webhook |
+| Processing | 8 | Message↔Data、Filter、Combine、JSON Parser、OSS へ保存 |
+| Models | 5 | Ollama、Anthropic、DeepSeek、OpenAI、Google |
+| Vector Store | 1 | Milvus |
+| Embeddings | 1 | OpenAI |
+| Memory | 1 | Upstash Redis Chat Memory |
+| Agent | 1 | Agent |
+| Logic | 5 | If‑Else、Listen、Loop、Notify、Pass |
+| Tools | 5 | Baidu Search、Google Search、Tavily、Calculator、Timezone |
+| Helpers | 5 | ID Generator、Message Store、Structured Output、List Output、History |
+| MCP | 3 | MCP HTTP、MCP SSE、MCP stdio |
+| SubFlow | 1 | Workflow |
+| Plugins | 0 | 近日公開 |
 
 ---
 
 ## 🖼 スクリーンショット
 
-| Nodes | Playground | API |
-|----------------------|----------------------|----------------------|
-| ![1](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![2](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![3](https://file.web.hlingsoft.com/zIHhaij2H6tBbym8eap1aqar2svuQ0q7/%E6%88%AA%E5%B1%8F2025-06-26%2011.24.37.png) |
-
----
- 
-
-## ⚙️ システム要件
-
-- **Node.js ≥ 20**
-- **npm ≥ 10**
-- **pnpm ≥ 10**（推奨）
-
-> ⚠️ Node バージョン管理には [nvm](https://github.com/nvm-sh/nvm) の利用を推奨します。
+| ノード編集 | Playground | API 呼び出し |
+|-----------|------------|--------------|
+| ![Nodes](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![Play](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![API](https://file.web.hlingsoft.com/zIHhaij2H6tBbym8eap1aqar2svuQ0q7/%E6%88%AA%E5%B1%8F2025-06-26%2011.24.37.png) |
 
 ---
 
-## ⚡ はじめに
+## 📱 コミュニティ & API キー取得
 
-### 💡 開発環境がない方向け（非エンジニア向け）
+著者の WeChat QR をスキャンし、GitHub ユーザー名を送ると各種 LLM の無料 API キーを入手できます。
 
-プロダクトマネージャーや非技術者の方は、以下の **ワンクリック環境セットアップパッケージ** をご利用いただけます。開発環境の準備は不要です：
+![WeChat QR](https://file.web.hlingsoft.com/6hMSdEMQ6cCDCCWmReDNcEL63gW0UAap/WechatIMG1891.jpg)
 
-👉 [📦 Torra 環境インストーラー（ZIP）をダウンロード](https://file.web.hlingsoft.com/maO3Mw0xynoVsmeBnRXqOzLBP1kmhDsA/torra-starter.zip)
+---
 
-ZIP ファイルを解凍した後：
+## ⚙️ 必要環境
 
-- **Windows ユーザー**：`start.bat` をダブルクリック
-- **Mac ユーザー**：右クリック → `start.command` を開く
+- **Node.js ≥ 20**
+- **npm ≥ 10**
+- **pnpm ≥ 10**
 
-スクリプトは自動的に以下を実行します：
+---
 
-- **Node.js** をインストール（未インストールの場合）
-- **pnpm** をインストール
-- 新しい **Torra プロジェクト** を作成
-- ビジュアルエディタを起動
-
-ブラウザが自動的に [http://localhost:3000](http://localhost:3000) を開き、すぐに使用を開始できます ✨
-
-> ⚠️ 初回実行で失敗する場合は、スクリプトの実行許可があるか確認してください。あるいは [Node.js](https://nodejs.org) を手動でインストールしてください。
-
-
-### 🏁 クイックスタート（推奨）
+## ⚡ クイックスタート
 
 ```bash
 npx create-torra-app my-app
 cd my-app
-pnpm dev
-```
+pnpm dev          # SQLite を使用
 
-### 🛠 手動セットアップ
 
-```bash
-npm i -g pnpm
-git clone https://github.com/HLingSoft/torra-community.git
-cd torra-community
-pnpm install
-pnpm dev
-```
+#### MongoDB に切り替え
 
----
+# .env
+TORRA_DATASOURCE=cloud
+MONGO_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/torra
+
 
 ## 📄 ライセンス
+MIT ライセンス。著作権表記を削除しないでください。
 
-このプロジェクトは [MIT ライセンス](./LICENSE) に基づいてオープンソース化されています。
 
-> 本プロジェクトを使用・修正・再配布する際は、  
-> 元のライセンスを保持し、**Torra チーム** を明記してください。
 
----
-
-## 🙌 クレジット
-
-本プロジェクトは **Torra チーム** によって作成・保守されています。  
-オンラインで試す 👉 [https://www.torra.cloud](https://www.torra.cloud)
-
-💬 フィードバックや提案は [GitHub Issue](https://github.com/HLingSoft/torra-community/issues) にて歓迎します。  
-💖 役に立ったと思ったら GitHub のスター ⭐ をお願いします！
+## 🙌 謝辞
+Torra Team が開発・保守。
+オンラインデモ → https://www.torra.cloud
+気に入ったら GitHub で ⭐Star！

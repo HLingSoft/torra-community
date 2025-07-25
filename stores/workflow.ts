@@ -1,7 +1,6 @@
 import type { Edge, Node } from '@vue-flow/core'
 import { defineStore } from 'pinia'
-import Workflow from '~/models/Workflow'
-
+import Workflow from '~~/models/Workflow'
 
 export const useWorkflowStore = defineStore('workflow', () => {
 
@@ -9,7 +8,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
   const edges = ref<Edge[]>([])
   const executionErrorNodeIds = ref<string[]>([])
   const currentWorkflow = ref<Workflow>()
-
+  const capturingScreenshotMode = ref(true)
   const triggerNodeComponentName = ref()
 
   const selectedNodeId = ref<string | null>(null)
@@ -18,7 +17,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
   return {
     nodes,
     edges,
-
+    capturingScreenshotMode,
     triggerNodeComponentName,
     currentWorkflow,
     executionErrorNodeIds,

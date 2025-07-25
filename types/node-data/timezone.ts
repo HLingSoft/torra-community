@@ -1,4 +1,4 @@
-import type { OutputPortVariable } from '~/types/workflow'
+import type { OutputPortVariable } from '~~/types/workflow'
 
 export interface TimezoneData {
   title: string

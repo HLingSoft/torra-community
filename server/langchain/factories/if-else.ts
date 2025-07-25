@@ -1,8 +1,8 @@
-import type { LangFlowNode, BuildContext } from '~/types/workflow'
-import type { IfElseData } from '@/types/node-data/if-else'
-import { MatchType } from '@/types/node-data/if-else'
+import type { LangFlowNode, BuildContext } from '~~/types/workflow'
+import type { IfElseData } from '~~/types/node-data/if-else'
+import { MatchType } from '~~/types/node-data/if-else'
 import { resolveInputVariables, writeLogs } from '../utils'
-import { InputPortVariable } from '~/types/workflow'
+import { InputPortVariable } from '~~/types/workflow'
 
 export const ifElseFactory = async (node: LangFlowNode, context: BuildContext) => {
 

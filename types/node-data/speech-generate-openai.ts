@@ -1,4 +1,4 @@
-import type { InputPortVariable, OutputPortVariable } from '~/types/workflow'
+import type { InputPortVariable, OutputPortVariable } from '~~/types/workflow'
 export const allVoices = {
     alloy: 'alloy',
     ash: 'ash',
@@ -33,15 +33,15 @@ export interface SpeechGenerateOpenAIData {
     show: boolean
     saved: boolean
 }
-export const SpeechGenerateOpenAILangchainName = 'SpeechRecognitionOpenAI'
+export const SpeechGenerateOpenAILangchainName = 'SpeechGenerateOpenAI'
 
 export const speechGenerateOpenAIMeta: SpeechGenerateOpenAIData = {
     title: 'Speech Generation OpenAI',
-    description: 'Use OpenAI to generate voices based on text instructions. DALLE-3 is recommended for best results.',
+    description: 'Use OpenAI to generate voices based on text instructions.',
     type: SpeechGenerateOpenAILangchainName,
     icon: 'streamline-color:Voice-saturation-flat',
     modelName: 'gpt-4o-mini-tts', // 默认模型名称
-    voice: 'coral', // 默认音色
+    voice: 'echo', // 默认音色
     apiKeyInputVariable: {
         name: 'OpenAI API Key',
         allowedTypes: ['Data'],

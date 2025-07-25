@@ -1,5 +1,5 @@
-import type { BuildContext, LangFlowNode, InputPortVariable } from '~/types/workflow'
-import type { MessageHistoryData } from '@/types/node-data/message-history'
+import type { BuildContext, LangFlowNode, InputPortVariable } from '~~/types/workflow'
+import type { MessageHistoryData } from '~~/types/node-data/message-history'
 import { resolveInputVariables, writeLogs } from '../utils'
 import {
   AIMessage,

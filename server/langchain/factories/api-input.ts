@@ -1,5 +1,5 @@
-import type { LangFlowNode, BuildContext } from '~/types/workflow'
-import type { APIInputData } from '@/types/node-data/api-input'
+import type { LangFlowNode, BuildContext } from '~~/types/workflow'
+import type { APIInputData } from '~~/types/node-data/api-input'
 import { writeLogs } from '../utils'
 
 export async function apiInputFactory(node: LangFlowNode, context: BuildContext) {

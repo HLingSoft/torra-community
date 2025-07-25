@@ -10,7 +10,6 @@
   "editor.accessibilitySupport": "off",
   // "editor.defaultFormatter": "Vue.volar",
   // "editor.defaultFormatter": "esbenp.prettier-vscode",
-
   // "eslint.options": {
   //   "overrideConfigFile": "eslint.config.mjs"
   // },
@@ -18,6 +17,15 @@
   "tailwindCSS.includeLanguages": {
     "vue": "html",
     "typescript": "javascript"
+  },
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.profiles.osx": {
+    "zsh": {
+      "path": "/bin/zsh",
+      "args": [
+        "-l"
+      ]
+    }
   },
   "github.copilot.chat.codeGeneration.instructions": [
     {
@@ -284,8 +292,14 @@
       "/\\*\\s?ui\\s?\\*/\\s*{([^;]*)}",
       ":\\s*[\"'`]([^\"'`]*).*?[\"'`]"
     ],
-    ["class(?:Name)?=\\s*[\"'`]([^\"'`]+)[\"'`]", 1],
-    ["\\bclass:\\s*['`]([^'`]+)['`]", 1]
+    [
+      "class(?:Name)?=\\s*[\"'`]([^\"'`]+)[\"'`]",
+      1
+    ],
+    [
+      "\\bclass:\\s*['`]([^'`]+)['`]",
+      1
+    ]
   ],
   "tailwindCSS.classAttributes": [
     "class",
@@ -297,7 +311,6 @@
     "strings": true
   },
   "workbench.sideBar.location": "right",
-
   "vite.autoStart": false,
   "files.associations": {
     "*.ts": "typescriptreact",
@@ -316,11 +329,9 @@
   },
   // "workbench.productIconTheme": "icons-carbon",
   // "workbench.iconTheme": "file-icons",
-
   "[javascriptreact]": {
     // "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-
   "dashboard.projectTileWidth": 200,
   "redhat.telemetry.enabled": true,
   "[xml]": {

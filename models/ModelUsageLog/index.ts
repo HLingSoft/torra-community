@@ -1,4 +1,4 @@
-import AV from '~/models/fake-av' // 上面那个本地适配器
+import AV from "../fake-av"
 import User from "../User"
 import DayJS from "dayjs"
 import cn from "dayjs/locale/zh-cn.js"
@@ -28,14 +28,32 @@ export enum EnumModelUsageLog {
   PROMPTTOKENS = "promptTokens",
   ASSISTANTMESSAGE = "assistantMessage",
   MODEL = "model",
+  USER = 'user',
+  WORKFLOW = 'workflow',
 }
 
 class ModelUsageLog extends AV.Object {
-  static CLASSNAME = "ModelUsageLog"
+  static _CLASSNAME = "ModelUsageLog"
   public tempVars: Record<string, any> = {}
 
-  constructor(initial?: any) {
-    super(ModelUsageLog.CLASSNAME, initial)
+  static _SCHEMA = {
+    callType: 'string',
+    totalTokens: 'number',
+    baseUrl: 'string',
+    userPrompt: 'string',
+    systemPrompt: 'string',
+    durationMs: 'number',
+    completionTokens: 'number',
+    historyMessages: 'string',
+    promptTokens: 'number',
+    assistantMessage: 'string',
+    model: 'string',
+    user: 'pointer',
+    workflow: 'pointer',
+  } as const
+
+  constructor() {
+    super()
     return new Proxy(this, {
       get(target, prop: string | symbol) {
         // 如果 prop 是 symbol，直接返回默认行为
@@ -220,5 +238,5 @@ class ModelUsageLog extends AV.Object {
   [key: `temp_${string}`]: any
 }
 
-AV.Object.register(ModelUsageLog, ModelUsageLog.CLASSNAME)
+AV.Object.register(ModelUsageLog, "ModelUsageLog")
 export default ModelUsageLog

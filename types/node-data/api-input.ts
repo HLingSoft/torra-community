@@ -1,4 +1,4 @@
-import type { OutputPortVariable, KeyValueSchema } from '~/types/workflow'
+import type { OutputPortVariable, KeyValueSchema } from '~~/types/workflow'
 
 
 

@@ -1,6 +1,6 @@
 
 
-import type { InputPortVariable, OutputPortVariable } from '~/types/workflow'
+import type { InputPortVariable, OutputPortVariable } from '~~/types/workflow'
 
 
 export interface LoopData {
@@ -29,7 +29,7 @@ export const loopMeta: LoopData = {
 
     listDataInputVariable: {
         name: 'List Data',
-        allowedTypes: ['Data[]'],
+        allowedTypes: ['Data[]', 'Base64[]'],
         value: '',
 
     } as InputPortVariable,
@@ -41,11 +41,11 @@ export const loopMeta: LoopData = {
     } as InputPortVariable,
     itemOutputVariable: {
         name: 'Return Loop Item',
-        outputType: 'Data',
+        outputType: 'Any',
     } as OutputPortVariable,
     doneOutputVariable: {
         name: 'When Done',
-        outputType: 'Data[]',
+        outputType: 'Any[]',
     } as OutputPortVariable,
     show: true,
 }

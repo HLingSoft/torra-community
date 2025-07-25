@@ -1,5 +1,5 @@
-import type { PassData } from '@/types/node-data/pass'
-import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~/types/workflow'
+import type { PassData } from '~~/types/node-data/pass'
+import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~~/types/workflow'
 
 import { resolveInputVariables, writeLogs } from '../utils'
 
@@ -16,9 +16,10 @@ export const passFactory: NodeFactory = async (
 
     // 统一解析所有输入端口
     const inputValues = await resolveInputVariables(context, [data.inputInputVariable])
-    const inputValue = inputValues[data.inputInputVariable.id] as string
+    const inputValue = inputValues[data.inputInputVariable.id] as any
     const outputVar = data.outputVariable as OutputPortVariable
     const outputPortId = outputVar.id
+    // console.log(`🔄 Pass node ${node.id} inputValue:`, inputValue)
 
     const elapsed = performance.now() - t0
     writeLogs(

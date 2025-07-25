@@ -1,5 +1,4 @@
-import type { InputPortVariable, OutputPortVariable } from '~/types/workflow'
-
+import type { InputPortVariable, OutputPortVariable } from '~~/types/workflow'
 export interface APIRequestData {
     type: string
     title: string
@@ -37,7 +36,7 @@ export const apiRequestMeta: APIRequestData = {
     } as InputPortVariable,
     bodyInputVariable: {
         name: 'Body',
-        allowedTypes: ['Data'],
+        allowedTypes: ['Structured Data', 'Data'],
 
         value: {
         } as Record<string, any>,

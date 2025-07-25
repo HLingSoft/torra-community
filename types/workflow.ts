@@ -47,6 +47,13 @@ export interface DAGStepInfo {
   }[]
   error?: string
   elapsed: number // 当前节点总耗时
+  // ✅ 可选新增字段，表示 Loop 上下文信息
+  loopContext?: {
+    loopNodeId: string;
+    loopNodeTitle: string;
+    currentItemIndex: number;
+    currentItemValue: unknown;
+  };
 }
 
 export interface InputPortVariable {
@@ -103,6 +110,7 @@ export interface DAGRunResult {
 export type NodeResultsMap = Record<string, Record<string, any>>
 export interface BuildContext {
   userId: string
+  variables: Record<string, any>[]
   workflowId: string
 
   logs: NodeResultsMap,
@@ -111,6 +119,7 @@ export interface BuildContext {
   json: LangFlowJson
   /** 由 executeDAG 注入，用来回写真实耗时 */
   onRunnableElapsed?: (nodeId: string, ms: number) => void
+  onStep?: (stepInfo: DAGStepInfo) => void  // ✅ 新增此回调
 }
 
 // 👇 工厂函数中我们明确用 LangFlowNode

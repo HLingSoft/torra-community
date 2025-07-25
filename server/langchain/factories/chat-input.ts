@@ -1,10 +1,10 @@
-import type { ChatInputData } from '@/types/node-data/chat-input'
+import type { ChatInputData } from '~~/types/node-data/chat-input'
 import type {
   BuildContext,
   LangFlowNode,
   NodeFactory,
   OutputPortVariable,
-} from '~/types/workflow'
+} from '~~/types/workflow'
 import { writeLogs } from '../utils'
 
 /**
@@ -18,6 +18,7 @@ export const chatInputFactory: NodeFactory = async (
 ) => {
   const t0 = performance.now()
   const data = node.data as ChatInputData
+
   const outputVar = data.outputVariable as OutputPortVariable
   const outputPortId = outputVar.id
   const inputValue = data.inputValue || ''

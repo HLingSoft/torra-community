@@ -1,9 +1,9 @@
-import type { FilterData } from '@/types/node-data/filter-data'
+import type { FilterData } from '~~/types/node-data/filter-data'
 import type {
     BuildContext,
     LangFlowNode,
     InputPortVariable,
-} from '~/types/workflow'
+} from '~~/types/workflow'
 
 import {
     resolveInputVariables,

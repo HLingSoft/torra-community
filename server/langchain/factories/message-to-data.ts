@@ -3,8 +3,8 @@ import type {
   LangFlowNode,
   NodeFactory,
   InputPortVariable
-} from '~/types/workflow'
-import type { MessageToDataData } from '@/types/node-data/message-to-data'
+} from '~~/types/workflow'
+import type { MessageToDataData } from '~~/types/node-data/message-to-data'
 import { resolveInputVariables, writeLogs } from '../utils'
 
 /**

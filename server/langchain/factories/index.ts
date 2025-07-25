@@ -1,113 +1,166 @@
-import type { NodeFactory } from '~/types/workflow'
-import { chatInputMeta } from '@/types/node-data/chat-input'
-import { chatOpenAIMeta } from '@/types/node-data/chat-openai'
-import { chatOutputMeta } from '@/types/node-data/chat-output'
-import { promptTemplateMeta } from '@/types/node-data/prompt-template'
-import { textInputMeta } from '~/types/node-data/text-input'
+import type { NodeFactory } from '~~/types/workflow'
+import { chatInputMeta } from '~~/types/node-data/chat-input'
+import { chatOpenAIMeta } from '~~/types/node-data/chat-openai'
+import { chatOutputMeta } from '~~/types/node-data/chat-output'
+import { promptTemplateMeta } from '~~/types/node-data/prompt-template'
+import { textInputMeta } from '~~/types/node-data/text-input'
 import { chatInputFactory } from './chat-input'
 import { chatOpenAIFactory } from './chat-openai'
 import { chatOutputFactory } from './chat-output'
 import { promptTemplateFactory } from './prompt-template'
 import { textInputFactory } from './text-input'
 import { ifElseFactory } from './if-else'
-import { ifElseMeta } from '~/types/node-data/if-else'
-import { iDGeneratorMeta } from '~/types/node-data/id-generator'
+import { ifElseMeta } from '~~/types/node-data/if-else'
+import { iDGeneratorMeta } from '~~/types/node-data/id-generator'
 import { iDGeneratorFactory } from './id-generator'
 import { milvusFactory } from './milvus'
-import { milvusMeta } from '~/types/node-data/milvus'
+import { milvusMeta } from '~~/types/node-data/milvus'
 
 
-import { openAIEmbeddingsMeta } from '~/types/node-data/openai-embeddings'
+import { openAIEmbeddingsMeta } from '~~/types/node-data/openai-embeddings'
 import { openAIEmbeddingsFactory } from './openai-embeddings'
 
 import { apiRequestFactory } from './api-request'
-import { apiRequestMeta } from '~/types/node-data/api-request'
+import { apiRequestMeta } from '~~/types/node-data/api-request'
 
-import { messageStoreMeta } from '~/types/node-data/message-store'
+import { messageStoreMeta } from '~~/types/node-data/message-store'
 import { messageStoreFactory } from './message-store'
 
 import { upstashRedisChatMemoryFactory } from './memory-upstash-redis'
-import { upstashRedisChatMemoryMeta } from '~/types/node-data/memory-redis'
+import { upstashRedisChatMemoryMeta } from '~~/types/node-data/memory-redis'
 
 import { messageHistoryFactory } from './message-history'
-import { messageHistoryMeta } from '~/types/node-data/message-history'
+import { messageHistoryMeta } from '~~/types/node-data/message-history'
 import { timezoneFactory } from './timezone'
-import { timezoneMeta } from '~/types/node-data/timezone'
+import { timezoneMeta } from '~~/types/node-data/timezone'
 
 import { structuredOutputFactory } from './structured-output'
-import { structuredOutputMeta } from '~/types/node-data/structured-output'
+import { structuredOutputMeta } from '~~/types/node-data/structured-output'
 
 import { messageToDataFactory } from './message-to-data'
-import { messageToDataMeta } from '~/types/node-data/message-to-data'
+import { messageToDataMeta } from '~~/types/node-data/message-to-data'
 
 import { textOutputFactory } from './text-output'
-import { textOutputMeta } from '~/types/node-data/text-output'
+import { textOutputMeta } from '~~/types/node-data/text-output'
 import { filterDataFactory } from './filter-data'
-import { filterDataMeta } from '~/types/node-data/filter-data'
+import { filterDataMeta } from '~~/types/node-data/filter-data'
 
 import { apiInputFactory } from './api-input'
-import { apiInputMeta } from '~/types/node-data/api-input'
+import { apiInputMeta } from '~~/types/node-data/api-input'
 
 import { mcpHttpFactory } from './mcp-http'
-import { mcpHttpMeta } from '~/types/node-data/mcp-http'
+import { mcpHttpMeta } from '~~/types/node-data/mcp-http'
 
 import { agentFactory } from './agent'
-import { agentMeta } from '~/types/node-data/agent'
+import { agentMeta } from '~~/types/node-data/agent'
 
 import { apiToolFactory } from './api-tool'
-import { apiToolMeta } from '~/types/node-data/api-tool'
+import { apiToolMeta } from '~~/types/node-data/api-tool'
 
 import { jsonParserFactory } from './json-parser'
-import { jsonParserMeta } from '~/types/node-data/json-parser'
+import { jsonParserMeta } from '~~/types/node-data/json-parser'
 
 import { subWorkflowFactory } from './sub-workflow'
-import { subWorkflowMeta } from '~/types/node-data/sub-workflow'
+import { subWorkflowMeta } from '~~/types/node-data/sub-workflow'
 
 import { listOutputFactory } from './list-output'
-import { listOutputMeta } from '~/types/node-data/list-output'
+import { listOutputMeta } from '~~/types/node-data/list-output'
 
 import { loopFactory } from './loop'
-import { loopMeta } from '~/types/node-data/loop'
+import { loopMeta } from '~~/types/node-data/loop'
 
 import { dataToMessageFactory } from './data-to-message'
-import { dataToMessageMeta } from '~/types/node-data/data-to-message'
+import { dataToMessageMeta } from '~~/types/node-data/data-to-message'
 
 import { passFactory } from './pass'
-import { passMeta } from '~/types/node-data/pass'
+import { passMeta } from '~~/types/node-data/pass'
 
 import { listenFactory } from './listen'
-import { listenMeta } from '~/types/node-data/listen'
+import { listenMeta } from '~~/types/node-data/listen'
 
 import { notifyFactory } from './notify'
-import { notifyMeta } from '~/types/node-data/notify'
+import { notifyMeta } from '~~/types/node-data/notify'
 
 import { imageRecognitionOpenAIFactory } from './image-recognition-openai'
-import { imageRecognitionOpenAIMeta } from '~/types/node-data/image-recognition-openai'
-
-import { imageGenerateOpenAIFactory } from './image-generate-openai'
-import { imageGenerateOpenAIMeta } from '~/types/node-data/image-generate-openai'
+import { imageRecognitionOpenAIMeta } from '~~/types/node-data/image-recognition-openai'
 
 
+
+import { imageGenerateOpenAIFactory } from './image-generate-openai-dalle3'
+import { imageGenerateOpenAIMeta } from '~~/types/node-data/image-generate-openai-dalle3'
+
+import { imageGenerateOpenAIGPTImageFactory } from './image-generate-openai-gpt-image'
+import { imageGenerateOpenAIGptImageMeta } from '~~/types/node-data/image-generate-openai-gpt-image'
 
 
 import { urlFactory } from './url'
-import { urlMeta } from '~/types/node-data/url'
+import { urlMeta } from '~~/types/node-data/url'
 
 
 import { combineDataFactory } from './combine-data'
-import { combineDataMeta } from '~/types/node-data/combine-data'
+import { combineDataMeta } from '~~/types/node-data/combine-data'
 
 import { speechRecognitionOpenAIFactory } from './speech-recognition-openai'
-import { speechRecognitionOpenAIMeta } from '~/types/node-data/speech-recognition-openai'
+import { speechRecognitionOpenAIMeta } from '~~/types/node-data/speech-recognition-openai'
 
 import { speechGenerateOpenAIFactory } from './speech-generate-openai'
-import { speechGenerateOpenAIMeta } from '~/types/node-data/speech-generate-openai'
+import { speechGenerateOpenAIMeta } from '~~/types/node-data/speech-generate-openai'
 
 import { structuredToDataFactory } from './structured-to-data'
-import { structuredToDataMeta } from '~/types/node-data/structured-to-data'
+import { structuredToDataMeta } from '~~/types/node-data/structured-to-data'
 
 import { dataToStructuredFactory } from './data-to-structured'
-import { dataToStructuredMeta } from '~/types/node-data/data-to-structured'
+import { dataToStructuredMeta } from '~~/types/node-data/data-to-structured'
+
+
+
+
+
+
+
+import { replicateKlingVideoFactory } from './video-replicate-kling'
+import { replicateKlingVideoMeta } from '~~/types/node-data/video-replicate-kling'
+
+
+import { saveToFileCloudflareFactory } from './save-file-to-cloudflare'
+import { saveToFileCloudflareMeta } from '~~/types/node-data/save-file-to-cloudflare'
+
+import { speechGenerateEleventlabsFactory } from './speech-generate-elevenlabs'
+import { speechGenerateEleventlabsMeta } from '~~/types/node-data/speech-generate-elevenlabs'
+
+import { filterArrayFactory } from './filter-array'
+import { filterArrayMeta } from '~~/types/node-data/filter-array'
+
+import { replicateFluxFactory } from './image-generate-replicate-flux'
+import { replicateFluxMeta } from '~~/types/node-data/image-generate-replicate-flux'
+
+import { replicateMinimaxFactory } from './speech-generate-replicate-minimax'
+import { speechGenerateMinimaxMeta } from '~~/types/node-data/speech-generate-replicate-minimax'
+
+import { audioDurationFactory } from './audio-duration'
+import { audioDurationMeta } from '~~/types/node-data/audio-duration'
+
+
+import { fileUploadFactory } from './file-upload'
+import { fileUploadMeta } from '~~/types/node-data/file-upload'
+
+import { videoDurationFactory } from './video-duration'
+import { videoDurationMeta } from '~~/types/node-data/video-duration'
+
+import { bigFileUploadFactory } from './big-file-upload'
+import { bigFileUploadMeta } from '~~/types/node-data/big-file-upload'
+
+
+import { chatAnthropicFactory } from './chat-anthropic'
+import { chatAnthropicMeta } from '~~/types/node-data/chat-anthropic'
+
+import { chatDeepSeekFactory } from './chat-deepseek'
+import { chatDeepSeekMeta } from '~~/types/node-data/chat-deepseek'
+
+import { saveToFileLCFactory } from './save-file-to-local'
+import { saveToFileLCMeta } from '~~/types/node-data/save-file-to-local'
+
+
 
 export const nodeFactoryMap: Record<string, NodeFactory> = {}
 
@@ -176,5 +229,34 @@ export const initFactories = () => {
   nodeFactoryMap[dataToStructuredMeta.type] = dataToStructuredFactory
 
   nodeFactoryMap[speechGenerateOpenAIMeta.type] = speechGenerateOpenAIFactory
+
+
+  nodeFactoryMap[replicateKlingVideoMeta.type] = replicateKlingVideoFactory
+
+  nodeFactoryMap[saveToFileCloudflareMeta.type] = saveToFileCloudflareFactory
+
+  nodeFactoryMap[imageGenerateOpenAIGptImageMeta.type] = imageGenerateOpenAIGPTImageFactory
+
+  nodeFactoryMap[speechGenerateEleventlabsMeta.type] = speechGenerateEleventlabsFactory
+
+  nodeFactoryMap[filterArrayMeta.type] = filterArrayFactory
+
+  nodeFactoryMap[replicateFluxMeta.type] = replicateFluxFactory
+
+  nodeFactoryMap[speechGenerateMinimaxMeta.type] = replicateMinimaxFactory
+
+  nodeFactoryMap[audioDurationMeta.type] = audioDurationFactory
+
+  nodeFactoryMap[fileUploadMeta.type] = fileUploadFactory
+
+  nodeFactoryMap[videoDurationMeta.type] = videoDurationFactory
+
+  nodeFactoryMap[bigFileUploadMeta.type] = bigFileUploadFactory
+
+  nodeFactoryMap[chatAnthropicMeta.type] = chatAnthropicFactory
+
+  nodeFactoryMap[chatDeepSeekMeta.type] = chatDeepSeekFactory
+
+  nodeFactoryMap[saveToFileLCMeta.type] = saveToFileLCFactory
 
 }

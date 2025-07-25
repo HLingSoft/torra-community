@@ -4,10 +4,10 @@ import type {
     NodeFactory,
     InputPortVariable,
     OutputPortVariable
-} from '~/types/workflow'
-import type { SpeechGenerateOpenAIData } from '~/types/node-data/speech-generate-openai'
-import { resolveInputVariables, wrapRunnable, writeLogs, updatePortLog } from '../utils'
-import { RunnableLambda } from "@langchain/core/runnables";
+} from '~~/types/workflow'
+import type { SpeechGenerateOpenAIData } from '~~/types/node-data/speech-generate-openai'
+import { resolveInputVariables, writeLogs, updatePortLog } from '../utils'
+
 import { OpenAIClient } from "@langchain/openai";
 import { StructuredTool } from "langchain/tools";
 import { z } from "zod";
@@ -40,33 +40,23 @@ export const speechGenerateOpenAIFactory: NodeFactory = async (
     const openai = new OpenAIClient({ apiKey, baseURL });
 
     const response = await openai.audio.speech.create({
-        model: modelName,
+        model: 'tts-1-hd',
         voice,
         input: userInput,
         instructions: instruction,
-        response_format: "wav"
+        response_format: "wav",
+
+
+        speed: 0.75
     });
 
-    const voiceGenerateChain = RunnableLambda.from(async () => {
-        const buffer = Buffer.from(await response.arrayBuffer());
-        return buffer.toString("base64");
-    });
-
-    const wrappedBase64 = wrapRunnable(
-        voiceGenerateChain,
-        node.id,
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const base64Voice = buffer.toString("base64");
+    // return buffer.toString("base64");
+    // console.log("OpenAI Voice Synthesis Output:", base64Voice.slice(0, 100) + '...(内容过长已截断)');
 
 
-        {
-            context,
-            portId: base64VoiceOutputVariable.id,
-            logFormat: res => ({
-                type: "openai-voice-base64",
-                data: res
-            }),
-            outputPort: base64VoiceOutputVariable
-        }
-    );
+
 
     const tool = new OpenAIVoiceGenerateTool(
         apiKey,
@@ -101,7 +91,7 @@ export const speechGenerateOpenAIFactory: NodeFactory = async (
     )
 
     return {
-        [base64VoiceOutputVariable.id]: wrappedBase64,
+        [base64VoiceOutputVariable.id]: base64Voice,
         [toolOutputVariable.id]: tool
     };
 };
@@ -160,7 +150,7 @@ class OpenAIVoiceGenerateTool extends StructuredTool {
             {
                 content: {
                     type: "openai-voice-base64",
-                    data: base64.slice(0, 100) + '...',
+                    data: base64.slice(0, 100) + '...(内容过长已截断)',
                 },
                 elapsed
             },

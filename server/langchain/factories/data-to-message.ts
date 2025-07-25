@@ -3,8 +3,8 @@ import type {
     LangFlowNode,
     NodeFactory,
     InputPortVariable
-} from '~/types/workflow'
-import type { DataToMessageData } from '@/types/node-data/data-to-message'
+} from '~~/types/workflow'
+import type { DataToMessageData } from '~~/types/node-data/data-to-message'
 import { resolveInputVariables, writeLogs } from '../utils'
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages'
 

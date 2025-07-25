@@ -2,151 +2,119 @@
 
 🌐 [English](./README.md) | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
 
-**Torra Community Edition** is an open-source visual editor for building AI agents and workflows — inspired by **Coze** and **Langflow**, but built entirely with **Vue3 + TypeScript**.
+> **Built with Nuxt 4 (latest). All packages are kept up‑to‑date.**
 
-Unlike Coze (closed-source) and Langflow (React + Python), Torra is built with **Nuxt3**, **VueFlow**, **Tailwind CSS v4**, **Shadcn UI**, and **LangChain.js** — providing a modern, high-performance experience for developers and teams.
+**Torra Community Edition** is an open‑source visual editor for building AI agents and workflows — inspired by **Coze** and **Langflow**, but entirely implemented with **Vue 3 + TypeScript**.
 
-This edition is free to use, modify, and extend.  
- 
-## 🌐 video
+Unlike Coze (closed‑source) and Langflow (React + Python), Torra is powered by **Nuxt 4**, **VueFlow**, **Tailwind CSS v4**, **Shadcn UI**, **LangChain.js**, and **FeathersJS**, offering a modern, high‑performance experience.
+
+---
+
+## 🌟 What’s new in v0.6
+
+| Feature | Description |
+|---------|-------------|
+| **SQLite & MongoDB** | Out‑of‑the‑box support for both back‑ends. |
+| **Local ↔ Cloud Seamless Switch** | Toggle `TORRA_DATASOURCE=local | cloud` and Torra migrates data automatically. |
+| **Full FeathersJS Hooks** | All CRUD operations (`find`, `get`, `create`, `patch`, `remove`) pass through configurable hooks for auth, rate‑limit, audit‑log, LiveQuery, etc. |
+| **API‑Key Hub** | Scan the author’s WeChat QR to request free‑tier keys for leading LLM platforms (Keling / Jimeng / Sora / Flux / Minimax / ElevenLabs / …). |
+
+---
+
+## 🌐 Demo Video
+
 [![Try it Online](https://file.web.hlingsoft.com/SN1tGlRFSFsCB2B4in87AeKxt6nGFRrY/torra_screenshot.png)](https://file.web.hlingsoft.com/70ccmgMsHhoo8TnCFBqRWhBiMXudgrem/%E9%A3%9E%E4%B9%A620250627-212754.mp4)
 
-
 ---
 
-## ✨ Features
+## ✨ Features
 
-- 🚀 Visual workflow editor powered by VueFlow
-- 🎨 Modern UI with Tailwind CSS v4 + Shadcn
-- 🤖 Built-in LangChain.js integration for LLM workflows
-- 🗂 Local-first storage (no cloud lock-in)
-- ⚡ Fast to prototype, easy to extend
-- 🔓 100% open-source and community-friendly
-- 🧠 Supports major LLMs: OpenAI, Anthropic, Google, DeepSeek, Qwen, etc.
-- 🗃 Supports diverse data sources: MySQL, PostgreSQL, MongoDB, SQLite, Redis, Elasticsearch
-- 📄 Handles various data formats: CSV, JSON, XML, YAML
-- 🔧 Full data processing: cleaning, transforming, analysis, visualization
-- 🛢 Flexible backends: local file, cloud, databases
-- 🔍 Query with SQL, NoSQL, and GraphQL
-- 🖼 Supports multimodal data: text, images, audio, video
-- 🧪 Built-in Playground for agent testing & debugging
-- 🚀 One-click API publishing
-- 📊 Full logging and billing system for LLM usage
-- 🌍 Multi-language UI (English, 中文, 日本語, etc.)
+- 🚀 Visual workflow editor (VueFlow)
+- 🎨 Modern UI (Tailwind CSS v4 + Shadcn UI)
+- 🤖 Built‑in LangChain.js integration
+- 🗂 **Pluggable storage**: SQLite for local prototyping, MongoDB for production
+- 🔄 **Hot‑swap** local ↔ online with zero downtime
+- 🪝 FeathersJS hook pipeline on every DB operation
+- 🧠 Supports major LLMs: OpenAI, Anthropic, Google, DeepSeek, Qwen, …
+- 📦 Connects to MySQL, PostgreSQL, Redis, Elasticsearch, files, URLs, APIs
+- 🖼 Multimodal data: text · image · audio · video
+- 🧪 Built‑in playground & one‑click API publishing
+- 📊 Usage logging & billing
+- 🌍 Multi‑language UI (English, 中文, 日本語, …)
 
-### 🧩 Built-in Modules & Features
+### 🧩 Built‑in Modules
 
-| Module        | Count | Features                                                                 |
-|---------------|-------|--------------------------------------------------------------------------|
-| Input         | 3     | Chat Input, Text Input, API Input                                       |
-| Output        | 2     | Chat Output, Text Output                                                |
-| Prompt        | 1     | Prompt                                                                   |
-| Image         | 2     | OpenAI Image Recognition, OpenAI Image Generation                       |
-| Voice         | 2     | OpenAI Voice Recognition, OpenAI Voice Generation                       |
-| Data Sources  | 8     | API Request, API Tool, Directory, File, MongoDB, SQL Query, URL, Webhook |
-| Processing    | 8     | Message to Data, Data to Message, Filter Data, Combine Data, Structured To Data, Data To Structured, JSON Parser, Save File To Aliyun |
-| Models        | 5     | Ollama, Anthropic, DeepSeek, OpenAI, Google                             |
-| Vector Stores | 1     | Milvus                                                                   |
-| Embeddings    | 1     | OpenAI                                                                   |
-| Memory        | 1     | Upstash Redis Chat Memory                                               |
-| Agent         | 1     | Agent                                                                    |
-| Logic         | 5     | If-Else, Listen, Loop, Notify, Pass                                     |
-| Tools         | 5     | Baidu Search, Calculator, Google Search, Tavily AI Search, Timezone/Geo |
-| Helpers       | 5     | ID Generator, Message History, Message Store, Structured Output, List Output |
-| MCP           | 3     | MCP Tools HTTP, MCP Tools SSE, MCP Tools stdio                          |
-| SubFlow       | 1     | Workflow                                                                 |
-| Plugins       | 0     | Comming Soon                                                                        |
-
----
-
-## 🖼 More Screenshots
-
-| Nodes | Playground | API |
-|--------------|--------------|--------------|
-| ![1](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![2](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![3](https://file.web.hlingsoft.com/zIHhaij2H6tBbym8eap1aqar2svuQ0q7/%E6%88%AA%E5%B1%8F2025-06-26%2011.24.37.png) |
-
----
-
-## 📱  Join our community
-
-Share ideas, get support, and collaborate with other users:
-
-<img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="微信群二维码" width="300" />
-
-
-
----
+| Category | Count | Highlights |
+|----------|-------|------------|
+| Input | 3 | Chat Input, Text Input, API Input |
+| Output | 2 | Chat Output, Text Output |
+| Prompt | 1 | Prompt |
+| Image | 2 | OpenAI Vision, Image Generation |
+| Voice | 2 | OpenAI TTS, STT |
+| Data Sources | 8 | API Request, Directory, File, MongoDB, SQL Query, URL, Webhook |
+| Processing | 8 | Message ↔ Data, Filter, Combine, JSON Parser, Save to OSS |
+| Models | 5 | Ollama, Anthropic, DeepSeek, OpenAI, Google |
+| Vector Store | 1 | Milvus |
+| Embeddings | 1 | OpenAI |
+| Memory | 1 | Upstash Redis Chat Memory |
+| Agent | 1 | Agent |
+| Logic | 5 | If‑Else, Listen, Loop, Notify, Pass |
+| Tools | 5 | Baidu Search, Google Search, Tavily, Calculator, Timezone |
+| Helpers | 5 | ID Generator, Message Store, Structured Output, List Output, History |
+| MCP | 3 | MCP HTTP, MCP SSE, MCP stdio |
+| SubFlow | 1 | Workflow |
  
 
-## ⚙️ Requirements
+---
 
-- **Node.js ≥ 20**
-- **npm ≥ 10**
-- **pnpm ≥ 10** (recommended)
+## 🖼 More Screenshots
 
-> ⚠️ Use [nvm](https://github.com/nvm-sh/nvm) to manage Node versions if needed.
+| Nodes | Playground | API |
+|-------|------------|-----|
+| ![Nodes](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![Play](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![API](https://file.web.hlingsoft.com/zIHhaij2H6tBbym8eap1aqar2svuQ0q7/%E6%88%AA%E5%B1%8F2025-06-26%2011.24.37.png) |
 
 ---
 
-## ⚡ Getting Started
+## 📱 Community & API Keys
 
+Need free keys for OpenAI, Claude, DeepSeek, Keling, Jimeng, Sora, Flux, Minimax, ElevenLabs, etc.?  
+Scan and add the author on WeChat:
 
-### 💡 For Non-Developers (No Dev Environment Required)
+![WeChat QR](https://file.web.hlingsoft.com/6hMSdEMQ6cCDCCWmReDNcEL63gW0UAap/WechatIMG1891.jpg)
 
-If you're a product manager or a non-technical user, you can use our **one-click installation package** to get started without any setup:
+---
 
-👉 [📦 Click to download the Torra Environment Installer (ZIP)](https://file.web.hlingsoft.com/maO3Mw0xynoVsmeBnRXqOzLBP1kmhDsA/torra-starter.zip)
+## ⚙️ Requirements
+- **Node.js ≥ 20**
+- **npm ≥ 10**
+- **pnpm ≥ 10** (recommended)
 
-After extracting the ZIP file:
+---
 
-- **Windows users**: Double-click `start.bat`
-- **Mac users**: Right-click → Open `start.command`
+## ⚡ Getting Started
 
-The script will automatically:
+### One‑click (non‑developers)
 
-- Install **Node.js** (if not already installed)
-- Install **pnpm**
-- Create a new **Torra** project
-- Launch the **visual editor**
+1. Download [torra‑starter.zip](https://file.web.hlingsoft.com/maO3Mw0xynoVsmeBnRXqOzLBP1kmhDsA/torra-starter.zip)  
+2. **Windows**: run `start.bat` · **macOS**: run `start.command`  
+3. Browser opens <http://localhost:3000>
 
-Your browser will open [http://localhost:3000](http://localhost:3000) automatically — and you're ready to go! ✨
-
-> ⚠️ If the script fails on first run, make sure you allow execution permissions or install [Node.js](https://nodejs.org) manually.
-
-
-### 🏁 Quick Start For Developers (Recommended)
+### Quick Start (developers)
 
 ```bash
 npx create-torra-app my-app
 cd my-app
-pnpm dev
-```
+pnpm dev                 # uses SQLite
 
-### 🛠 Manual Setup For Developers
+#### Switch to MongoDB
 
-```bash
-npm i -g pnpm
-git clone https://github.com/HLingSoft/torra-community.git
-cd torra-community
-pnpm install
-pnpm dev
-```
-
----
+# .env
+TORRA_DATASOURCE=cloud
+MONGO_URI=mongodb+srv://<user>:<pass>@cluster0.mongodb.net/torra
 
 ## 📄 License
+MIT License — please retain attribution.
 
-This project is open-sourced under the [MIT License](./LICENSE).
-
-> When using, modifying, or redistributing this project (in whole or in part),  
-> you must retain the original license and **clearly attribute the Torra Team** as the authors.
-
----
-
-## 🙌 Acknowledgment
-
-Created and maintained by the **Torra Team**.  
-Try it online 👉 [https://www.torra.cloud](https://www.torra.cloud)
-
-💬 We welcome feedback and suggestions — feel free to [open an issue](https://github.com/HLingSoft/torra-community/issues).  
-💖 If you find this project useful, please star ⭐ us on GitHub!
+## 🙌 Acknowledgment
+Created and maintained by the Torra Team.
+Online demo → https://www.torra.cloud — please ⭐ Star us on GitHub!

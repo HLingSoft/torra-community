@@ -1,13 +1,14 @@
-import type { ChatOutputData } from '@/types/node-data/chat-output'
+import type { ChatOutputData } from '~~/types/node-data/chat-output'
 import type {
   BuildContext,
   LangFlowNode,
   InputPortVariable,
-} from '~/types/workflow'
+} from '~~/types/workflow'
 
 import {
   resolveInputVariables,
-  writeLogs
+  writeLogs,
+  stringifyForDisplay
 } from '../utils'
 
 /** ChatOutput 节点工厂函数 */
@@ -26,6 +27,7 @@ export async function chatOutputFactory(
   const inputValues = await resolveInputVariables(context, variableDefs)
   const inputValue = inputValues[inputInputVariable.id]
   const outputPortId = outputVariable.id
+  // console.log(`[ChatOutput] inputValue:`, inputValue)
 
   const elapsed = performance.now() - t0
   // ✅ 写入日志：结构化
@@ -38,7 +40,7 @@ export async function chatOutputFactory(
   }, elapsed)
 
   return {
-    [outputPortId]: inputValue,
-    default: inputValue
+    [outputPortId]: stringifyForDisplay(inputValue),
+    default: stringifyForDisplay(inputValue)
   }
 }

@@ -1,5 +1,5 @@
-import type { StructuredToDataData } from '@/types/node-data/structured-to-data'
-import type { BuildContext, LangFlowNode, InputPortVariable, NodeFactory, OutputPortVariable } from '~/types/workflow'
+import type { StructuredToDataData } from '~~/types/node-data/structured-to-data'
+import type { BuildContext, LangFlowNode, InputPortVariable, NodeFactory, OutputPortVariable } from '~~/types/workflow'
 
 
 import { resolveInputVariables, writeLogs } from '../utils'
@@ -15,11 +15,16 @@ export const structuredToDataFactory: NodeFactory = async (
 
     // 统一解析所有输入端口
     const inputValues = await resolveInputVariables(context, [data.structuredDataInputVariable])
-    const inputValue = inputValues[data.structuredDataInputVariable.id] as string
+    const inputValue = inputValues[data.structuredDataInputVariable.id]
     const outputVar = data.outputVariable as OutputPortVariable
     const outputPortId = outputVar.id
     // 如果已经是字符串就直接用，否则转字符串
-    const outputStr = typeof inputValue === "string" ? inputValue : JSON.stringify(inputValue)
+    const outputStr = JSON.stringify(inputValue, null, 2)
+    // console.log(
+    //     `🔄 StructuredToData node ${node.id} outputStr:`,
+    //     JSON.stringify(outputStr, null, 2)
+    // )
+    // console.log(`🔄 StructuredToData node ${node.id} inputValue:`, JSON.stringify(inputValue, null, 2))
     const elapsed = performance.now() - t0
     writeLogs(context, node.id, node.data.title, node.data.type, {
         [outputPortId]: {
@@ -31,6 +36,6 @@ export const structuredToDataFactory: NodeFactory = async (
 
 
     return {
-        [outputPortId]: outputStr,
+        [outputPortId]: outputStr
     }
 }

@@ -1,5 +1,5 @@
-import type { LangFlowNode, BuildContext } from '~/types/workflow'
-import type { OpenAIEmbeddingsData } from '@/types/node-data/openai-embeddings'
+import type { LangFlowNode, BuildContext } from '~~/types/workflow'
+import type { OpenAIEmbeddingsData } from '~~/types/node-data/openai-embeddings'
 import { resolveInputVariables, writeLogs } from '../utils'
 import { OpenAIEmbeddings } from '@langchain/openai'
 
@@ -19,7 +19,7 @@ export async function openAIEmbeddingsFactory(node: LangFlowNode, context: Build
 
   // 创建 OpenAI Embeddings 实例
   const embeddings = new OpenAIEmbeddings({
-    openAIApiKey: apiKey,
+    apiKey: apiKey,
     model: modelName,
     stripNewLines: true,
     dimensions: 1536,

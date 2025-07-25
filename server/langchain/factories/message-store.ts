@@ -1,7 +1,7 @@
-import type { BuildContext, LangFlowNode } from '~/types/workflow'
+import type { BuildContext, LangFlowNode } from '~~/types/workflow'
 import { BaseMessage } from '@langchain/core/messages'
 import { resolveInputVariables, writeLogs } from '../utils'
-import type { MessageStoreData } from '@/types/node-data/message-store'
+import type { MessageStoreData } from '~~/types/node-data/message-store'
 
 /**
  * MessageStore 节点工厂函数

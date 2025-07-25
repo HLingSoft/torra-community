@@ -5,18 +5,18 @@
 import type {
     LangFlowNode,
     BuildContext,
-
+    DAGStepInfo,
     DAGRunResult
-} from '~/types/workflow';
-import type { LoopData } from '@/types/node-data/loop';
+} from '~~/types/workflow';
+import type { LoopData } from '~~/types/node-data/loop';
 import * as _ from 'lodash-es';
 import {
     resolveInputVariables,
-    isWrappedRunnable,
+
     collectLoopBodyNodes,
     writeLogs
 } from '../utils';
-import { executeDAG } from '../../langchain/builder';
+import { executeDAG } from '../builder';
 
 
 /** 判断一个对象是不是 DAGRunResult */
@@ -32,60 +32,23 @@ async function autoResolve(val: any): Promise<any> {
 
         if (isDag(cur)) { cur = cur.output; continue }
 
-        if (isWrappedRunnable(cur)) {
-            console.log('[autoResolve] invokeIfAvailable')
-            const next = await cur.invokeIfAvailable?.()
-            // 防护：避免 next === cur 造成死循环
-            if (next === cur) {
-                console.warn('[autoResolve] invoke returned self, break')
-                return next
-            }
-            cur = next
-            continue
-        }
+        // if (isWrappedRunnable(cur)) {
+        //     // console.log('[autoResolve] invokeIfAvailable')
+        //     const next = await cur.invokeIfAvailable?.()
+        //     // 防护：避免 next === cur 造成死循环
+        //     if (next === cur) {
+        //         console.warn('[autoResolve] invoke returned self, break')
+        //         return next
+        //     }
+        //     cur = next
+        //     continue
+        // }
 
         if (Array.isArray(cur)) { return Promise.all(cur.map(autoResolve)) }
 
         return cur
     }
 }
-// function collectLoopBodyNodes(
-//     json: LangFlowJson,
-//     loopId: string,
-//     itemPortId: string,        // ↱  loop.item
-//     itemResultPortId: string,  // ↳  loop.itemResult
-// ) {
-
-//     // ① 终点节点 = itemResult 的 *直接* target（可能有多条线）
-//     const endNodes = json.edges
-//         .filter(e => e.source === loopId && e.sourceHandle === itemResultPortId)
-//         .map(e => e.target);
-
-
-//     const body = new Set<string>();
-//     const stack = json.edges
-//         .filter(e => e.source === loopId && e.sourceHandle === itemPortId)
-//         .map(e => e.target);
-
-//     while (stack.length) {
-//         const nid = stack.pop()!;
-//         if (nid === loopId || body.has(nid)) continue;
-
-//         body.add(nid);            // 记录本节点
-
-//         // 如果已经到 “终点节点” 就停止向后扩散
-//         if (endNodes.includes(nid)) continue;
-
-//         json.edges
-//             .filter(e => e.source === nid)
-//             .forEach(e => stack.push(e.target));
-//     }
-
-//     // 把“终点节点”本身也放进循环体（它在上一轮里已经加了，但若 itemResult 没连线则为空）
-//     endNodes.forEach(n => body.add(n));
-
-//     return body;
-// }
 
 
 /** Loop 节点工厂（一次性跑完整个列表） */
@@ -101,6 +64,7 @@ export async function loopFactory(
         itemOutputVariable,
         doneOutputVariable,
     } = node.data as LoopData;
+    // console.log(`[Loop] 开始执行循环节点: ${node.id} (${node.data.title})`, loopItemResultInputVariable);
 
     /* 1. 解析循环输入列表 ---------------------------------------------------- */
     const vars = await resolveInputVariables(context, [listDataInputVariable]);
@@ -123,25 +87,65 @@ export async function loopFactory(
 
     for (let idx = 0; idx < list.length; idx++) {
         const item = list[idx];
-        // console.log(`[Loop] item ${idx + 1}/${list.length} processing…`, item);
-
 
         (context.results[node.id] ??= {})[itemOutputVariable.id] = item;
 
-        const subRun = await executeDAG(context.json, item as string, 'loop', context.userId, context.workflowId, {
-            results: _.cloneDeep(context.results),
-            customNodeIds,              // 只跑循环体
-        }) as DAGRunResult;
-        if (subRun.statusCode !== 200) {
+        const subRun = await executeDAG(
+            context.json, item as string, 'loop', context.variables,
+            context.userId, context.workflowId,
+            {
+                results: _.cloneDeep(context.results), customNodeIds, onStep(step) {
+                    writeLogs(
+                        context,
+                        step.nodeId,
+                        step.nodeTitle,
+                        step.nodeType,
+                        Object.fromEntries(
+                            step.ports.map(p => [p.portId, {
+                                content: p.content,
+                                outputPort: itemOutputVariable, // ✅ 传入这个字段！
+                                elapsed: p.elapsed
+                            }])
+                        ),
+                        step.elapsed,
+                        {
+                            loopNodeId: node.id,
+                            loopNodeTitle: node.data.title,
+                            loopItem: item,
+                        }
+                    );
 
-            throw new Error(`Loop item ${idx + 1} failed: ${subRun.errorMessage || 'Unknown error'}`);
+                    context.onStep?.({
+                        ...step,
+                        loopContext: {
+                            loopNodeId: node.id,
+                            loopNodeTitle: node.data.title,
+                            currentItemValue: item,
+                            currentItemIndex: idx,
+                        },
+                    });
+                },
+            }
+        ) as DAGRunResult;
+
+        /* A) executeDAG 自己就失败 */
+        if (subRun.statusCode !== 200) {
+            throw new Error(subRun.output);
         }
 
-        const resolved = await autoResolve(subRun);
+        /* B) 子 DAG 某节点返回 { error } */
+        const errNode = Object.entries(subRun.results)
+            .find(([, v]) => v && typeof v === 'object' && 'error' in v);
+        if (errNode) {
+            const [nid, val] = errNode;
+            throw new Error(`Loop body node ${nid} error: ${val.error}`);
+        }
 
+        /* C) 正常分支 */
+        const resolved = await autoResolve(subRun);
         results.push(resolved);
     }
-
+    // console.log(`[Loop] 所有 ${list.length} 个项已处理完毕，结果：`, results);
 
     const elapsed = performance.now() - t0
 

@@ -4,12 +4,12 @@ import type {
     NodeFactory,
     InputPortVariable,
     OutputPortVariable
-} from '~/types/workflow'
-import type { ImageRecognitionOpenAIData } from '~/types/node-data/image-recognition-openai'
-import { resolveInputVariables, writeLogs, updatePortLog, wrapRunnable } from '../utils'
+} from '~~/types/workflow'
+import type { ImageRecognitionOpenAIData } from '~~/types/node-data/image-recognition-openai'
+import { resolveInputVariables, writeLogs, updatePortLog } from '../utils'
 import { ChatOpenAI } from '@langchain/openai'
 import { HumanMessage } from '@langchain/core/messages'
-import { RunnableLambda } from '@langchain/core/runnables'
+
 import { StructuredTool } from "langchain/tools";
 import { z } from "zod";
 
@@ -79,7 +79,7 @@ export const imageRecognitionOpenAIFactory: NodeFactory = async (
 
     const chat = new ChatOpenAI({
         model: "gpt-4-vision-preview",
-        openAIApiKey: inputValues[apiKeyInputVariable.id],
+        apiKey: inputValues[apiKeyInputVariable.id],
         configuration: {
             baseURL: inputValues[baseURLInputVariable.id] || 'https://api.openai.com/v1',
         }
@@ -96,29 +96,13 @@ export const imageRecognitionOpenAIFactory: NodeFactory = async (
         ]
     });
 
-    // 3. 组装 RunnableLambda
-    // const res = await chat.call([message]);
-    const imageRecognitionChain = RunnableLambda.from(async (input, options) => {
-        // 你也可以将 input 作为 prompt 或图片
-        const res = await chat.call([message])
-        return res.content
-    })
-
+    const res = await chat.call([message])
+    const result = res.content
 
 
 
     // 4. 返回结果
 
-    const wrapped = wrapRunnable(
-        imageRecognitionChain,
-        node.id,
-        {
-            context,
-            portId: outputVariable.id,
-            logFormat: res => ({ type: 'openai-image-recognition', data: res }),
-            outputPort: outputVariable,
-        }
-    )
 
 
     //5. 创建工具实例
@@ -137,7 +121,7 @@ export const imageRecognitionOpenAIFactory: NodeFactory = async (
     // ✅ 写入结构化日志
     writeLogs(context, node.id, node.data.title, node.data.type, {
         [outputVariable.id]: {
-            content: 'OpenAI Image Recognition Output',
+            content: result,
             outputPort: outputVariable,
             elapsed
         },
@@ -151,7 +135,7 @@ export const imageRecognitionOpenAIFactory: NodeFactory = async (
 
 
     return {
-        [outputVariable.id]: wrapped,
+        [outputVariable.id]: result,
         [toolOutputVariable.id]: tool
     };
 }
@@ -200,7 +184,7 @@ class ImageRecognitionTool extends StructuredTool {
     async _call(inputs: { imageData?: string | string[]; instruction?: string }) {
         const chat = new ChatOpenAI({
             model: "gpt-4-vision-preview",
-            openAIApiKey: this.apiKey,
+            apiKey: this.apiKey,
             configuration: { baseURL: this.baseURL },
         });
 

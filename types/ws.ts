@@ -1,7 +1,7 @@
 // types/ws.ts
 
-import type Workflow from "~/models/Workflow"
-import type { DAGStepInfo } from "~/types/workflow"
+import type Workflow from "~~/models/Workflow"
+import type { DAGStepInfo } from "~~/types/workflow"
 export type WSNamespace = 'execute' | 'chat' | 'status'
 
 export type WSMessage =
@@ -53,11 +53,13 @@ export interface WSExecuteDoneMessage {
 // ✅ 系统消息结构
 
 export interface WSWelcomeMessage {
+  namespace: 'status'
   type: 'welcome'
   clientId: string
 }
 
 export interface WSErrorMessage {
+  namespace: 'status'
   type: 'error'
   message: string
   stack?: string

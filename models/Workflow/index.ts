@@ -3,7 +3,7 @@ import DayJS from 'dayjs'
 
 import cn from 'dayjs/locale/zh-cn.js'
 import relativeTime from 'dayjs/plugin/relativeTime.js'
-import AV from '~/models/fake-av' // 上面那个本地适配器
+import AV from "../fake-av"
 import type UserWorkspace from '../UserWorkspace'
 
 DayJS.extend(relativeTime)
@@ -30,11 +30,25 @@ export enum EnumWorkflow {
 }
 
 class Workflow extends AV.Object {
-  static CLASSNAME = 'Workflow'
+  static _CLASSNAME = 'Workflow'
   public tempVars: Record<string, any> = {}
 
-  constructor(initial?: any) {
-    super(Workflow.CLASSNAME, initial)
+
+  static _SCHEMA = {
+    description: 'string',
+    name: 'string',
+    icon: 'string',
+    nodes: 'array',
+    edges: 'array',
+    user: 'pointer',
+    workspace: 'pointer',
+    token: 'string',
+    apiSchema: 'object',
+  } as const
+
+
+  constructor() {
+    super()
     return new Proxy(this, {
       get(target, prop: string | symbol) {
         // 如果 prop 是 symbol，直接返回默认行为
@@ -69,7 +83,9 @@ class Workflow extends AV.Object {
     })
   }
 
-
+  get leanCloudClassName(): string {
+    return 'Workflow'
+  }
 
   get createdAtShort(): string {
     return `${DayJS(this.createdAt).format('MM-DD HH')}点`
@@ -186,5 +202,5 @@ class Workflow extends AV.Object {
   [key: `temp_${string}`]: any
 }
 
-AV.Object.register(Workflow, Workflow.CLASSNAME)
+AV.Object.register(Workflow, 'Workflow')
 export default Workflow

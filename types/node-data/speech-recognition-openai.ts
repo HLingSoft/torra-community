@@ -1,4 +1,4 @@
-import type { InputPortVariable, OutputPortVariable } from '~/types/workflow'
+import type { InputPortVariable, OutputPortVariable } from '~~/types/workflow'
 
 
 export const languages = [
@@ -69,7 +69,7 @@ export const speechRecognitionOpenAIMeta: SpeechRecognitionOpenAIData = {
     } as InputPortVariable,
     voiceDataInputVariable: {
         name: 'Voice Data',
-        allowedTypes: ['Data'],
+        allowedTypes: ['Data', 'Base64'],
     } as InputPortVariable,
 
 

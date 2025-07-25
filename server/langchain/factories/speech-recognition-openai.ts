@@ -1,9 +1,9 @@
-import { RunnableLambda } from "@langchain/core/runnables";
+
 import { StructuredTool } from "langchain/tools";
 import { z } from "zod";
-import type { LangFlowNode, BuildContext, OutputPortVariable } from '~/types/workflow'
-import type { SpeechRecognitionOpenAIData } from '@/types/node-data/speech-recognition-openai'
-import { resolveInputVariables, writeLogs, wrapRunnable, updatePortLog } from '../utils'
+import type { LangFlowNode, BuildContext, OutputPortVariable } from '~~/types/workflow'
+import type { SpeechRecognitionOpenAIData } from '~~/types/node-data/speech-recognition-openai'
+import { resolveInputVariables, writeLogs } from '../utils'
 import { OpenAIClient, toFile } from "@langchain/openai";
 
 /** 判断是否 http(s) url */
@@ -68,95 +68,81 @@ export const speechRecognitionOpenAIFactory = async (
     const inputAudio = inputValues[voiceDataInputVariable.id];
     const instructions = inputValues[instructionInputVariable?.id] || "";
 
-    const asrChain = RunnableLambda.from(async () => {
-        const t0 = performance.now();
+
+    try {
+
 
         const { buf, fileName } = await toBufferAndFileName(inputAudio, node.id);
         const file = await toFile(buf, fileName);
 
         const openai = new OpenAIClient({ apiKey, baseURL });
+        // const resp = await openai.audio.transcriptions.create({
+        //     file,
+        //     model: "gpt-4o-transcribe",
+        //     language: languageModelName || undefined,
+        //     response_format: "json",
+
+        //     prompt: instructions || undefined
+        // });
+        //        const text = resp.text;
+        // console.log("OpenAI ASR Response:", text);
         const resp = await openai.audio.transcriptions.create({
             file,
-            model: "gpt-4o-transcribe",
+            model: "whisper-1",
             language: languageModelName || undefined,
-            response_format: "json",
+            response_format: "srt",
             prompt: instructions || undefined
         });
+        const text = resp;  // 这是一个 SRT 字幕文本字符串
+        // console.log("OpenAI Whisper SRT Response:", text);
 
-        const text = resp.text;
-        const elapsed = performance.now() - t0;
 
-        // 更新日志
-        updatePortLog(
+
+
+
+        const tool = new OpenAIWhisperTool(
+            apiKey,
+            baseURL,
+            languageModelName,
+            instructions,
             context,
             node.id,
-            outputVariable.id,
-            {
-                content: {
-                    type: "openai-asr",
-                    data: text.slice(0, 100) + '...',
-                },
+            outputVariable,
+            title,
+            type
+        );
 
-                elapsed
-            },
-        )
-
-
-        return text;
-    });
-
-    const wrapped = wrapRunnable(
-        asrChain,
-        node.id,
-
-        {
+        const elapsed = performance.now() - t0;
+        writeLogs(
             context,
-            portId: outputVariable.id,
-            outputPort: outputVariable,
-            logFormat: res => ({
-                type: "openai-asr",
-                data: res
-            })
-        }
-    );
-
-    const tool = new OpenAIWhisperTool(
-        apiKey,
-        baseURL,
-        languageModelName,
-        instructions,
-        context,
-        node.id,
-        outputVariable,
-        title,
-        type
-    );
-
-    const elapsed = performance.now() - t0;
-    writeLogs(
-        context,
-        node.id,
-        title ?? "OpenAI Whisper ASR",
-        type ?? "speech-recognition-openai",
-        {
-            [outputVariable.id]: {
-                content: "OpenAI Whisper ASR Output",
-                outputPort: outputVariable,
-                elapsed
+            node.id,
+            title ?? "OpenAI Whisper ASR",
+            type ?? "speech-recognition-openai",
+            {
+                [outputVariable.id]: {
+                    content: text,
+                    outputPort: outputVariable,
+                    elapsed
+                },
+                [toolOutputVariable.id]: {
+                    content: "OpenAI Whisper ASR Tool",
+                    outputPort: toolOutputVariable,
+                    elapsed
+                }
             },
-            [toolOutputVariable.id]: {
-                content: "OpenAI Whisper ASR Tool",
-                outputPort: toolOutputVariable,
-                elapsed
-            }
-        },
-        elapsed
-    );
+            elapsed
+        );
 
-    return {
-        [outputVariable.id]: wrapped,
-        [toolOutputVariable.id]: tool
-    };
+        return {
+            [outputVariable.id]: text,
+            [toolOutputVariable.id]: tool
+        };
+    } catch (error: any) {
+        console.error("OpenAI ASR Error:", error);
+        throw new Error(`OpenAI ASR 识别失败: ${error.message}`);
+    }
+
+
 }
 
 

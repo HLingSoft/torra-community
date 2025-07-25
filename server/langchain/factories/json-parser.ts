@@ -1,22 +1,22 @@
-import type { JSONParserData } from '@/types/node-data/json-parser'
+import type { JSONParserData } from '~~/types/node-data/json-parser'
 import type {
     BuildContext,
     LangFlowNode,
-} from '~/types/workflow'
+} from '~~/types/workflow'
 
 import { resolveInputVariables, writeLogs } from '../utils'
 import { jsonrepair } from 'jsonrepair'
-import { z, ZodTypeAny } from 'zod'
+import { z } from 'zod'
 
 function buildZodSchema(schemaDef: Record<string, string>) {
-    const shape: Record<string, ZodTypeAny> = {}
+    const shape: Record<string, z.ZodTypeAny> = {}
     for (const [key, type] of Object.entries(schemaDef)) {
         switch (type) {
             case 'string': shape[key] = z.string(); break
             case 'number': shape[key] = z.number(); break
             case 'boolean': shape[key] = z.boolean(); break
             case 'array': shape[key] = z.array(z.any()); break
-            case 'object': shape[key] = z.record(z.any()); break
+            case 'object': shape[key] = z.record(z.string(), z.any()); break
             default: shape[key] = z.any()
         }
     }

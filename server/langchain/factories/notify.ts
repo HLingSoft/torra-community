@@ -1,8 +1,8 @@
-import type { NotifyData } from '@/types/node-data/notify'
-import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~/types/workflow'
+import type { NotifyData } from '~~/types/node-data/notify'
+import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~~/types/workflow'
 
 import { resolveInputVariables, writeLogs } from '../utils'
-import { createRedisClient } from '~/server/utils/redis'
+import { createRedisClient } from '~~/server/utils/redis'
 
 export const notifyFactory: NodeFactory = async (
     node: LangFlowNode,

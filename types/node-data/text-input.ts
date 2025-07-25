@@ -1,4 +1,4 @@
-import type { InputPortVariable, OutputPortVariable } from '~/types/workflow'
+import type { InputPortVariable, OutputPortVariable } from '~~/types/workflow'
 
 export interface TextInputData {
   title: string // 节点标题

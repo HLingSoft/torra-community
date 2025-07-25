@@ -1,8 +1,8 @@
-import type { ListenData } from '@/types/node-data/listen'
-import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~/types/workflow'
+import type { ListenData } from '~~/types/node-data/listen'
+import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~~/types/workflow'
 
 import { resolveInputVariables, writeLogs } from '../utils'
-import { createRedisClient } from '~/server/utils/redis'
+import { createRedisClient } from '~~/server/utils/redis'
 
 /**
  * Listen 节点工厂函数（Redis版）

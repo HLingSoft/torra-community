@@ -1,4 +1,4 @@
-import type { OutputPortVariable, InputPortVariable } from '~/types/workflow'
+import type { OutputPortVariable, InputPortVariable } from '~~/types/workflow'
 
 export enum MatchType {
     String = 'String',

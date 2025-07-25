@@ -1,4 +1,4 @@
-import type { OutputPortVariable, InputPortVariable } from '~/types/workflow'
+import type { OutputPortVariable, InputPortVariable } from '~~/types/workflow'
 
 export interface MCPHttpData {
     type: string // 节点类型
@@ -23,7 +23,7 @@ export const mcpHttpMeta: MCPHttpData = {
     type: MCPHttpLangchainName,
 
     urlInputVariable: {
-        name: 'MCP URL',
+        name: 'MCP Server URL',
         allowedTypes: ['Data'],
         value: '',
 

@@ -1,10 +1,10 @@
 import { resolveInputVariables, writeLogs } from '../utils'
-import type { CombineDataData } from '@/types/node-data/combine-data'
+import type { CombineDataData } from '~~/types/node-data/combine-data'
 import type {
     BuildContext,
     LangFlowNode,
     InputPortVariable,
-} from '~/types/workflow'
+} from '~~/types/workflow'
 
 /**
  * 组合数据工厂函数（立即执行）
@@ -26,30 +26,36 @@ export async function combineDataFactory(
 
     const variableDefs: InputPortVariable[] = [dataInputsInputVariable]
     const inputValues = await resolveInputVariables(context, variableDefs)
-    const inputValue = inputValues[dataInputsInputVariable.id] as any[]
+    const inputValue = inputValues[dataInputsInputVariable.id]
+    // console.log(`[CombineData] inputValue:`, inputValue, operationType)
     const outputPortId = outputVariable.id
+
 
     // ✅ 执行数据组合逻辑
     let result: any
+
     switch (operationType) {
         case 'append':
         case 'concatenate':
             result = Array.isArray(inputValue)
-                ? inputValue.flat()
-                : [inputValue]
+                ? inputValue.flat()            // 保证展平嵌套数组
+                : [inputValue]                 // 不是数组就包成数组
             break
+
         case 'merge':
             result = Array.isArray(inputValue)
-                ? inputValue.reduce((acc, item) => ({ ...acc, ...item }), {})
+                ? inputValue.reduce((acc, item) => ({ ...acc, ...item }), {}) // 合并对象
                 : inputValue
             break
+
         case 'join':
             result = Array.isArray(inputValue)
-                ? inputValue.join('\n')
+                ? inputValue.map(String).join(',')   // 明确转换为字符串再用 , 连接
                 : String(inputValue)
             break
+
         default:
-            result = inputValue
+            result = inputValue             // 保底原样返回
     }
 
     // ✅ 计时结束
@@ -66,7 +72,7 @@ export async function combineDataFactory(
             elapsed,
         }
     }, elapsed)
-
+    // console.log(`[CombineData] `, result)
     // ✅ 返回执行结果
     return {
         [outputPortId]: result

@@ -1,10 +1,10 @@
-import type { DataToStructuredData } from '@/types/node-data/data-to-structured'
+import type { DataToStructuredData } from '~~/types/node-data/data-to-structured'
 import type {
     BuildContext,
     LangFlowNode,
     NodeFactory,
     OutputPortVariable
-} from '~/types/workflow'
+} from '~~/types/workflow'
 
 import { resolveInputVariables, writeLogs } from '../utils'
 

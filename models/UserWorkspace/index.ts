@@ -1,5 +1,5 @@
 import User from "../User"
-import AV from '~/models/fake-av' // 上面那个本地适配器
+import AV from "../fake-av"
 
 import DayJS from "dayjs"
 import cn from "dayjs/locale/zh-cn.js"
@@ -24,11 +24,20 @@ export enum EnumUserWorkspace {
 }
 
 class UserWorkspace extends AV.Object {
-  static CLASSNAME = "UserWorkspace"
+  static _CLASSNAME = "UserWorkspace"
   public tempVars: Record<string, any> = {}
 
-  constructor(initial?: any) {
-    super(UserWorkspace.CLASSNAME, initial)
+  static _SCHEMA = {
+    description: 'string',
+    name: 'string',
+    user: 'pointer',
+    isDefault: 'boolean',
+  } as const
+
+
+
+  constructor() {
+    super()
     return new Proxy(this, {
       get(target, prop: string | symbol) {
         // 如果 prop 是 symbol，直接返回默认行为
@@ -62,7 +71,9 @@ class UserWorkspace extends AV.Object {
     })
   }
 
-
+  get leanCloudClassName(): string {
+    return "UserWorkspace"
+  }
 
   get createdAtShort(): string {
     return `${DayJS(this.createdAt).format("MM-DD HH")}点`
@@ -139,5 +150,5 @@ class UserWorkspace extends AV.Object {
   [key: `temp_${string}`]: any
 }
 
-AV.Object.register(UserWorkspace, UserWorkspace.CLASSNAME)
+AV.Object.register(UserWorkspace, "UserWorkspace")
 export default UserWorkspace

@@ -1,9 +1,9 @@
-import type { StructuredOutputData } from '@/types/node-data/structured-output'
+import type { StructuredOutputData } from '~~/types/node-data/structured-output'
 import type {
     BuildContext,
     LangFlowNode,
     InputPortVariable,
-} from '~/types/workflow'
+} from '~~/types/workflow'
 
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers'
 import { RunnableSequence } from '@langchain/core/runnables'
@@ -34,9 +34,27 @@ export async function structuredOutputFactory(
 
     // 1. 解析输入变量
     const variableDefs = [languageModelInputVariable] as InputPortVariable[]
+
     const inputValues = await resolveInputVariables(context, variableDefs)
+
     const languageModel = inputValues[languageModelInputVariable.id] as LanguageModel
 
+    /* ===☆ 关键改动开始 ☆=== */
+    // 为所有 array 字段补充默认 items: { type: 'string' }
+    const schemaProperties = Object.fromEntries(
+        Object.entries(outputSchemaInputVariable.value).map(([key, def]: any) => {
+            if (def.type === 'array' && !def.items) {
+                return [
+                    key,
+                    {
+                        ...def,
+                        items: { type: 'string' },
+                    },
+                ]
+            }
+            return [key, def]
+        })
+    )
     // 2. 构造 Function schema（用于 LLM function call）
     const outputFunctionSchema = {
         name: outputSchemaInputVariable.name,
@@ -49,10 +67,8 @@ export async function structuredOutputFactory(
     `,
         parameters: {
             type: 'object',
-            properties: {
-                ...outputSchemaInputVariable.value,
-            },
-            required: Object.keys(outputSchemaInputVariable.value),
+            properties: schemaProperties,
+            required: Object.keys(schemaProperties),
         },
     }
 
@@ -68,9 +84,11 @@ export async function structuredOutputFactory(
         new JsonOutputFunctionsParser(), // 解析为 JSON
     ])
 
-    // 5. 执行推理
     const result = await runnablePrompt.invoke(languageModel.messages)
-    // console.log('StructuredOutput invoke result:', result)
+
+
+
+    // console.log('Structured Output Result:', result)
 
     // 6. 日志
     const elapsed = performance.now() - t0

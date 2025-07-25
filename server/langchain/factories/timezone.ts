@@ -1,5 +1,5 @@
-import type { TimezoneData } from '@/types/node-data/timezone'
-import type { BuildContext, LangFlowNode, NodeFactory } from '~/types/workflow'
+import type { TimezoneData } from '~~/types/node-data/timezone'
+import type { BuildContext, LangFlowNode, NodeFactory } from '~~/types/workflow'
 
 import { DateTime } from 'luxon'
 import { writeLogs } from '../utils'

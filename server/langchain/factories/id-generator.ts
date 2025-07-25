@@ -1,8 +1,8 @@
-import type { IDGeneratorData } from '@/types/node-data/id-generator'
+import type { IDGeneratorData } from '~~/types/node-data/id-generator'
 import type {
   BuildContext,
   LangFlowNode
-} from '~/types/workflow'
+} from '~~/types/workflow'
 import { writeLogs } from '../utils'
 
 /** ID 生成器节点工厂函数 */

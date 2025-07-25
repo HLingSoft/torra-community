@@ -1,8 +1,8 @@
 import * as cheerio from 'cheerio'
-import type { URLData } from '@/types/node-data/url'
-import type { BuildContext, LangFlowNode, NodeFactory } from '~/types/workflow'
-import { resolveInputVariables, wrapRunnable, writeLogs } from '../utils'
-import { RunnableLambda } from "@langchain/core/runnables";
+import type { URLData } from '~~/types/node-data/url'
+import type { BuildContext, LangFlowNode, NodeFactory } from '~~/types/workflow'
+import { resolveInputVariables, writeLogs } from '../utils'
+
 async function fetchWithTimeout(url: string, timeoutMs = 10000) {
     const controller = new AbortController()
     const id = setTimeout(() => controller.abort(), timeoutMs)
@@ -91,44 +91,31 @@ export const urlFactory: NodeFactory = async (
 
 
 
-    // 封装成 runnable
-    const urlFetchRunnable = RunnableLambda.from(async () => {
-        const docs = await fetchUrlRecursive(
-            inputUrl,
-            maxDepth,
-            visited,
-            { maxDepth, preventOutside, format },
-            rootDomain
-        )
-        return docs.map(doc => ({
-            url: doc.url,
-            content: doc.content,
-        }))
-    })
-
-
-
-    const wrapped = wrapRunnable(
-        urlFetchRunnable,
-        node.id,
-        {
-            context,
-            portId: outputVariable.id,
-            logFormat: res => ({ type: 'url-fetch', name: `Fetched ${visited.size} URLs`, data: res }),
-            outputPort: outputVariable, // 输出端口
-        }
+    const docs = await fetchUrlRecursive(
+        inputUrl,
+        maxDepth,
+        visited,
+        { maxDepth, preventOutside, format },
+        rootDomain
     )
+    const result = docs.map(doc => ({
+        url: doc.url,
+        content: doc.content,
+    }))
+
+
+
 
     const elapsed = performance.now() - t0
     // 写入日志
     writeLogs(context, node.id, node.data.title, node.data.type, {
         [outputVariable.id]: {
-            content: `Fetched ${visited.size} URLs`,
+            content: result,
             outputPort: outputVariable,
             elapsed, // 这里可以计算实际耗时
         },
     }, elapsed)
     return {
-        [outputVariable.id]: wrapped
+        [outputVariable.id]: result
     }
 }

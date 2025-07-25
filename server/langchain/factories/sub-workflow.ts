@@ -1,7 +1,7 @@
-import { RunnableLambda } from '@langchain/core/runnables'
-import type { LangFlowNode, BuildContext, } from '~/types/workflow'
-import { resolveInputVariables, wrapRunnable, writeLogs } from '../utils'
-import type { SubWorkflowData } from '~/types/node-data/sub-workflow'
+
+import type { LangFlowNode, BuildContext, } from '~~/types/workflow'
+import { resolveInputVariables, writeLogs } from '../utils'
+import type { SubWorkflowData } from '~~/types/node-data/sub-workflow'
 
 /**
  * SubWorkflow 节点工厂函数
@@ -19,6 +19,7 @@ export async function subWorkflowFactory(
         bodyInputVariable,
         dataOutputVariable,
         tokenInputVariable,
+        userIdInputVariable
 
     } = data
 
@@ -26,71 +27,56 @@ export async function subWorkflowFactory(
     const inputValues = await resolveInputVariables(context, [
         urlInputVariable,
         tokenInputVariable,
+        userIdInputVariable,
         ...bodyInputVariable
     ])
 
     const url = inputValues[urlInputVariable.id]
     const token = inputValues[tokenInputVariable.id]
     const userId = inputValues[data.userIdInputVariable.id]
+    // console.log('SubWorkflow ', data)
+    // console.log('SubWorkflow userId:', userId)
 
-    const requestChain = RunnableLambda.from(async () => {
-        try {
-            const headers: HeadersInit = { 'Content-Type': 'application/json' }
-            if (token) headers['Authorization'] = `Bearer ${token}`
-            if (userId) headers['X-User-Id'] = userId
+    if (!url) {
+        throw new Error('SubWorkflow 节点需要一个有效的 URL')
+    }
+    let result = {}
+    try {
+        const headers: HeadersInit = { 'Content-Type': 'application/json' }
+        if (token) headers['Authorization'] = `Bearer ${token}`
+        if (userId) headers['Torra-User-Id'] = userId
 
-            const body: Record<string, any> = {}
-            for (const inputVariable of bodyInputVariable) {
-                body[inputVariable.name] = inputValues[inputVariable.id]
-            }
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify(body)
-            })
-
-            if (!response.ok) {
-                const errorText = await response.text()
-                return { error: `HTTP ${response.status} ${response.statusText}`, details: errorText }
-            }
-
-            const result = await response.json()
-            const isArrayOfObjects = Array.isArray(result) && result.every(item => typeof item === 'object')
-
-            return {
-                raw: result,
-                table: isArrayOfObjects ? result : []
-            }
-        } catch (err: any) {
-            return { error: err.message || '请求失败' }
+        const body: Record<string, any> = {}
+        for (const inputVariable of bodyInputVariable) {
+            body[inputVariable.name] = inputValues[inputVariable.id]
         }
-    })
+
+        // console.log('SubWorkflow 请求 headers:', headers)
+        const response = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body)
+        })
+        // console.log('SubWorkflow 请求 body:', body)
+        if (!response.ok) {
+            const errorText = await response.text()
+            return { error: `HTTP ${response.status} ${response.statusText}`, details: errorText }
+        }
+
+
+
+        result = await response.text()
+        // console.log('SubWorkflow 请求结果:', result)
+
+    } catch (err: any) {
+        // return { error: err.message || '请求失败' }
+        console.error('SubWorkflow 请求失败:', err)
+        throw new Error(`SubWorkflow 请求失败: ${err.message || '未知错误'}`)
+    }
+
     const elapsed = performance.now() - t0
 
-    // 日志封装 + runnable 包装
-    const wrapped = wrapRunnable(
-        requestChain.pipe(res => res.raw ?? res),
-        node.id,
 
-        {
-            context,
-            portId: dataOutputVariable.id,
-
-            logFormat: (res) => ({
-                type: 'sub-workflow',
-                data: res
-            }),
-            outputPort: data.dataOutputVariable,
-
-
-        },
-
-
-    )
-
-    // 立即执行返回结果（保持语义）
-    const result = await wrapped.invokeIfAvailable()
 
     writeLogs(context, node.id, data.title, data.type, {
         [dataOutputVariable.id]: {

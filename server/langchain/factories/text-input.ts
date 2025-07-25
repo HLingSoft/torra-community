@@ -1,5 +1,5 @@
-import type { TextInputData } from '@/types/node-data/text-input'
-import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~/types/workflow'
+import type { TextInputData } from '~~/types/node-data/text-input'
+import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~~/types/workflow'
 
 import { resolveInputVariables, writeLogs } from '../utils'
 
