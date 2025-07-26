@@ -16,7 +16,7 @@ Coze（クローズドソース）や Langflow（React + Python）とは異な
 
 | 機能 | 説明 |
 |------|------|
-| **SQLite & MongoDB** | ローカル SQLite と クラウド MongoDB の両方をサポート。 |
+| **SQLite / MySQL / MongoDB** | SQLite（開発用）、MySQL（本番環境）、MongoDB（柔軟な用途）に対応したバックエンドサポートを内蔵。 |
 | **ローカル ↔ クラウド 無停止切替** | `TORRA_DATASOURCE` を `local` / `cloud` に変更するだけで自動移行。 |
 | **FeathersJS フックパイプライン** | 全 CRUD 操作をカスタムフックで拡張でき、認証・レート制限・監査ログなども簡単。 |
 | **API キーハブ** | 著者の WeChat QR をスキャンし、OpenAI・可灵・即梦・Sora・Flux・Minimax・ElevenLabs などの無料キーを取得。 |
@@ -34,7 +34,7 @@ Coze（クローズドソース）や Langflow（React + Python）とは異な
 - 🚀 VueFlow によるドラッグ＆ドロップ編集
 - 🎨 Tailwind CSS v4 + Shadcn UI のモダン UI
 - 🤖 LangChain.js をネイティブ統合
-- 🗂 プラガブルストレージ: デフォルトはローカル **SQLite**、ローカル **MongoDB** へ切替可、さらにオンライン MongoDB へワンクリック移行対応
+- 🗂 プラグイン式ストレージ：デフォルトはローカル **SQLite**、任意で **MySQL** または **MongoDB** に切替可能。ワンクリックでオンラインDBに移行可能。
 - 🔄 ローカル ↔ クラウド データシームレス移行
 - 🪝 FeathersJS フックで認証・監査・リアルタイム拡張
 - 🧠 OpenAI・Anthropic・Google・DeepSeek・Qwen などサポート

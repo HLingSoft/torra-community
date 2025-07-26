@@ -15,7 +15,7 @@
 
 | 功能 | 说明 |
 |------|------|
-| **SQLite & MongoDB** | 内置对本地 SQLite 和云端 MongoDB 的双后端支持。 |
+| **SQLite / MySQL / MongoDB** | 内置支持多种主流数据库：开发推荐使用 SQLite，生产支持 MySQL，灵活集成 MongoDB。 |
 | **本地 ↔ 云端 无缝切换** | 设置 `TORRA_DATASOURCE=local` 或 `cloud`，即可自动迁移数据。 |
 | **FeathersJS 全链路 Hook** | 所有数据库操作（find / get / create / patch / remove）都经过可配置 Hook，可轻松实现鉴权、限流、审计、LiveQuery 等。 |
 | **API Key 社区发放** | 扫描作者微信二维码，领取 OpenAI、可灵、即梦、Sora、Flux、Minimax、ElevenLabs 等平台的免费 Key。 |
@@ -33,7 +33,7 @@
 - 🚀 **VueFlow** 可视化拖拽式节点编辑
 - 🎨 **Tailwind CSS v4 + Shadcn UI** 现代化界面
 - 🤖 原生集成 **LangChain.js**，快速调用多家 LLM
-- 🗂 存储可插拔：默认本地 **SQLite**，可切换本地 **MongoDB**，并支持一键迁移到线上 MongoDB
+- 🗂 存储可插拔：默认使用本地 **SQLite**，支持切换至 **MySQL** 或 **MongoDB**，可一键迁移至线上数据库服务。
 - 🔄 **本地 / 在线** 数据零停机迁移
 - 🪝 **FeathersJS Hook**：鉴权、限流、审计、实时推送一步到位
 - 🧠 支持 OpenAI、Anthropic、Google、DeepSeek、Qwen 等主流大模型
