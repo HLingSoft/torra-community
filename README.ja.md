@@ -19,7 +19,7 @@ Coze（クローズドソース）や Langflow（React + Python）とは異な
 | **SQLite / MySQL / MongoDB** | SQLite（開発用）、MySQL（本番環境）、MongoDB（柔軟な用途）に対応したバックエンドサポートを内蔵。 |
 | **ローカル ↔ クラウド 無停止切替** | `TORRA_DATASOURCE` を `local` / `cloud` に変更するだけで自動移行。 |
 | **FeathersJS フックパイプライン** | 全 CRUD 操作をカスタムフックで拡張でき、認証・レート制限・監査ログなども簡単。 |
-| **API キーハブ** | 著者の WeChat QR をスキャンし、OpenAI・可灵・即梦・Sora・Flux・Minimax・ElevenLabs などの無料キーを取得。 |
+| **GraphQL-style API Schema** | Declarative, flexible querying of workflow data. Simplifies frontend‑only development – no need to write custom backend endpoints. |
 
 ---
 

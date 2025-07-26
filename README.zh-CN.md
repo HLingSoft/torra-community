@@ -18,7 +18,7 @@
 | **SQLite / MySQL / MongoDB** | 内置支持多种主流数据库：开发推荐使用 SQLite，生产支持 MySQL，灵活集成 MongoDB。 |
 | **本地 ↔ 云端 无缝切换** | 设置 `TORRA_DATASOURCE=local` 或 `cloud`，即可自动迁移数据。 |
 | **FeathersJS 全链路 Hook** | 所有数据库操作（find / get / create / patch / remove）都经过可配置 Hook，可轻松实现鉴权、限流、审计、LiveQuery 等。 |
-| **API Key 社区发放** | 扫描作者微信二维码，领取 OpenAI、可灵、即梦、Sora、Flux、Minimax、ElevenLabs 等平台的免费 Key。 |
+| **类 GraphQL 接口风格** | 统一的数据访问语法，声明式设计，适合一人全栈项目开发，无需专门后端工程师介入。 |
 
 ---
 

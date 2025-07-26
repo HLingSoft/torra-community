@@ -17,7 +17,7 @@ Unlike Coze (closed‑source) and Langflow (React + Python), Torra is powered 
 | **SQLite, MySQL & MongoDB** | Out‑of‑the‑box support for multiple back‑ends: SQLite (dev), MySQL (prod), MongoDB (flexible). |
 | **Local ↔ Cloud Seamless Switch** | Toggle `TORRA_DATASOURCE=local | cloud` and Torra migrates data automatically. |
 | **Full FeathersJS Hooks** | All CRUD operations (`find`, `get`, `create`, `patch`, `remove`) pass through configurable hooks for auth, rate‑limit, audit‑log, LiveQuery, etc. |
-| **API‑Key Hub** | Scan the author’s WeChat QR to request free‑tier keys for leading LLM platforms (Keling / Jimeng / Sora / Flux / Minimax / ElevenLabs / …). |
+| **GraphQL‑style API Schema** | Unified data access via declarative GraphQL-like syntax. Ideal for solo fullstack workflows – no backend engineers required. |
 
 ---
 
