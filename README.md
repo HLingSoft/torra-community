@@ -66,12 +66,22 @@ Unlike Coze (closed‑source) and Langflow (React + Python), Torra is powered 
  
 
 ---
+## 🧾 Additional Highlights
+
+- 📅 **Complete Runtime**: All features work out-of-the-box from **Day 1**, including database, auth, workflow runtime, logging, billing, and multi-language UI.
+- 🖥 **Fully Functional Backend**: Ships with a complete **FeathersJS backend system**, supporting user auth, role control, data ops, logs, LiveQuery, and plugin hooks.
+- 🧑‍💻 **100% Open Source**: All client + server code is open-sourced under **MIT License** – no vendor lock-in.
+- 🧩 **Fullstack TypeScript**: End-to-end TypeScript (Nuxt 4 + FeathersJS + LangChain.js), enabling **enterprise-grade integration** and easier onboarding for teams.
+- 🧠 **LangChain & LangGraph Native Support**: Out-of-the-box compatibility with **LangChain.js** and progressive integration of **LangGraph**, following the latest agentic architectures and community best practices.
+
+---
+
 
 ## 🖼 More Screenshots
 
-| Nodes | Playground | API |
-|-------|------------|-----|
-| ![Nodes](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![Play](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![API](https://file.web.hlingsoft.com/zIHhaij2H6tBbym8eap1aqar2svuQ0q7/%E6%88%AA%E5%B1%8F2025-06-26%2011.24.37.png) |
+| Nodes | Playground | API | Minimal Mode |
+|-------|------------|-----|-----------|
+| ![Nodes](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![Play](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![API](https://file.web.hlingsoft.com/lKilFV9MR3r6flvFCPVlcquvvHyb0fL7/%E6%88%AA%E5%B1%8F2025-07-26%2014.46.22.png) | ![Minimal](https://file.web.hlingsoft.com/lKilFV9MR3r6flvFCPVlcquvvHyb0fL7/%E6%88%AA%E5%B1%8F2025-07-26%2014.46.22.png) |
 
 ---
 

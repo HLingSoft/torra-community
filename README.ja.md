@@ -68,11 +68,24 @@ Coze（クローズドソース）や Langflow（React + Python）とは異な
 
 ---
 
+
+## 🧾 その他の特長
+
+- 📅 **完全なランタイムサポート**：データベース、認証、ワークフロー実行、ログ、課金、多言語UIなど、すべてが初日からすぐに使えます。
+- 🖥 **フル機能のバックエンド**：FeathersJS による完全なバックエンドシステムを搭載。認証、ロール制御、データ操作、ログ、LiveQuery、プラグイン拡張に対応。
+- 🧑‍💻 **100％オープンソース**：クライアントとサーバーのコードはすべて MIT ライセンスのもとで公開されており、ベンダーロックインはありません。
+- 🧩 **フルスタック TypeScript**：Nuxt4 + FeathersJS + LangChain.js を用いたエンドツーエンドの TypeScript 開発により、企業レベルの統合とチーム導入が容易に。
+- 🧠 **LangChain と LangGraph にネイティブ対応**：LangChain.js にすぐ対応可能で、LangGraph の段階的な統合も進行中。最新のエージェントアーキテクチャとコミュニティのベストプラクティスに準拠。
+
+
+---
+
+
 ## 🖼 スクリーンショット
 
-| ノード編集 | Playground | API 呼び出し |
-|-----------|------------|--------------|
-| ![Nodes](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![Play](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![API](https://file.web.hlingsoft.com/zIHhaij2H6tBbym8eap1aqar2svuQ0q7/%E6%88%AA%E5%B1%8F2025-06-26%2011.24.37.png) |
+| ノード編集 | Playground | API 呼び出し | ミニマルモード |
+|------------|------------|--------------|----------------|
+| ![Nodes](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![Play](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![API](https://file.web.hlingsoft.com/lKilFV9MR3r6flvFCPVlcquvvHyb0fL7/%E6%88%AA%E5%B1%8F2025-07-26%2014.46.22.png) | ![Minimal](https://file.web.hlingsoft.com/lKilFV9MR3r6flvFCPVlcquvvHyb0fL7/%E6%88%AA%E5%B1%8F2025-07-26%2014.46.22.png) |
 
 ---
  

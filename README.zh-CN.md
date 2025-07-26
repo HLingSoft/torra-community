@@ -68,11 +68,21 @@
 
 ---
 
+## 🧾 其他亮点
+
+- 📅 **完整运行时支持**：所有功能开箱即用，包括数据库、权限、工作流执行、日志、计费、多语言 UI。
+- 🖥 **功能齐全的后端系统**：内置完整的 FeathersJS 后端，支持用户权限、数据操作、日志、LiveQuery 和插件扩展。
+- 🧑‍💻 **100% 开源**：客户端与服务端代码全部开源，遵循 MIT 协议，真正无供应商绑定。
+- 🧩 **全栈 TypeScript**：前后端均采用 TypeScript（Nuxt4 + FeathersJS + LangChain.js），支持企业级接入，方便团队协作。
+- 🧠 **原生支持 LangChain 与 LangGraph**：即插即用，逐步集成 LangGraph，紧跟社区 Agentic 架构发展趋势。
+
+---
+
 ## 🖼 更多截图
 
-| 节点编辑 | Playground | API 调用 |
-|----------|------------|----------|
-| ![Nodes](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![Play](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![API](https://file.web.hlingsoft.com/zIHhaij2H6tBbym8eap1aqar2svuQ0q7/%E6%88%AA%E5%B1%8F2025-06-26%2011.24.37.png) |
+| 节点编辑 | Playground | API 调用 | 极简模式 |
+|----------|------------|----------|----------|
+| ![Nodes](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![Play](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![API](https://file.web.hlingsoft.com/lKilFV9MR3r6flvFCPVlcquvvHyb0fL7/%E6%88%AA%E5%B1%8F2025-07-26%2014.46.22.png) | ![Minimal](https://file.web.hlingsoft.com/lKilFV9MR3r6flvFCPVlcquvvHyb0fL7/%E6%88%AA%E5%B1%8F2025-07-26%2014.46.22.png) |
 
 ---
 
