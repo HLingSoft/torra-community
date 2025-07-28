@@ -455,56 +455,6 @@ const canEditCurrentWorkflow = computed(() => {
 })
 
 
-const capturingScreenshot = ref(false)
-
-const doScreenshot = async () => {
-  if (!vueFlowRef.value) {
-    console.warn('VueFlow element not found');
-    return;
-  }
-  useToast('正在截图，请稍等...')
-  capturingScreenshot.value = true
-  // capture(vueFlowRef.value, { shouldDownload: true });
-  const response = await fetch('https://api.torra.cloud/api/puppeteer/workflow-screenshot', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId: user.value?.objectId,
-      url: window.location.origin + '/workflow',
-      workflowId: currentWorkflow.value?.objectId,
-
-    }),
-  })
-
-
-  const data = await response.json()
-  // console.log('Screenshot response:', data)
-
-  // 如果返回的数据中包含 URL，处理下载
-  if (data.url) {
-    await downloadImage(data.url, `Torra-${currentWorkflow.value!.name}-工作流截图.png`)
-  }
-  capturingScreenshot.value = false
-
-}
-const downloadImage = async (url: string, filename = 'screenshot.png') => {
-  const res = await fetch(url, { mode: 'cors' })
-  // console.log(res)
-  if (!res.ok) throw new Error('网络响应不是OK')
-  const blob = await res.blob()
-  const objectUrl = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = objectUrl
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  setTimeout(() => {
-    URL.revokeObjectURL(objectUrl)
-    document.body.removeChild(a)
-  }, 200)
-}
-
-
 
 
 </script>
@@ -911,10 +861,10 @@ const downloadImage = async (url: string, filename = 'screenshot.png') => {
 
                       <thead class="sticky top-0   z-10">
                         <TableRow>
-                          <TableHead class="w-1/3">Version</TableHead>
-                          <TableHead>CreatedAt</TableHead>
-                          <TableHead>User</TableHead>
-                          <TableHead class="flex items-center justify-end space-x-2">Operator</TableHead>
+                          <TableHead class="w-1/3">{{ t('Version') }}</TableHead>
+                          <TableHead>{{ t('CreatedAt') }}</TableHead>
+                          <TableHead>{{ t('User') }}</TableHead>
+                          <TableHead class="flex items-center justify-end space-x-2">{{ t('Operator') }}</TableHead>
                         </TableRow>
                       </thead>
 
@@ -927,8 +877,8 @@ const downloadImage = async (url: string, filename = 'screenshot.png') => {
                           <TableCell>{{ history.user.name }}</TableCell>
                           <TableCell>
                             <div class="flex items-center justify-end space-x-2">
-                              <Button size="sm" variant="destructive" @click="deleteHistory(history)">删除</Button>
-                              <Button size="sm" variant="outline" class="ml-2" @click="rollbackHistory(history)">回退</Button>
+                              <Button size="sm" variant="destructive" @click="deleteHistory(history)">{{ t('Delete') }}</Button>
+                              <Button size="sm" variant="outline" class="ml-2" @click="rollbackHistory(history)">{{ t('Rollback') }}</Button>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -941,7 +891,7 @@ const downloadImage = async (url: string, filename = 'screenshot.png') => {
                 <DialogFooter>
                   <DialogClose as-child>
                     <Button type="button" variant="secondary">
-                      Close
+                      {{ t('Close') }}
                     </Button>
                   </DialogClose>
                 </DialogFooter>
@@ -956,9 +906,9 @@ const downloadImage = async (url: string, filename = 'screenshot.png') => {
               </DialogTrigger>
               <DialogContent v-if="currentWorkflow" class="!max-w-7xl     ">
                 <DialogHeader>
-                  <DialogTitle>Logs</DialogTitle>
+                  <DialogTitle>{{ t('Logs') }}</DialogTitle>
                   <DialogDescription>
-                    Show the logs of the current workflow. 仅显示最近的10条记录
+                    {{ t('Show the logs of the current workflow.') }} {{ t('Show only the latest 10 records.') }}
                   </DialogDescription>
                 </DialogHeader>
 
@@ -972,24 +922,20 @@ const downloadImage = async (url: string, filename = 'screenshot.png') => {
 
                       <thead class="sticky top-0   z-10">
                         <TableRow>
-                          <!-- <TableHead class="w-10">Name</TableHead> -->
-                          <TableHead class="w-14">Channel</TableHead>
-                          <TableHead class="w-14">Times</TableHead>
-                          <TableHead class="w-1/3">Logs</TableHead>
-                          <TableHead class="w-1/3">Result</TableHead>
 
-                          <TableHead class="w-20">CreatedAt</TableHead>
-                          <!-- <TableHead class="flex items-center justify-end space-x-2">Operator</TableHead> -->
+                          <TableHead class="w-14"> {{ t('Channel') }}</TableHead>
+                          <TableHead class="w-14">{{ t('Duration') }}</TableHead>
+                          <TableHead class="w-1/3">{{ t('Logs') }}</TableHead>
+                          <TableHead class="w-1/3">{{ t('Result') }}</TableHead>
+
+                          <TableHead class="w-20">{{ t('CreatedAt') }}</TableHead>
+
                         </TableRow>
                       </thead>
 
                       <TableBody>
                         <TableRow v-for="log in allCurrentWorkflowLogs" :key="log.objectId">
-                          <!-- <TableCell class="font-medium w-10 ">
-                            <div class="line-clamp-1">
-                              {{ log.name }}
-                            </div>
-                          </TableCell> -->
+
                           <TableCell class="font-medium w-10">
                             {{ log.channel }}
                           </TableCell>
@@ -1031,7 +977,7 @@ const downloadImage = async (url: string, filename = 'screenshot.png') => {
                 <DialogFooter>
                   <DialogClose as-child>
                     <Button type="button" variant="secondary">
-                      Close
+                      {{ t('Close') }}
                     </Button>
                   </DialogClose>
                 </DialogFooter>
@@ -1045,21 +991,21 @@ const downloadImage = async (url: string, filename = 'screenshot.png') => {
               </DialogTrigger>
               <DialogContent v-if="currentWorkflow" class="!max-w-4xl p-5    ">
                 <DialogHeader>
-                  <DialogTitle>Share this Workflow</DialogTitle>
+                  <DialogTitle> {{ t('Share this Workflow') }}</DialogTitle>
                   <DialogDescription>
-                    Anyone with the link can view this workflow.
+                    {{ t('Anyone with the link can view this workflow.') }}
                   </DialogDescription>
                 </DialogHeader>
                 <div v-if="currentWorkflowShareLink" class="flex flex-row items-center justify-between gap-x-4">
                   <Input v-model="currentWorkflowShareLink" class="" readonly disabled />
                   <Button variant="outline" size="sm" class="ml-2" @click="copyShareLink">
                     <NuxtIcon name="lucide:copy" size="16" />
-                    Copy Link
+                    {{ t('Copy Link') }}
                   </Button>
 
                 </div>
                 <Separator class="my-2" />
-                <p class="font-extrabold">People with access({{ allWorkflowUserShares.length }})</p>
+                <p class="font-extrabold"> {{ t('People with access') }}({{ allWorkflowUserShares.length }})</p>
 
                 <ScrollArea class="h-[50vh]   ">
 
@@ -1101,7 +1047,7 @@ const downloadImage = async (url: string, filename = 'screenshot.png') => {
                 <DialogFooter>
                   <DialogClose as-child>
                     <Button type="button" variant="secondary">
-                      Close
+                      {{ t('Close') }}
                     </Button>
                   </DialogClose>
                 </DialogFooter>

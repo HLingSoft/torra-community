@@ -47,13 +47,11 @@ onMounted(async () => {
         mineFinance.value.tokenBalance = 0
         await mineFinance.value.save()
     }
-
-    console.log('mineFinance', mineFinance.value)
     allTransactions.value = await new LC.Query(UserFinanceTransaction)
         .include(EnumUserFinanceTransaction.WORKFLOW)
         .equalTo(EnumUserFinanceTransaction.USER, user.value)
         .include(EnumUserFinanceTransaction.USER)
-      
+        // .equalTo(EnumUserFinanceTransaction.TYPE, 'consume')
         .descending(EnumUserFinanceTransaction.CREATEDAT)
         .limit(1000)
         .find() as UserFinanceTransaction[]

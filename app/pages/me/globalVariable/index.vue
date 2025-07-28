@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import UserWorkflowVariable, { EnumUserWorkflowVariable } from '~~/models/UserWorkflowVariable'
 import User from '~~/models/User'
+const { t } = useI18n()
 definePageMeta({
     layout: 'me',
     title: '全局变量',
@@ -111,15 +112,15 @@ const save = async () => {
         <div class="mb-6 text-sm  shrink-0 flex items-center justify-between w-full">
             <div class="">
                 <h3 class="text-lg font-medium">
-                    Global Variables
+                    {{ t('Global Variables') }}
                 </h3>
                 <p class="text-sm text-muted-foreground">
-                    Define global variables that can be used across your application. These variables can be referenced in your API tools, workflows, and other components.
+                    {{ t('Define global variables that can be used across your application. These variables can be referenced in your API tools, workflows, and other components.') }}
                 </p>
             </div>
             <Button @click="save">
                 <NuxtIcon name="lucide:check-line" class="mr-2" />
-                Save
+                {{ t('Save Global Variables') }}
             </Button>
         </div>
         <Separator class="mb-4" />
@@ -131,10 +132,10 @@ const save = async () => {
                         <TableHead class="w-[40px]">
                             <Checkbox />
                         </TableHead>
-                        <TableHead class="w-60">Name</TableHead>
-                        <TableHead>Value</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead class="w-60">Type</TableHead>
+                        <TableHead class="w-60">{{ t('Variable Name') }}</TableHead>
+                        <TableHead>{{ t('Variable Value') }}</TableHead>
+                        <TableHead>{{ t('Variable Description') }}</TableHead>
+                        <TableHead class="w-60">{{ t('Variable Type') }}</TableHead>
                     </TableRow>
                 </TableHeader>
 

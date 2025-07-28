@@ -4,6 +4,7 @@ definePageMeta({
     layout: 'me',
     title: '个人信息',
 })
+const { t } = useI18n();
 const { user } = storeToRefs(useUserStore())
 const uploadAvatarUrl = ref('')
 const { onChange: avatarFileOnChange, open: openUploadUserAvatar } = useFileDialog({
@@ -13,13 +14,13 @@ const { onChange: avatarFileOnChange, open: openUploadUserAvatar } = useFileDial
 avatarFileOnChange(async (files) => {
     /** do something with files */
     if (files && files.length > 0) {
-        const file = files[0]
+        const file = files[0] as File
         const avFile = new LC.File(file.name, file)
         await avFile.save()
         // console.log(avFile.url())
         if (user.value) {
-            user.value.avatar = avFile.url()
-            uploadAvatarUrl.value = avFile.url()
+            user.value.avatar = avFile.url() as string
+            uploadAvatarUrl.value = avFile.url() as string
         }
     }
 })
@@ -53,50 +54,52 @@ const save = async () => {
     <div v-if="user" class="flex flex-col items-start space-y-2 p-6 w-full max-w-lg">
         <div class="">
             <h3 class="text-lg font-medium">
-                Profile
+                {{ t('Profile') }}
             </h3>
             <p class="text-sm text-muted-foreground">
-                This is how others will see you on the site.
+                {{ t('This is how others will see you on the site.') }}
+
             </p>
         </div>
         <Separator class="mb-4" />
         <div class="mt-6 flex flex-col gap-8 w-full">
             <div class="grid w-full max-w-sm items-center gap-5">
-                <Label>Default User Id
+                <Label>
+                    {{ t('Default User Id') }}
                     <NuxtIcon size="19" name="solar:copy-line-duotone" class="cursor-copy" @click="copyUserId" />
                 </Label>
                 <Input type="text" :disabled="true" v-model:model-value="user.objectId" placeholder="objectId" class="w-full" />
 
             </div>
             <div class="grid w-full max-w-sm items-center gap-5">
-                <Label>UserName</Label>
+                <Label> {{ t('UserName') }}</Label>
                 <Input type="text" v-model:model-value="user.name" placeholder="username" class="w-full" />
             </div>
             <div class="grid w-full max-w-sm items-center gap-5">
-                <Label>Email</Label>
+                <Label> {{ t('Email') }}</Label>
                 <Input type="email" v-model:model-value="user.email" placeholder="email" class="w-full" />
             </div>
             <div class="grid w-full max-w-sm items-center gap-5">
-                <Label>Phone</Label>
+                <Label> {{ t('Phone') }}</Label>
                 <Input type="text" :disabled="true" v-model:model-value="user.phone" class="w-full" />
             </div>
             <div class="grid w-full max-w-sm items-center gap-5">
-                <Label>Gender</Label>
+                <Label> {{ t('Gender') }}</Label>
 
                 <div class="flex flex-row items-center space-x-6">
                     <div class="flex flex-row items-center space-x-2 text-xs">
-                        <Label for="gender">Male</Label>
+                        <Label for="gender">{{ t('Male') }}</Label>
                         <input v-model.number="user.gender" type="radio" name="gender" :value="1" class="radio radio-sm">
                     </div>
 
                     <div class="flex flex-row items-center space-x-2">
-                        <Label for="gender">Female</Label>
+                        <Label for="gender">>{{ t('Female') }}</Label>
                         <input v-model.number="user.gender" type="radio" name="gender" :value="2" class="radio radio-sm">
                     </div>
                 </div>
             </div>
             <div class="grid w-full max-w-sm items-center gap-5">
-                <Label>Avatar</Label>
+                <Label>{{ t('Change Avatar') }}</Label>
                 <div class="cursor-pointer  rounded-full  " @click="openUploadUserAvatar()">
                     <NuxtIcon v-if="!uploadAvatarUrl" name="icon-park-outline:upload-one" size="26" class="cursor-pointer" />
                     <div v-else class="avatar online">
@@ -111,7 +114,7 @@ const save = async () => {
         </div>
         <Separator class="my-5" />
         <div class="flex w-full max-w-sm items-center  space-x-2">
-            <Button @click="save">Save</Button>
+            <Button @click="save">{{ t('Save') }}</Button>
 
         </div>
 

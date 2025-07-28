@@ -19,22 +19,23 @@ const theme = ref<'light' | 'dark'>(
 
 /* 单选框变化 → 立即写回 preference */
 watch(theme, v => { colorMode.preference = v })
+const { t } = useI18n();
 </script>
 
 <template>
     <div v-if="user" class="flex flex-col items-start space-y-2 p-6 w-full max-w-3xl">
         <div class="">
             <h3 class="text-lg font-medium">
-                Appearance
+                {{ t('Appearance') }}
             </h3>
             <p class="text-sm text-muted-foreground">
-                Customize the appearance of the app. Automatically switch between day and night themes.
+                {{ t('Customize the appearance of the app. Automatically switch between day and night themes.') }}
             </p>
         </div>
         <Separator class="mb-4" />
         <div class="mt-6 flex flex-col gap-8 w-full">
             <div class="grid w-full max-w-sm items-center gap-5">
-                <Label>Lanuage
+                <Label>{{ t('Language') }}
                 </Label>
                 <div class="w-40 flex items-center justify-start">
                     <LanguageSwitch />
@@ -46,9 +47,9 @@ watch(theme, v => { colorMode.preference = v })
 
             <FormField v-slot="{ componentField }" type="radio" name="theme">
                 <FormItem class="space-y-1">
-                    <FormLabel>Theme</FormLabel>
+                    <FormLabel>{{ t('Theme') }}</FormLabel>
                     <FormDescription>
-                        Select the theme for the dashboard.
+                        {{ t('Select the theme for the dashboard.') }}
                     </FormDescription>
                     <FormMessage />
 
@@ -75,7 +76,7 @@ watch(theme, v => { colorMode.preference = v })
                                     </div>
                                 </div>
                                 <div class="block w-full p-2 text-center font-normal">
-                                    Light
+                                    {{ t('Light') }}
                                 </div>
                             </FormLabel>
                         </FormItem>
@@ -101,7 +102,7 @@ watch(theme, v => { colorMode.preference = v })
                                     </div>
                                 </div>
                                 <span class="block w-full p-2 text-center font-normal">
-                                    Dark
+                                    {{ t('Dark') }}
                                 </span>
                             </FormLabel>
                         </FormItem>
@@ -109,11 +110,6 @@ watch(theme, v => { colorMode.preference = v })
                 </FormItem>
             </FormField>
         </div>
-        <!-- <Separator class="my-5" /> -->
-        <!-- <div class="flex w-full max-w-sm items-center  space-x-2">
-            <Button @click="update">Update preference</Button>
-
-        </div> -->
 
     </div>
 </template>
