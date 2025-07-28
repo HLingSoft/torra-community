@@ -27,40 +27,6 @@ onMounted(() => {
                     <img src="~/assets/logo_1.png" class="w-auto max-h-12">
                 </NuxtLink>
             </div>
-            <!-- <NavigationMenu class="hidden lg:flex">
-                <NavigationMenuList>
-                    <NavigationMenuLink asChild>
-                        <NuxtLink href="#" class="group inline-flex h-9 w-max items-center justify-center  rounded-lg bg-background px-6 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
-                            产品
-                        </NuxtLink>
-                    </NavigationMenuLink>
-                    <NavigationMenuLink asChild>
-                        <NuxtLink href="#" class="group inline-flex h-9 w-max items-center justify-center  rounded-lg bg-background px-6 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
-                            VIP
-                        </NuxtLink>
-                    </NavigationMenuLink>
-                    <NavigationMenuLink asChild>
-                        <NuxtLink href="#" class="group inline-flex h-9 w-max items-center justify-center  rounded-lg bg-background px-6 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
-                            商店
-                        </NuxtLink>
-                    </NavigationMenuLink>
-                    <NavigationMenuLink asChild>
-                        <NuxtLink href="#" class="group inline-flex h-9 w-max items-center justify-center  rounded-lg bg-background px-6 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
-                            文档
-                        </NuxtLink>
-                    </NavigationMenuLink>
-                    <NavigationMenuLink asChild>
-                        <NuxtLink href="#" class="group inline-flex h-9 w-max items-center justify-center  rounded-lg bg-background px-6 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
-                            Blog
-                        </NuxtLink>
-                    </NavigationMenuLink>
-                    <NavigationMenuLink asChild>
-                        <NuxtLink href="#" class="group inline-flex h-9 w-max items-center justify-center  rounded-lg bg-background px-6 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
-                            联系我们
-                        </NuxtLink>
-                    </NavigationMenuLink>
-                </NavigationMenuList>
-            </NavigationMenu> -->
 
 
             <div class="hidden lg:flex lg:flex-1 lg:justify-end gap-x-5">

@@ -37,6 +37,7 @@
     "@langchain/google-genai": "^0.2.16",
     "@langchain/langgraph": "^0.3.11",
     "@langchain/mcp-adapters": "^0.6.0",
+    "@langchain/ollama": "^0.2.3",
     "@langchain/openai": "^0.6.3",
     "@langchain/redis": "^0.1.1",
     "@lottiefiles/dotlottie-vue": "^0.8.1",
