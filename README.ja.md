@@ -44,26 +44,29 @@
 
 ### 🧩 内蔵モジュール
 
-| カテゴリ | 数 | 代表機能 |
-|----------|----|----------|
-| Input | 3 | Chat Input、Text Input、API Input |
-| Output | 2 | Chat Output、Text Output |
-| Prompt | 1 | Prompt |
-| Image | 2 | OpenAI 画像認識、画像生成 |
-| Voice | 2 | OpenAI 音声認識、音声合成 |
-| Data Sources | 8 | API Request、Directory、File、MongoDB、SQL Query、URL、Webhook |
-| Processing | 8 | Message↔Data、Filter、Combine、JSON Parser、OSS へ保存 |
-| Models | 5 | Ollama、Anthropic、DeepSeek、OpenAI、Google |
-| Vector Store | 1 | Milvus |
-| Embeddings | 1 | OpenAI |
-| Memory | 1 | Upstash Redis Chat Memory |
-| Agent | 1 | Agent |
-| Logic | 5 | If‑Else、Listen、Loop、Notify、Pass |
-| Tools | 5 | Baidu Search、Google Search、Tavily、Calculator、Timezone |
-| Helpers | 5 | ID Generator、Message Store、Structured Output、List Output、History |
-| MCP | 3 | MCP HTTP、MCP SSE、MCP stdio |
-| SubFlow | 1 | Workflow |
-| Plugins | 0 | 近日公開 |
+| カテゴリ            | 数量  | 注目コンポーネント・機能                               |
+| --------------- | --- | ------------------------------------------ |
+| 入力（Input）       | 3   | チャット入力、テキスト入力、API入力                        |
+| 出力（Output）      | 2   | チャット出力、テキスト出力                              |
+| プロンプト           | 1   | Promptビルダー                                 |
+| 画像生成            | 5   | DALL·E 3、GPT画像、Stable Diffusion、OpenArt など |
+| 画像認識            | 1   | OpenAIビジョン                                 |
+| 音声関連            | 5   | OpenAI音声合成/認識、ElevenLabs、Minimax           |
+| 動画生成            | 1   | Replicate Klingによるビデオ生成                    |
+| データソース          | 9   | APIリクエスト、ファイル/ディレクトリ、MongoDB、SQL、Webhook等  |
+| データ処理           | 11+ | メッセージ↔データ変換、フィルター、統合、JSON、ファイル保存など         |
+| モデル             | 5   | OpenAI、DeepSeek、Anthropic、Google、Ollama    |
+| ベクトルストア         | 1   | Milvus                                     |
+| 埋め込み（Embedding） | 1   | OpenAI埋め込み                                 |
+| メモリー管理          | 1   | Upstash Redisチャットメモリ                       |
+| エージェント          | 1   | AIエージェントノード                                |
+| ロジック制御          | 5   | 条件分岐、リッスン、ループ、通知、通過                        |
+| ツール             | 5   | Google/Baidu検索、Tavily、電卓、タイムゾーン変換          |
+| ヘルパー            | 7   | ID生成、メッセージ履歴、構造化出力、音声/映像の長さ計測など            |
+| MCP             | 3   | HTTP、SSE、Stdio                             |
+| サブフロー           | 1   | ワークフローの再利用ノード                              |
+| プラグイン           | —   | プラグイン対応機能は開発中                              |
+
 
 ---
 

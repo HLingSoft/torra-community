@@ -44,26 +44,28 @@
 
 ### 🧩 内置节点 & 功能
 
-| 分类 | 数量 | 代表功能 |
-|------|------|----------|
-| 输入 | 3 | Chat Input、Text Input、API Input |
-| 输出 | 2 | Chat Output、Text Output |
-| Prompt | 1 | Prompt |
-| 图片 | 2 | OpenAI 图片识别、图片生成 |
-| 语音 | 2 | OpenAI 语音识别、语音合成 |
-| 数据源 | 8 | API Request、Directory、File、MongoDB、SQL Query、URL、Webhook |
-| 处理 | 8 | Message↔Data、Filter、Combine、JSON Parser、保存至阿里云 OSS 等 |
-| 模型 | 5 | Ollama、Anthropic、DeepSeek、OpenAI、Google |
-| 向量库 | 1 | Milvus |
-| Embedding | 1 | OpenAI |
-| Memory | 1 | Upstash Redis Chat Memory |
-| Agent | 1 | Agent |
-| 逻辑 | 5 | If‑Else、Listen、Loop、Notify、Pass |
-| 工具 | 5 | 百度搜索、Google Search、Tavily、Calculator、Timezone/Geo |
-| Helpers | 5 | ID Generator、Message Store、Structured Output、List Output、History |
-| MCP | 3 | MCP HTTP、MCP SSE、MCP stdio |
-| 子流程 | 1 | Workflow |
-| 插件 | 0 | 敬请期待 |
+| 模块分类         | 数量  | 关键组件/功能亮点                                |
+| ------------ | --- | ---------------------------------------- |
+| 输入（Input）    | 3   | 聊天输入框、文本输入框、API 输入                       |
+| 输出（Output）   | 2   | 聊天输出、文本输出                                |
+| 提示词（Prompt）  | 1   | Prompt 构建器                               |
+| 图像生成         | 5   | DALL·E 3、GPT 图像、Stable Diffusion、OpenArt |
+| 图像识别         | 1   | OpenAI 图像识别                              |
+| 语音模块         | 5   | OpenAI 语音合成/识别、ElevenLabs、Minimax        |
+| 视频模块         | 1   | Replicate Kling 视频生成                     |
+| 数据源（Data）    | 9   | API 请求、文件/目录上传、MongoDB、SQL 查询、Webhook 等  |
+| 数据处理         | 11+ | 消息↔数据转换、数据过滤、合并、结构化转换、OSS 存储等            |
+| 模型调用         | 5   | OpenAI、DeepSeek、Anthropic、Google、Ollama  |
+| 向量存储         | 1   | Milvus                                   |
+| Embedding    | 1   | OpenAI 向量嵌入                              |
+| 记忆模块         | 1   | Upstash Redis 聊天记忆                       |
+| 智能体（Agent）   | 1   | Agent 智能节点                               |
+| 逻辑控制         | 5   | 条件判断、监听、循环、通知、直通                         |
+| 工具类（Tool）    | 5   | Google/Baidu 搜索、Tavily、计算器、时区转换          |
+| 辅助模块         | 7   | ID 生成器、消息记录、结构化输出、音视频时长计算等               |
+| MCP 通道       | 3   | HTTP、SSE、Stdio                           |
+| 子流程（SubFlow） | 1   | 可复用的工作流模块                                |
+| 插件（Plugins）  | —   | 插件机制开发中                                  |
 
 ---
 

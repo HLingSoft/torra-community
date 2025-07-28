@@ -44,26 +44,29 @@ While **Coze Studio** (React + Go) and **Langflow** (React + Python) follow diff
 
 ### 🧩 Built‑in Modules
 
-| Category | Count | Highlights |
-|----------|-------|------------|
-| Input | 3 | Chat Input, Text Input, API Input |
-| Output | 2 | Chat Output, Text Output |
-| Prompt | 1 | Prompt |
-| Image | 2 | OpenAI Vision, Image Generation |
-| Voice | 2 | OpenAI TTS, STT |
-| Data Sources | 8 | API Request, Directory, File, MongoDB, SQL Query, URL, Webhook |
-| Processing | 8 | Message ↔ Data, Filter, Combine, JSON Parser, Save to OSS |
-| Models | 5 | Ollama, Anthropic, DeepSeek, OpenAI, Google |
-| Vector Store | 1 | Milvus |
-| Embeddings | 1 | OpenAI |
-| Memory | 1 | Upstash Redis Chat Memory |
-| Agent | 1 | Agent |
-| Logic | 5 | If‑Else, Listen, Loop, Notify, Pass |
-| Tools | 5 | Baidu Search, Google Search, Tavily, Calculator, Timezone |
-| Helpers | 5 | ID Generator, Message Store, Structured Output, List Output, History |
-| MCP | 3 | MCP HTTP, MCP SSE, MCP stdio |
-| SubFlow | 1 | Workflow |
- 
+| Category          | Count | Highlights                                          |
+| ----------------- | ----- | --------------------------------------------------- |
+| Input             | 3     | Chat Input, Text Input, API Input                   |
+| Output            | 2     | Chat Output, Text Output                            |
+| Prompt            | 1     | Prompt Builder                                      |
+| Image             | 5     | DALL·E 3, GPT Image, Stable Diffusion, OpenArt      |
+| Image Recognition | 1     | OpenAI Vision                                       |
+| Voice             | 5     | OpenAI TTS/STT, ElevenLabs, Minimax                 |
+| Video             | 1     | Replicate Kling Video                               |
+| Data Sources      | 9     | API Request, File, Directory, MongoDB, SQL, Webhook |
+| Processing        | 11+   | Message↔Data, Filters, Combine, JSON, Save to OSS   |
+| Models            | 5     | OpenAI, DeepSeek, Google, Anthropic, Ollama         |
+| Vector Store      | 1     | Milvus                                              |
+| Embeddings        | 1     | OpenAI Embedding                                    |
+| Memory            | 1     | Upstash Redis Memory                                |
+| Agent             | 1     | Agent Node                                          |
+| Logic             | 5     | If‑Else, Loop, Listen, Notify, Pass                 |
+| Tools             | 5     | Google/Baidu Search, Tavily, Calculator, Timezone   |
+| Helpers           | 7     | ID Generator, History, List Output, Duration Tools  |
+| MCP               | 3     | HTTP, SSE, stdio                                    |
+| SubFlow           | 1     | Workflow (Reusable Flow)                            |
+| Plugins           | —     | Plugin support under development                    |
+
 
 ---
 ## 🧾 Additional Highlights
