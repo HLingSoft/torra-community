@@ -120,9 +120,9 @@ const { mini } = useMiniNode()
 // 6. 计算 Handle 的 style：mini 模式下 top=0，否则 top=20
 const handleStyle = computed<Record<string, string>>(() => {
   const base: Record<string, string> = {
-    left: '-25px'
+    left: mini.value ? '-3px' : '-25px',
   }
-  base.top = mini.value ? '0px' : '20px'
+  base.top = mini.value ? '44px' : '20px'
   return base
 })
 </script>
