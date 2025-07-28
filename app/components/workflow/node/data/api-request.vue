@@ -46,17 +46,6 @@ const { mini } = useMiniNode()
         <WorkflowBaseNode v-model:currentNode="currentNode" :id="props.id" :meta="apiRequestMeta" @not-found="() => { }">
             <template #content v-if="currentNode && currentNode.data">
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.urlInputVariable" :description="`以 http/https 开头。例如:https://www.baidu.com`" />
-                <!-- <div ref="urlInputVariableRef">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.urlInputVariable.name }}<span class="text-red-500">*</span></p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
-
-                        <EditTextDialog v-model:input-variable="currentNode.data.urlInputVariable" />
-                    </div>
-                    <div class="mt-3 text-xs text-muted-foreground">以 http/https 开头。例如:https://www.baidu.com</div>
-                </div> -->
 
 
                 <div v-show="!mini" class="w-full">
@@ -83,31 +72,9 @@ const { mini } = useMiniNode()
                 <EditTextDialogComponent v-if="currentNode.data.methodType !== 'get'" class="w-full" v-model:inputPortVariable="currentNode.data.tokenInputVariable" />
 
 
-                <!-- <div v-if="currentNode.data.methodType !== 'get'" ref="tokenVariableRef">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.tokenInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
-
-                        <EditTextDialog v-model:input-variable="currentNode.data.tokenInputVariable" />
-                    </div>
-
-                </div> -->
 
                 <EditTextDialogComponent v-if="currentNode.data.methodType !== 'get'" class="w-full" v-model:inputPortVariable="currentNode.data.bodyInputVariable" />
 
-                <!-- <div v-if="currentNode.data.methodType !== 'get'" ref="bodyVariableRef">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.bodyInputVariable.name }}<span class="text-red-500">*</span></p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
-                        <EditTextDialog v-model:input-variable="currentNode.data.bodyInputVariable" :show-input="false" />
-
-
-                    </div>
-                </div> -->
 
                 <Button v-show="!mini" :disabled="currentNode.data.bodyInputVariable.connected" variant="outline" class="w-full" @click.stop="bodyVariableIsOpen = true">
                     <NuxtIcon name="mdi-light:table" size="20" />

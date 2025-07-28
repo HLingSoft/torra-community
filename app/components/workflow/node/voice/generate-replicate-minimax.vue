@@ -52,27 +52,11 @@ const { mini } = useMiniNode()
             <template #content v-if="currentNode && currentNode.data">
                 <!-- Auth Token -->
                 <GlobalVariablePopoverComponent class="w-full" v-model:inputPortVariable="currentNode.data.authInputVariable" />
-                <!-- <div class="flex flex-col mb-6">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.authInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="mt-5 w-full">
-                        <GlobalVariablePopover class="w-full" v-model:inputVariable="currentNode.data.authInputVariable" />
-                    </div>
-                </div> -->
+
 
                 <!-- User Text Input -->
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.userInputInputVariable" />
-                <!-- <div class="flex flex-col mb-6">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.userInputInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="mt-5 w-full">
-                        <EditTextDialog class="w-full" v-model:inputVariable="currentNode.data.userInputInputVariable" />
-                    </div>
-                </div> -->
+
 
                 <!-- Voice ID Select -->
                 <div v-show="!mini" class="flex flex-col mb-6">

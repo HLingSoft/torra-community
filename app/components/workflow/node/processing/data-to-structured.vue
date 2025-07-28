@@ -18,16 +18,7 @@ const currentNode = ref<{ id: string, data: DataToStructuredData } | null>(null)
             <template #content v-if="currentNode && currentNode.data">
 
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.dataInputVariable" :show-input="false" />
-                <!-- <div>
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.dataInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full mt-5">
-                        <EditTextDialog v-model:input-variable="currentNode.data.dataInputVariable" :show-input="false" />
 
-                    </div>
-                </div> -->
             </template>
 
             <template #footer v-if="currentNode && currentNode.data">

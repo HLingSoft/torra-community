@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { InputPortVariable } from '~~/types/workflow';
 defineProps<{ placeholder?: string }>()
-const inputVariableRef = defineModel<InputPortVariable>('inputVariable')
+const inputVariableRef = defineModel<InputPortVariable>('inputPortVariable')
 
 const { mini } = useMiniNode()
 </script>

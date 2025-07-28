@@ -25,26 +25,9 @@ const { mini } = useMiniNode()
                     <Switch v-model="currentNode.data.isAppend" />
                 </div>
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.dataInputVariable" :show-input="false" />
-                <!-- <div>
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.dataInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full mt-5">
-                        <EditTextDialog v-model:input-variable="currentNode.data.dataInputVariable" :show-input="false" />
-                    </div>
-                </div> -->
+
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.notifyNameInputVariable" :show-input="false" />
-                <!-- 
-                <div>
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.notifyNameInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full mt-5">
-                        <EditTextDialog v-model:input-variable="currentNode.data.notifyNameInputVariable" />
-                    </div>
-                </div> -->
+
             </template>
 
             <template #footer v-if="currentNode && currentNode.data">

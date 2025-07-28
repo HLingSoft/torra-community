@@ -161,6 +161,8 @@ import { saveToFileLCFactory } from './save-file-to-local'
 import { saveToFileLCMeta } from '~~/types/node-data/save-file-to-local'
 
 
+import { chatOllamaFactory } from './chat-ollama'
+import { ChatOllamaLangchainName } from '~~/types/node-data/chat-ollama'
 
 export const nodeFactoryMap: Record<string, NodeFactory> = {}
 
@@ -258,5 +260,7 @@ export const initFactories = () => {
   nodeFactoryMap[chatDeepSeekMeta.type] = chatDeepSeekFactory
 
   nodeFactoryMap[saveToFileLCMeta.type] = saveToFileLCFactory
+
+  nodeFactoryMap[ChatOllamaLangchainName] = chatOllamaFactory
 
 }

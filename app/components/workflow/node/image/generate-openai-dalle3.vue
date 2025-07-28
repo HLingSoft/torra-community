@@ -114,31 +114,9 @@ const { mini } = useMiniNode()
                         </Select>
                     </div>
                 </div>
-                <!-- <div class="flex flex-col">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.imageDataInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-
-                    <div class="mt-5 w-full">
-                        <EditTextDialog v-model:input-variable="currentNode.data.imageDataInputVariable" :show-input="false" :handleBg="`oklch(82.7% 0.119 306.383)`" />
-                    </div>
-                    <p class="text-muted-foreground text-sm mt-2">*支持图片链接或 Base64 格式，均可为数组</p>
-                    <p class="text-muted-foreground text-sm mt-1">*作为工具（Tool）输出时，该字段由 Agent 自动提供，无需手动填写</p>
-                </div> -->
 
 
                 <GlobalVariablePopoverComponent class="w-full" v-model:inputPortVariable="currentNode.data.userInputInputVariable" />
-                <!-- <div class="flex flex-col">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.userInputInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="mt-5 w-full">
-                        <EditTextDialog class="w-full" v-model:inputVariable="currentNode.data.userInputInputVariable" />
-                    </div>
-
-                </div> -->
 
             </template>
 

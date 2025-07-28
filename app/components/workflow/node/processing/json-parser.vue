@@ -49,17 +49,6 @@ const { mini } = useMiniNode()
             <template #content v-if="currentNode && currentNode.data">
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.inputMessageInputVariable" />
 
-                <!-- <div>
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.inputMessageInputVariable.name }} </p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
-                        <EditTextDialog v-model:input-variable="currentNode.data.inputMessageInputVariable" />
-
-                    </div>
-                </div> -->
-
 
 
                 <div v-show="!mini">

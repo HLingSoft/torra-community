@@ -44,41 +44,10 @@ const { mini } = useMiniNode()
     <WorkflowBaseNode v-model:currentNode="currentNode" :id="props.id" :meta="chatOpenAIMeta" @not-found="() => { }">
       <template #content v-if="currentNode && currentNode.data">
         <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.inputTextInputVariable" />
-        <!-- <div>
-          <div class="flex flex-row items-center space-x-2">
-            <p>{{ currentNode.data.inputTextInputVariable.name }}</p>
-            <NuxtIcon name="clarity:info-line" size="20" />
-          </div>
-          <div class="w-full  mt-5">
-
-            <EditTextDialog v-model:input-variable="currentNode.data.inputTextInputVariable" />
-          </div>
-        </div> -->
 
         <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.historyMessageInputVariable" :show-input="false" :handleBg="`var(--clr-messages)`" />
-        <!-- <div class="relative ">
-          <div class="flex flex-row items-center space-x-2">
-            <p>{{ currentNode.data.historyMessageInputVariable.name }}</p>
-            <NuxtIcon name="clarity:info-line" size="20" />
-          </div>
-          <div class="w-full  mt-5">
 
-            <EditTextDialog v-model:input-variable="currentNode.data.historyMessageInputVariable" :show-input="false" :handleBg="`var(--clr-messages)`" />
-          </div>
-
-
-        </div> -->
         <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.systemMessageInputVariable" />
-        <!-- <div>
-          <div class=" flex flex-row items-center space-x-2">
-            <p>{{ currentNode.data.systemMessageInputVariable.name }}</p>
-            <NuxtIcon name="clarity:info-line" size="20" />
-          </div>
-          <div class="w-full  mt-5">
-            <EditTextDialog v-model:input-variable="currentNode.data.systemMessageInputVariable" />
-
-          </div>
-        </div> -->
 
         <div v-show="!mini" class="flex flex-row nodrag nopan  items-center justify-between space-x-2 w-full">
           <div class="flex flex-row items-center space-x-2">

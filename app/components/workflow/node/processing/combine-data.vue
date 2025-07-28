@@ -29,17 +29,6 @@ const { mini } = useMiniNode()
         <WorkflowBaseNode v-model:currentNode="currentNode" :id="props.id" :meta="combineDataMeta" @not-found="() => { }">
             <template #content v-if="currentNode && currentNode.data">
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.dataInputsInputVariable" :show-input="false" :description="`*支持多个连线接入或者数组数据`" />
-                <!-- <div ref="urlInputVariableRef">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.dataInputsInputVariable.name }}<span class="text-red-500">*</span></p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
-
-                        <EditTextDialog v-model:input-variable="currentNode.data.dataInputsInputVariable" :show-input="false" />
-                    </div>
-                    <div class="mt-3 text-xs text-muted-foreground">*支持多个连线接入或者数组数据</div>
-                </div> -->
 
 
                 <div v-show="!mini" class="w-full">

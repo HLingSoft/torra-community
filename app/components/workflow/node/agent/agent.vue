@@ -46,80 +46,16 @@ const { mini } = useMiniNode()
             </div>
           </div>
           <GlobalVariablePopoverComponent class="w-full" v-model:inputPortVariable="currentNode.data.apiKeyInputVariable" />
-          <!-- <div>
-            <div v-show="!mini" class="flex flex-row items-center space-x-2">
-              <p>{{ currentNode.data.apiKeyInputVariable.name }}<span class="text-red-500">*</span></p>
-              <NuxtIcon name="clarity:info-line" size="20" />
-            </div>
-            <div :class="{ 'mt-5': !mini }" class="w-full  ">
 
-              <GlobalVariablePopover class="w-full" v-model:inputVariable="currentNode.data.apiKeyInputVariable" />
-
-            </div>
-          </div> -->
-          <!-- <div>
-            <div v-show="!mini" class="flex flex-row items-center space-x-2">
-              <p>{{ currentNode.data.baseURLInputVariable.name }}<span class="text-red-500">*</span></p>
-              <NuxtIcon name="clarity:info-line" size="20" />
-            </div>
-            <div :class="{ 'mt-5': !mini }" class="w-full  ">
-
-              <GlobalVariablePopover class="w-full" v-model:inputVariable="currentNode.data.baseURLInputVariable" />
-
-
-            </div>
-
-          </div> -->
           <GlobalVariablePopoverComponent class="w-full" v-model:inputPortVariable="currentNode.data.baseURLInputVariable" />
 
-          <!-- <div>
-            <div v-show="!mini" class="flex flex-row items-center space-x-2">
-              <p>{{ currentNode.data.instructionInputVariable.name }}</p>
-              <NuxtIcon name="clarity:info-line" size="20" />
-            </div>
-            <div :class="{ 'mt-5': !mini }" class="w-full  ">
-
-              <EditTextDialog class="w-full" v-model:inputVariable="currentNode.data.instructionInputVariable" />
-            </div>
-          </div> -->
           <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.instructionInputVariable" />
 
-          <!-- 
-          <div>
-            <div v-show="!mini" class="flex flex-row items-center space-x-2">
-              <p>{{ currentNode.data.inputInputVariable.name }}</p>
-              <NuxtIcon name="clarity:info-line" size="20" />
-            </div>
-            <div :class="{ 'mt-5': !mini }" class="w-full  ">
 
-              <EditTextDialog class="w-full" v-model:inputVariable="currentNode.data.inputInputVariable" />
-
-            </div>
-          </div> -->
           <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.inputInputVariable" />
 
-          <!-- 
-          <div>
-            <div v-show="!mini" class="flex flex-row items-center space-x-2">
-              <p>{{ currentNode.data.historyMessageInputVariable.name }}</p>
-              <NuxtIcon name="clarity:info-line" size="20" />
-            </div>
-            <div :class="{ 'mt-5': !mini }" class="w-full  ">
-              <EditTextDialog class="w-full" v-model:inputVariable="currentNode.data.historyMessageInputVariable" :show-input="false" :handleBg="`var(--clr-messages)`" />
-            </div>
-          </div> -->
           <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.historyMessageInputVariable" :show-input="false" :handleBg="`var(--clr-messages)`" />
-          <!-- <div class="relative">
-            <div v-show="!mini" class="  flex flex-row w-full  items-center space-x-2">
-              <p>{{ currentNode.data.toolsInputVariable.name }} </p>
-              <NuxtIcon name="clarity:info-line" size="20" />
-            </div>
-            <p class="text-[#D1D5DB] text-sm"></p>
-            <div :class="{ 'mt-5': !mini }" class="w-full  ">
-              <EditTextDialog v-model:input-variable="currentNode.data.toolsInputVariable" :show-input="false" :handleBg="`var(--clr-tool)`" />
-            </div>
 
-          </div> -->
           <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.toolsInputVariable" :show-input="false" :handleBg="`var(--clr-tool)`" />
         </div>
       </template>

@@ -54,58 +54,14 @@ const { mini } = useMiniNode()
         <WorkflowBaseNode v-model:currentNode="currentNode" :id="props.id" :meta="apiToolMeta" @not-found="() => { }">
             <template #content v-if="currentNode && currentNode.data">
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.toolNameInputVariable" :description="`必须是纯英文、下划线、小写字母组成的。`" />
-                <!-- <div ref="toolNameInputVariableRef">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.toolNameInputVariable.name }}<span class="text-red-500">*</span></p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
 
-                        <EditTextDialog v-bind:input-variable="currentNode.data.toolNameInputVariable" />
-                    </div>
-                    <div class="mt-3 text-xs text-muted-foreground">必须是纯英文、下划线、小写字母组成的。</div>
-                </div> -->
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.toolDescriptionInputVariable" />
-                <!-- <div ref="toolDescriptionInputVariableRef">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.toolDescriptionInputVariable.name }}<span class="text-red-500">*</span></p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
 
-                        <EditTextDialog v-bind:input-variable="currentNode.data.toolDescriptionInputVariable" />
-                    </div>
-
-                </div> -->
 
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.urlInputVariable" :description="`以 http/https 开头。例如:https://www.baidu.com`" />
 
-                <!-- <div ref="urlInputVariableRef">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.urlInputVariable.name }}<span class="text-red-500">*</span></p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
-
-                        <EditTextDialog v-bind:input-variable="currentNode.data.urlInputVariable" />
-                    </div>
-                    <div class="mt-3 text-xs text-muted-foreground">以 http/https 开头。例如:https://www.baidu.com</div>
-                </div> -->
-
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.tokenInputVariable" />
 
-                <!-- 
-                <div ref="tokenVariableRef">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.tokenInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
-
-                        <EditTextDialog v-bind:input-variable="currentNode.data.tokenInputVariable" />
-                    </div>
-                    <div class="mt-3 text-xs text-muted-foreground"></div>
-                </div> -->
 
 
                 <div v-show="!mini" class="w-full">

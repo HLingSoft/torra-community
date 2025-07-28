@@ -25,31 +25,11 @@ const currentNode = ref<{ id: string, data: FilterData } | null>(null)
       <template #content v-if="currentNode && currentNode.data">
         <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.inputInputVariable" />
 
-        <!-- <div class="relative">
-          <div class="flex flex-row items-center space-x-2">
-            <p>{{ currentNode.data.inputInputVariable.name }}</p>
-            <NuxtIcon name="clarity:info-line" size="20" />
-          </div>
-          <div class="w-full mt-5">
-            <EditTextDialog v-model:input-variable="currentNode.data.inputInputVariable" />
 
-          </div>
-
-        </div> -->
 
         <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.filterKeyInputVariable" />
 
 
-        <!-- <div ref="filterKeyRef">
-          <div class="flex flex-row items-center space-x-2">
-            <p>{{ currentNode.data.filterKeyInputVariable.name }}</p>
-            <NuxtIcon name="clarity:info-line" size="20" />
-          </div>
-          <div class="w-full mt-5">
-            <EditTextDialog v-model:input-variable="currentNode.data.filterKeyInputVariable" />
-
-          </div>
-        </div> -->
 
       </template>
 

@@ -27,16 +27,6 @@ const { mini } = useMiniNode()
         <WorkflowBaseNode v-model:currentNode="currentNode" :id="props.id" :meta="replicateKlingVideoMeta" @not-found="() => { }">
             <template #content v-if="currentNode && currentNode.data">
                 <GlobalVariablePopoverComponent class="w-full" v-model:inputPortVariable="currentNode.data.authInputVariable" />
-                <!-- <div class="flex flex-col">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.authInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="mt-5 w-full">
-                        <GlobalVariablePopover class="w-full" v-model:inputVariable="currentNode.data.authInputVariable" />
-                    </div>
-                </div> -->
-
 
                 <div v-show="!mini" class="flex flex-col">
                     <div class="flex flex-row items-center space-x-2">
@@ -94,43 +84,12 @@ const { mini } = useMiniNode()
                     </div>
                 </div>
 
-
-                <!-- <Separator class="my-2" />
-                <p class="text-muted-foreground text-sm   text-left">*作为工具输出时，以下字段由 Agent 自动提供，无需手动填写.</p> -->
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.promptInputport" />
 
-                <!-- <div class="flex flex-col">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.promptInputport.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="mt-5 w-full">
-                        <EditTextDialog class="w-full" v-model:inputVariable="currentNode.data.promptInputport" />
-                    </div>
-                </div> -->
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.startImageInputport" />
 
-                <!-- <div class="flex flex-col">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.startImageInputport.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="mt-5 w-full">
-                        <EditTextDialog class="w-full" v-model:inputVariable="currentNode.data.startImageInputport" />
-                    </div>
 
-                </div> -->
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.negativePromptInputport" />
-                <!-- <div class="flex flex-col">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.negativePromptInputport.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="mt-5 w-full">
-                        <EditTextDialog class="w-full" v-model:inputVariable="currentNode.data.negativePromptInputport" />
-                    </div>
-
-                </div> -->
 
             </template>
 

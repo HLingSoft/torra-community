@@ -120,45 +120,12 @@ const { mini } = useMiniNode()
 
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.urlInputVariable" :description="`以 http/https 开头。例如:https://www.baidu.com。仅支持 POST 请求。`" />
 
-                <!-- 
-                <div>
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.urlInputVariable.name }}<span class="text-red-500">*</span></p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
-                        <EditTextDialog v-model:input-variable="currentNode.data.urlInputVariable" />
 
-                    </div>
-                    <div class="mt-3 text-xs text-muted-foreground">以 http/https 开头。例如:https://www.baidu.com。仅支持 POST 请求。</div>
-                </div> -->
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.tokenInputVariable" />
 
-                <!-- <div ref="tokenVariableRef">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.tokenInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
-                        <EditTextDialog v-model:input-variable="currentNode.data.tokenInputVariable" />
-
-                    </div>
-                    <div class="mt-3 text-xs text-muted-foreground"></div>
-                </div> -->
 
                 <GlobalVariablePopoverComponent class="w-full" v-model:inputPortVariable="currentNode.data.userIdInputVariable" />
 
-                <!-- <div ref="tokenVariableRef">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.userIdInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full  mt-5">
-                        <GlobalVariablePopover v-model:input-variable="currentNode.data.userIdInputVariable" />
-
-                    </div>
-                    <div class="mt-3 text-xs text-muted-foreground"></div>
-                </div> -->
 
 
 

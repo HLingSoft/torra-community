@@ -58,15 +58,6 @@ const { mini } = useMiniNode()
         <WorkflowBaseNode v-model:currentNode="currentNode" :id="props.id" :meta="speechGenerateEleventlabsMeta" @not-found="() => { }">
             <template #content v-if="currentNode && currentNode.data">
                 <GlobalVariablePopoverComponent class="w-full" v-model:inputPortVariable="currentNode.data.apiKeyInputVariable" />
-                <!-- <div class="flex flex-col">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.apiKeyInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="mt-5 w-full">
-                        <GlobalVariablePopover class="w-full" v-model:inputVariable="currentNode.data.apiKeyInputVariable" />
-                    </div>
-                </div> -->
 
 
                 <div v-show="!mini" class="flex flex-col">
@@ -113,16 +104,7 @@ const { mini } = useMiniNode()
                     </div>
                 </div>
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.userInputInputVariable" />
-                <!-- <div class="flex flex-col">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.userInputInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="mt-5 w-full">
-                        <EditTextDialog class="w-full" v-model:inputVariable="currentNode.data.userInputInputVariable" />
-                    </div>
 
-                </div> -->
 
             </template>
 

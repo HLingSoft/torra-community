@@ -400,7 +400,7 @@ const data = ref<{ navMain: NavGroup[] }>({
         {
           title: 'Ollama',
           url: '#',
-
+          component: 'model/ollama',
           isActive: false, isDisabled: false,
           description: '',
         },

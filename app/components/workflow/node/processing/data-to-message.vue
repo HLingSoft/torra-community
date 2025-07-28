@@ -34,15 +34,7 @@ const { mini } = useMiniNode()
         <WorkflowBaseNode v-model:currentNode="currentNode" :id="props.id" :meta="dataToMessageMeta" @not-found="() => { }">
             <template #content v-if="currentNode && currentNode.data">
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.inputInputVariable" />
-                <!-- <div>
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.inputInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="w-full mt-5">
-                        <EditTextDialog v-model:input-variable="currentNode.data.inputInputVariable" />
-                    </div>
-                </div> -->
+
                 <div v-show="!mini" class="w-full">
                     <div class="flex flex-row items-center space-x-2 w-full">
                         <p>Role</p>

@@ -50,46 +50,12 @@ const { mini } = useMiniNode()
             <template #content v-if="currentNode && currentNode.data">
                 <!-- API Key -->
                 <GlobalVariablePopoverComponent class="w-full" v-model:inputPortVariable="currentNode.data.apiKeyInputVariable" />
-                <!-- <div class="flex flex-col ">
 
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.apiKeyInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="mt-5 w-full">
-                        <GlobalVariablePopover v-model:inputVariable="currentNode.data.apiKeyInputVariable" />
-                    </div>
-
-                </div> -->
 
                 <!-- Base URL -->
                 <GlobalVariablePopoverComponent class="w-full" v-model:inputPortVariable="currentNode.data.baseURLInputVariable" />
-                <!-- <div class="flex flex-col ">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.baseURLInputVariable.name }}</p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="mt-5 w-full">
-                        <GlobalVariablePopover v-model:inputVariable="currentNode.data.baseURLInputVariable" />
-                    </div>
 
-                </div> -->
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.promptInputVariable" />
-                <!-- Prompt -->
-                <!-- <div class="flex flex-col ">
-                    <div class="flex flex-col ">
-                        <div class="flex flex-row items-center space-x-2">
-                            <p>{{ currentNode.data.promptInputVariable.name }}</p>
-                            <NuxtIcon name="clarity:info-line" size="20" />
-                        </div>
-                        <div class="mt-5 w-full">
-                            <EditTextDialog v-model:inputVariable="currentNode.data.promptInputVariable" />
-                        </div>
-
-                    </div>
-
-
-                </div> -->
 
                 <!-- Number of Images -->
                 <div v-show="!mini" class="flex flex-col ">

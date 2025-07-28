@@ -48,20 +48,6 @@ const { mini } = useMiniNode()
                 <EditTextDialogComponent class="w-full" v-model:inputPortVariable="currentNode.data.languageModelInputVariable" :show-input="false" :handleBg="`oklch(82.7% 0.119 306.383)`" />
 
 
-                <!-- <div class="relative   ">
-                    <div class="flex flex-row items-center space-x-2">
-                        <p>{{ currentNode.data.languageModelInputVariable.name }}<span class="text-red-500">*</span></p>
-                        <NuxtIcon name="clarity:info-line" size="20" />
-                    </div>
-                    <div class="mt-5 w-full">
-                        <EditTextDialog v-model:input-variable="currentNode.data.languageModelInputVariable" :show-input="false" :handleBg="`oklch(82.7% 0.119 306.383)`" />
-                    </div>
-
-
-
-
-                </div> -->
-
 
 
 
