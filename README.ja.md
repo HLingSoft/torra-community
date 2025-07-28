@@ -3,12 +3,11 @@
 
 🌐 [English](./README.md) | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
 
-> **最新 Nuxt 4 で構築。すべての依存パッケージは常に最新です。**
+> **最新の Nuxt 4 を使用して構築。すべてのパッケージは常に最新に保たれています。**
 
-**Torra Community Edition** は AI エージェントとワークフローを可視的に構築できるオープンソースエディタです。  
-**Coze** と **Langflow** にインスパイアされつつ、**Vue 3 + TypeScript** でゼロから実装しました。
+**Torra Community Edition** は、AIエージェントとワークフローを構築するためのオープンソースのビジュアルエディターです。**Coze** や **Langflow** に着想を得ながらも、すべて **Vue 3 + TypeScript** で実装されています。
 
-Coze（クローズドソース）や Langflow（React + Python）とは異なり、Torra は **Nuxt 4**、**VueFlow**、**Tailwind CSS v4**、**Shadcn UI**、**LangChain.js**、**FeathersJS** を採用し、モダンで高速な開発体験を提供します。
+**Coze Studio**（React + Go）や **Langflow**（React + Python）とは異なり、**Torra** は **Nuxt 4**、**VueFlow**、**Tailwind CSS v4**、**Shadcn UI**、**LangChain.js**、**FeathersJS** を採用し、**軽量かつ本番環境対応のスタック** を提供。**エンタープライズ向けにスムーズな導入**が可能で、フルスタックTypeScript、デフォルトでのセルフホスティング、多言語UI、内蔵のランタイムによって企業環境への迅速な統合が実現できます。
 
 ---
 

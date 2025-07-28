@@ -4,9 +4,9 @@
 
 > **Built with Nuxt 4 (latest). All packages are kept up‑to‑date.**
 
-**Torra Community Edition** is an open‑source visual editor for building AI agents and workflows — inspired by **Coze** and **Langflow**, but entirely implemented with **Vue 3 + TypeScript**.
+**Torra Community Edition** is an open-source visual editor for building AI agents and workflows — inspired by **Coze** and **Langflow**, but entirely implemented using **Vue 3 + TypeScript**.
 
-Unlike Coze (closed‑source) and Langflow (React + Python), Torra is powered by **Nuxt 4**, **VueFlow**, **Tailwind CSS v4**, **Shadcn UI**, **LangChain.js**, and **FeathersJS**, offering a modern, high‑performance experience.
+While **Coze Studio** (React + Go) and **Langflow** (React + Python) follow different architecture stacks, **Torra** is uniquely powered by **Nuxt 4**, **VueFlow**, **Tailwind CSS v4**, **Shadcn UI**, **LangChain.js**, and **FeathersJS**, offering a **lightweight yet production-ready stack** designed for **seamless enterprise deployment**. It provides a full-stack TypeScript experience, self-hosting by default, multi-language UI, and a built-in runtime for quick integration into enterprise environments.
 
 ---
 

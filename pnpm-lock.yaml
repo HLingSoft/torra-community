@@ -42,11 +42,11 @@ importers:
         specifier: ^2.2.0
         version: 2.2.0(vue@3.5.18(typescript@5.8.3))
       '@langchain/anthropic':
-        specifier: ^0.3.24
-        version: 0.3.24(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))
+        specifier: ^0.3.25
+        version: 0.3.25(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))
       '@langchain/community':
         specifier: ^0.3.49
-        version: 0.3.49(7bd0822713dbe1dbacb67c9345be6c8f)
+        version: 0.3.49(8d110c62923e98a394c42f49ed9f55f6)
       '@langchain/core':
         specifier: ^0.3.66
         version: 0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))
@@ -174,8 +174,8 @@ importers:
         specifier: ^0.8.5
         version: 0.8.5
       daisyui:
-        specifier: ^5.0.47
-        version: 5.0.47
+        specifier: ^5.0.48
+        version: 5.0.48
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -208,13 +208,13 @@ importers:
         version: 3.1.0(better-sqlite3@12.2.0)
       langchain:
         specifier: ^0.3.30
-        version: 0.3.30(@langchain/anthropic@0.3.24(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))))(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(@langchain/deepseek@0.1.0(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(ws@8.18.3))(@langchain/google-genai@0.2.16(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))))(@opentelemetry/api@1.9.0)(axios@1.10.0)(cheerio@1.1.2)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))(ws@8.18.3)
+        version: 0.3.30(@langchain/anthropic@0.3.25(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))))(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(@langchain/deepseek@0.1.0(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(ws@8.18.3))(@langchain/google-genai@0.2.16(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))))(@opentelemetry/api@1.9.0)(axios@1.10.0)(cheerio@1.1.2)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))(ws@8.18.3)
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
       lucide-vue-next:
-        specifier: ^0.525.0
-        version: 0.525.0(vue@3.5.18(typescript@5.8.3))
+        specifier: ^0.526.0
+        version: 0.526.0(vue@3.5.18(typescript@5.8.3))
       luxon:
         specifier: ^3.7.1
         version: 3.7.1
@@ -225,8 +225,8 @@ importers:
         specifier: 1.6.1
         version: 1.6.1(@vueuse/core@13.5.0(vue@3.5.18(typescript@5.8.3)))(vue@3.5.18(typescript@5.8.3))
       music-metadata:
-        specifier: ^11.7.1
-        version: 11.7.1
+        specifier: ^11.7.3
+        version: 11.7.3
       nanoid:
         specifier: ^5.1.5
         version: 5.1.5
@@ -1258,8 +1258,8 @@ packages:
   '@kwsites/promise-deferred@1.1.1':
     resolution: {integrity: sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==}
 
-  '@langchain/anthropic@0.3.24':
-    resolution: {integrity: sha512-Gi1TwXu5vkCxUMToiXaiwTTWq9v3WMyU3ldB/VEWjzbkr3nKF5kcp+HLqhvV7WWOFVTTNgG+pzfq8JALecq5MA==}
+  '@langchain/anthropic@0.3.25':
+    resolution: {integrity: sha512-KipKY0njNps7bgINca1jVAShnOh/+MpfN/hB580TUVrnsT21e5bykfNjiGVZ1S1A/qdHSJsRMkie2igGij/acA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@langchain/core': '>=0.3.58 <0.4.0'
@@ -4809,8 +4809,8 @@ packages:
   dagre@0.8.5:
     resolution: {integrity: sha512-/aTqmnRta7x7MCCpExk7HQL2O4owCT2h8NT//9I1OQ9vt29Pa0BzSAkR5lwFUcQ7491yVi/3CXU9jQ5o0Mn2Sw==}
 
-  daisyui@5.0.47:
-    resolution: {integrity: sha512-RuYjjVKpodDoOYAHIvG6qC3BeRxhlyj4JCO+6aV0VzK+i3RWD7cmICh0m5+Xfr5938mV0Mk7FUOQ00msz8H8dw==}
+  daisyui@5.0.48:
+    resolution: {integrity: sha512-t2nvzKENuhbjkKmxhIoDgV/nzAnNLbswK9MBlOMnEO6hxfgNLlt7jVrHYWw6ts492JdQ0Mmf6iX3aO/u+1zXAw==}
 
   data-uri-to-buffer@4.0.1:
     resolution: {integrity: sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==}
@@ -6923,8 +6923,8 @@ packages:
     resolution: {integrity: sha512-ERJq3FOzJTxBbFjZ7iDs+NiK4VI9Wz+RdrrAB8dio1oV+YvdPzUEE4QNiT2VD51DkIbCYRUUzCRkssXCHqSnKQ==}
     engines: {node: 14 || >=16.14}
 
-  lucide-vue-next@0.525.0:
-    resolution: {integrity: sha512-Xf8+x8B2DrnGDV/rxylS+KBp2FIe6ljwDn2JsGTZZvXIfhmm/q+nv8RuGO1OyoMjOVkkz7CqtUqJfwtFPRbB2w==}
+  lucide-vue-next@0.526.0:
+    resolution: {integrity: sha512-YM3i5f56+401tjRP2LMFIG7gtBRd55tom7P9Fl2HfIlYI6+lwl37RO15RDPK4mMHFiFWU0RsVyVQCBnaUdVX8A==}
     peerDependencies:
       vue: '>=3.0.1'
 
@@ -7359,8 +7359,8 @@ packages:
   murmurhash-js@1.0.0:
     resolution: {integrity: sha512-TvmkNhkv8yct0SVBSy+o8wYzXjE4Zz3PCesbfs8HiCXXdcTuocApFv11UWlNFWKYsP2okqrhb7JNlSm9InBhIw==}
 
-  music-metadata@11.7.1:
-    resolution: {integrity: sha512-qoimzvpOnOi2VJpGz6Nz4SwmcYKe39TsAwlcNilgnDrGKNQDib35t0kj5fy1E71DQgqGApBeAKLmcV9pO3l/2w==}
+  music-metadata@11.7.3:
+    resolution: {integrity: sha512-xYbaSFpHi6qOUTFCb7fvC4/6Uk1NAJey2pSwNQPqJkCLwleYGUWVRKlxnNy2MsTaDRPnIwXdkgrmeiP/GDq/ww==}
     engines: {node: '>=18'}
 
   mustache@4.2.0:
@@ -9015,8 +9015,8 @@ packages:
   strnum@1.1.2:
     resolution: {integrity: sha512-vrN+B7DBIoTTZjnPNewwhx6cBA/H+IS7rfW68n7XxC1y7uoiGQBxaKzqucGUgavX15dJgiGztLJ8vxuEzwqBdA==}
 
-  strtok3@10.3.2:
-    resolution: {integrity: sha512-or9w505RhhY66+uoe5YOC5QO/bRuATaoim3XTh+pGKx5VMWi/HDhMKuCjDLsLJouU2zg9Hf1nLPcNW7IHv80kQ==}
+  strtok3@10.3.4:
+    resolution: {integrity: sha512-KIy5nylvC5le1OdaaoCJ07L+8iQzJHGH6pWDuzS+d07Cu7n1MZ2x26P8ZKIWfbK02+XIL8Mp4RkWeqdUCrDMfg==}
     engines: {node: '>=18'}
 
   strtok3@6.3.0:
@@ -9240,8 +9240,8 @@ packages:
     resolution: {integrity: sha512-6udB24Q737UD/SDsKAHI9FCRP7Bqc9D/MQUV02ORQg5iskjtLJlZJNdN4kKtcdtwCeWIwIHDGaUsTsCCAa8sFQ==}
     engines: {node: '>=10'}
 
-  token-types@6.0.3:
-    resolution: {integrity: sha512-IKJ6EzuPPWtKtEIEPpIdXv9j5j2LGJEYk0CKY2efgKoYKLBiZdh6iQkLVBow/CB3phyWAWCyk+bZeaimJn6uRQ==}
+  token-types@6.0.4:
+    resolution: {integrity: sha512-MD9MjpVNhVyH4fyd5rKphjvt/1qj+PtQUz65aFqAZA6XniWAuSFRjLk3e2VALEFlh9OwBpXUN7rfeqSnT/Fmkw==}
     engines: {node: '>=14.16'}
 
   toml@3.0.0:
@@ -11095,13 +11095,13 @@ snapshots:
 
   '@kwsites/promise-deferred@1.1.1': {}
 
-  '@langchain/anthropic@0.3.24(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))':
+  '@langchain/anthropic@0.3.25(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))':
     dependencies:
       '@anthropic-ai/sdk': 0.56.0
       '@langchain/core': 0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))
       fast-xml-parser: 4.5.3
 
-  '@langchain/community@0.3.49(7bd0822713dbe1dbacb67c9345be6c8f)':
+  '@langchain/community@0.3.49(8d110c62923e98a394c42f49ed9f55f6)':
     dependencies:
       '@browserbasehq/stagehand': 1.14.0(@playwright/test@1.54.1)(deepmerge@4.3.1)(dotenv@16.6.1)(encoding@0.1.13)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))(zod@4.0.5)
       '@ibm-cloud/watsonx-ai': 1.6.8
@@ -11113,7 +11113,7 @@ snapshots:
       flat: 5.0.2
       ibm-cloud-sdk-core: 5.4.1
       js-yaml: 4.1.0
-      langchain: 0.3.30(@langchain/anthropic@0.3.24(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))))(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(@langchain/deepseek@0.1.0(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(ws@8.18.3))(@langchain/google-genai@0.2.16(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))))(@opentelemetry/api@1.9.0)(axios@1.10.0)(cheerio@1.1.2)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))(ws@8.18.3)
+      langchain: 0.3.30(@langchain/anthropic@0.3.25(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))))(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(@langchain/deepseek@0.1.0(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(ws@8.18.3))(@langchain/google-genai@0.2.16(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))))(@opentelemetry/api@1.9.0)(axios@1.10.0)(cheerio@1.1.2)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))(ws@8.18.3)
       langsmith: 0.3.47(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))
       openai: 5.10.2(ws@8.18.3)(zod@4.0.5)
       uuid: 10.0.0
@@ -12706,7 +12706,7 @@ snapshots:
     dependencies:
       debug: 4.4.1
       fflate: 0.8.2
-      token-types: 6.0.3
+      token-types: 6.0.4
     transitivePeerDependencies:
       - supports-color
 
@@ -15019,7 +15019,7 @@ snapshots:
       graphlib: 2.1.8
       lodash: 4.17.21
 
-  daisyui@5.0.47: {}
+  daisyui@5.0.48: {}
 
   data-uri-to-buffer@4.0.1: {}
 
@@ -15900,8 +15900,8 @@ snapshots:
   file-type@21.0.0:
     dependencies:
       '@tokenizer/inflate': 0.2.7
-      strtok3: 10.3.2
-      token-types: 6.0.3
+      strtok3: 10.3.4
+      token-types: 6.0.4
       uint8array-extras: 1.4.0
     transitivePeerDependencies:
       - supports-color
@@ -17038,7 +17038,7 @@ snapshots:
       dotenv: 16.6.1
       winston: 3.17.0
 
-  langchain@0.3.30(@langchain/anthropic@0.3.24(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))))(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(@langchain/deepseek@0.1.0(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(ws@8.18.3))(@langchain/google-genai@0.2.16(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))))(@opentelemetry/api@1.9.0)(axios@1.10.0)(cheerio@1.1.2)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))(ws@8.18.3):
+  langchain@0.3.30(@langchain/anthropic@0.3.25(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))))(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(@langchain/deepseek@0.1.0(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(ws@8.18.3))(@langchain/google-genai@0.2.16(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))))(@opentelemetry/api@1.9.0)(axios@1.10.0)(cheerio@1.1.2)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))(ws@8.18.3):
     dependencies:
       '@langchain/core': 0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5))
       '@langchain/openai': 0.6.3(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(ws@8.18.3)
@@ -17053,7 +17053,7 @@ snapshots:
       yaml: 2.8.0
       zod: 3.25.76
     optionalDependencies:
-      '@langchain/anthropic': 0.3.24(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))
+      '@langchain/anthropic': 0.3.25(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))
       '@langchain/deepseek': 0.1.0(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))(ws@8.18.3)
       '@langchain/google-genai': 0.2.16(@langchain/core@0.3.66(@opentelemetry/api@1.9.0)(openai@5.10.2(ws@8.18.3)(zod@4.0.5)))
       axios: 1.10.0(debug@4.4.1)
@@ -17272,7 +17272,7 @@ snapshots:
 
   lru-cache@9.1.2: {}
 
-  lucide-vue-next@0.525.0(vue@3.5.18(typescript@5.8.3)):
+  lucide-vue-next@0.526.0(vue@3.5.18(typescript@5.8.3)):
     dependencies:
       vue: 3.5.18(typescript@5.8.3)
 
@@ -17904,15 +17904,15 @@ snapshots:
 
   murmurhash-js@1.0.0: {}
 
-  music-metadata@11.7.1:
+  music-metadata@11.7.3:
     dependencies:
       '@tokenizer/token': 0.3.0
       content-type: 1.0.5
       debug: 4.4.1
       file-type: 21.0.0
       media-typer: 1.1.0
-      strtok3: 10.3.2
-      token-types: 6.0.3
+      strtok3: 10.3.4
+      token-types: 6.0.4
       uint8array-extras: 1.4.0
     transitivePeerDependencies:
       - supports-color
@@ -20063,7 +20063,7 @@ snapshots:
 
   strnum@1.1.2: {}
 
-  strtok3@10.3.2:
+  strtok3@10.3.4:
     dependencies:
       '@tokenizer/token': 0.3.0
 
@@ -20319,7 +20319,7 @@ snapshots:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
 
-  token-types@6.0.3:
+  token-types@6.0.4:
     dependencies:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
