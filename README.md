@@ -118,33 +118,27 @@ Scan and add the author on WeChat:
 Use [Volta](https://volta.sh) to manage Node versions if needed.
 ---
 
-## ⚡ Getting Started
 
-### One‑click (non‑developers)
+## ⚡ Getting Started
 
-1. Download [torra‑starter.zip](https://file.web.hlingsoft.com/maO3Mw0xynoVsmeBnRXqOzLBP1kmhDsA/torra-starter.zip)  
-2. **Windows**: run `start.bat` · **macOS**: run `start.command`  
-3. Browser opens <http://localhost:3000>
-
-### Quick Start (developers)
+Clone the repository and run the environment check script:
 
 ```bash
-npx create-torra-app my-app
-cd my-app
-pnpm dev                 # uses SQLite
-
+git clone https://github.com/HLingSoft/torra-community.git
+cd torra-community
+chmod +x check_and_setup.sh
+./check_and_setup.sh
 ```
 
-#### Switch to MongoDB
+- The script will check for and prompt installation of required dependencies (Node.js ≥20, npm >10, pnpm >10, SQLite, MongoDB, MySQL) and then start the development server.
+- Your browser will automatically open at <http://localhost:3000>
+
+---
+
+Happy hacking! 🚀
 
 
-```bash
 
-# .env
-TORRA_DATASOURCE=cloud
-MONGO_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/torra
-
-```
 ## 📄 License
 MIT License — please retain attribution.
 

@@ -118,30 +118,24 @@
 
 ---
 
-## ⚡ 快速开始
+## ⚡ 开始使用
 
-### 1. 一键安装包（无开发环境）
-
-1. 下载 [torra‑starter.zip](https://file.web.hlingsoft.com/maO3Mw0xynoVsmeBnRXqOzLBP1kmhDsA/torra-starter.zip)  
-2. Windows 双击 `start.bat`；macOS 右键→打开 `start.command`  
-3. 浏览器自动打开 <http://localhost:3000>
-
-### 2. 开发者快速上手
+克隆仓库并运行环境检查脚本：
 
 ```bash
-npx create-torra-app my-app
-cd my-app
-pnpm dev          # 默认 SQLite
+git clone https://github.com/HLingSoft/torra-community.git
+cd torra-community
+chmod +x check_and_setup.sh
+./check_and_setup.sh
+
 ```
 
-#### 切换到 MongoDB
+- 脚本将检测并提示安装所需依赖（Node.js ≥20、npm >10、pnpm >10、SQLite、MongoDB、MySQL），然后启动开发服务器。
+- 浏览器会自动打开 <http://localhost:3000>
 
-```bash
+---
 
-# .env
-TORRA_DATASOURCE=cloud
-MONGO_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/torra
-```
+Happy hacking! 🚀
 
 ## 📄 许可证
 本项目采用 MIT License，使用、修改、分发须保留原始版权及作者信息。

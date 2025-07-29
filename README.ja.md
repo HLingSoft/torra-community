@@ -93,31 +93,24 @@
  
 
 
-## ⚙️ 必要環境
+ ## ⚡ はじめに
 
-- **Node.js ≥ 20**
-- **npm ≥ 10**
-- **pnpm ≥ 10**
-
-
-> Node バージョン管理には [Volta](https://volta.sh) を推奨します。
----
-
-## ⚡ クイックスタート
+リポジトリをクローンし、環境チェックスクリプトを実行：
 
 ```bash
-npx create-torra-app my-app
-cd my-app
-pnpm dev          # SQLite を使用
+git clone https://github.com/HLingSoft/torra-community.git
+cd torra-community
+chmod +x check_and_setup.sh
+./check_and_setup.sh
 
 ```
 
-#### MongoDB に切り替え
+- スクリプトは必要な依存関係（Node.js ≥20、npm >10、pnpm >10、SQLite、MongoDB、MySQL）の有無とバージョンをチェックし、開発サーバーを起動します。
+- ブラウザが自動的に <http://localhost:3000> を開きます。
 
-# .env
-TORRA_DATASOURCE=cloud
-MONGO_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/torra
+---
 
+Happy hacking! 🚀
 
 ## 📄 ライセンス
 MIT ライセンス。著作権表記を削除しないでください。
