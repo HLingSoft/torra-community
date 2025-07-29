@@ -1,7 +1,7 @@
 import type { ReplicateFluxData } from '~~/types/node-data/image-generate-replicate-flux'
 import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~~/types/workflow'
 import Replicate from "replicate";
-import { resolveInputVariables, writeLogs, financeConsume, financeBalance, fetchToBase64, streamToBase64 } from '../utils'
+import { resolveInputVariables, writeLogs, fetchToBase64, streamToBase64 } from '../utils'
 
 /**
  * ReplicateFlux 节点工厂函数
@@ -12,7 +12,7 @@ export const replicateFluxFactory: NodeFactory = async (
     node: LangFlowNode,
     context: BuildContext,
 ) => {
-    await financeBalance(context)
+
     const t0 = performance.now()
 
     const data = node.data as ReplicateFluxData
@@ -63,11 +63,7 @@ export const replicateFluxFactory: NodeFactory = async (
             throw new Error('未知的 Flux 返回类型')
         }
 
-        await financeConsume(
-            context,
-            `通过 Replicate Flux 生成图片。模型: flux-1.1-pro, 比例: ${input.aspect_ratio}, 提示: ${prompt}`,
-            0.3,
-        )
+
     } catch (error) {
         console.error('Error running Replicate Flux:', error)
         throw new Error(`Failed to run Replicate Flux: ${error}`)

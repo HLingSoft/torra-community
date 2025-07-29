@@ -7,7 +7,7 @@ import type {
 } from '~~/types/workflow'
 
 import type { ImageGenerateOpenAIGptImageData } from '~~/types/node-data/image-generate-openai-gpt-image'
-import { resolveInputVariables, writeLogs, financeConsume, financeBalance } from '../utils'
+import { resolveInputVariables, writeLogs } from '../utils'
 
 import type { ImagesResponse } from "openai/resources/images"
 import { OpenAIClient } from "@langchain/openai";  // LangChain.js OpenAIClient
@@ -18,7 +18,7 @@ export const imageGenerateOpenAIGPTImageFactory: NodeFactory = async (
 ) => {
     try {
 
-        await financeBalance(context);
+
         const t0 = performance.now();
         const {
             promptInputVariable,
@@ -74,11 +74,7 @@ export const imageGenerateOpenAIGPTImageFactory: NodeFactory = async (
             if (!img.b64_json) throw new Error("GPT-Image-1 returned an image without b64_json");
             return img.b64_json;
         }) || [];
-        await financeConsume(
-            context,
-            `通过 GPT-Image-1 生成图片。模型: gpt-image-1, 图片数量: ${images.length}, 压缩级别: ${compression}, 背景: ${background}, 模式: ${moderation}, 格式: ${format}, 质量: ${quality}, 尺寸: ${size}`,
-            Number((images.length * 3).toFixed(2))
-        );
+
 
 
 

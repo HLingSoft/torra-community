@@ -140,17 +140,19 @@ export function contextLogsToSteps(
     const ports = Object.entries(nodeLog)
       .filter(([k, v]) => typeof v === 'object' && v && 'outputType' in v && 'id' in v)
       .map(([portId, val]) => {
+        const v = val as any
+
         return {
           portId,
-          elapsed: val.elapsed ?? 0,
-          elapsedStr: val.elapsed != null
-            ? (val.elapsed < 1000 ? `${val.elapsed.toFixed(1)}ms` : `${(val.elapsed / 1000).toFixed(2)}s`)
+          elapsed: v.elapsed ?? 0,
+          elapsedStr: v.elapsed != null
+            ? (v.elapsed < 1000 ? `${v.elapsed.toFixed(1)}ms` : `${(v.elapsed / 1000).toFixed(2)}s`)
             : '-',
-          content: useJSONStringify(val.content),
-          timestamp: val.timestamp ?? Date.now(),
-          name: val.name ?? portId,
-          outputType: val.outputType ?? 'unknown',
-          id: val.id ?? portId
+          content: useJSONStringify(v.content),
+          timestamp: v.timestamp ?? Date.now(),
+          name: v.name ?? portId,
+          outputType: v.outputType ?? 'unknown',
+          id: v.id ?? portId
 
         }
       })
@@ -251,37 +253,6 @@ export function updatePortLog(
     ...(trimmedContent !== undefined ? { content: trimmedContent } : {})
   }
 }
-
-export async function financeConsume(context: BuildContext, note: string, cost: number) {
-  await fetch('https://api.torra.cloud/api/finance/consume', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId: context.userId,
-      workflowId: context.workflowId,
-      note,
-      cost
-
-    })
-  })
-
-}
-
-export async function financeBalance(context: BuildContext) {
-  const result = await fetch('https://api.torra.cloud/api/finance/balance', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId: context.userId,
-    })
-  })
-  //如果返回的状态码不是 200，则抛出错误
-  if (!result.ok) {
-    throw new Error(`余额不足`)
-  }
-
-}
-
 
 
 
