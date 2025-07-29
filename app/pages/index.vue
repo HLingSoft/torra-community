@@ -56,7 +56,7 @@ useHead({
             </div>
             <div class="mt-10">
               <div class="mockup-code ">
-                <pre data-prefix="$"><code>npx create-torra-app my-app</code></pre>
+                <pre data-prefix="$"><code>git clone https://github.com/HLingSoft/torra-community.git</code></pre>
               </div>
 
 
