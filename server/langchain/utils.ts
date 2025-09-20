@@ -254,6 +254,37 @@ export function updatePortLog(
   }
 }
 
+export async function financeConsume(context: BuildContext, note: string, cost: number) {
+  await fetch('https://api.torra.cloud/api/finance/consume', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: context.userId,
+      workflowId: context.workflowId,
+      note,
+      cost
+
+    })
+  })
+
+}
+
+export async function financeBalance(context: BuildContext) {
+  const result = await fetch('https://api.torra.cloud/api/finance/balance', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: context.userId,
+    })
+  })
+  //如果返回的状态码不是 200，则抛出错误
+  if (!result.ok) {
+    throw new Error(`余额不足`)
+  }
+
+}
+
+
 
 
 /**

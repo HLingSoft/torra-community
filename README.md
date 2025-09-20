@@ -1,147 +1,94 @@
-# Torra Community Edition
+# README.md (English)
 
 🌐 [English](./README.md) | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
 
-> **Built with Nuxt 4 (latest). All packages are kept up‑to‑date.**
+> **A modern, Nuxt 4–powered visual editor for AI agents & workflows.**
 
-**Torra Community Edition** is an open-source visual editor for building AI agents and workflows — inspired by **Coze** and **Langflow**, but entirely implemented using **Vue 3 + TypeScript**.
+**Torra Community Edition** is the **second option after n8n** for visual, production-ready AI workflows — **inspired by Coze and Langflow**, but implemented end-to-end with **TypeScript, Vue 3, and Nuxt 4**. Torra pairs a lightweight UI with a full FeathersJS backend and LangChain.js integrations, giving you a clean, enterprise-friendly stack that’s easy to self-host and scale.
 
-While **Coze Studio** (React + Go) and **Langflow** (React + Python) follow different architecture stacks, **Torra** is uniquely powered by **Nuxt 4**, **VueFlow**, **Tailwind CSS v4**, **Shadcn UI**, **LangChain.js**, and **FeathersJS**, offering a **lightweight yet production-ready stack** designed for **seamless enterprise deployment**. It provides a full-stack TypeScript experience, self-hosting by default, multi-language UI, and a built-in runtime for quick integration into enterprise environments.
+- Built with **Nuxt 4 + Vue 3 + TypeScript**
+- Visual editor via **VueFlow**, modern UI with **Tailwind CSS v4 + shadcn/ui**
+- Full-stack TypeScript with **FeathersJS** backend and **LangChain.js** runtime
+- Multi-DB: SQLite / MySQL / MongoDB, hot-swap local ↔ cloud
 
----
-
-## 🌟 What’s new in v0.6
-
-| Feature | Description |
-|---------|-------------|
-| **SQLite, MySQL & MongoDB** | Out‑of‑the‑box support for multiple back‑ends: SQLite (dev), MySQL (prod), MongoDB (flexible). |
-| **Local ↔ Cloud Seamless Switch** | Toggle `TORRA_DATASOURCE=local | cloud` and Torra migrates data automatically. |
-| **Full FeathersJS Hooks** | All CRUD operations (`find`, `get`, `create`, `patch`, `remove`) pass through configurable hooks for auth, rate‑limit, audit‑log, LiveQuery, etc. |
-| **GraphQL‑style API Schema** | Unified data access via declarative GraphQL-like syntax. Ideal for solo fullstack workflows – no backend engineers required. |
+**Heads-up:** A **major release is coming in mid-October**.  
+Want early access? Try it now at **https://www.torra.cloud** or join our user group — we share iteration notes and previews there.
 
 ---
 
-## 🌐 Demo Video
+## ✨ Features
 
-[![Try it Online](https://file.web.hlingsoft.com/SN1tGlRFSFsCB2B4in87AeKxt6nGFRrY/torra_screenshot.png)](https://file.web.hlingsoft.com/70ccmgMsHhoo8TnCFBqRWhBiMXudgrem/%E9%A3%9E%E4%B9%A620250627-212754.mp4)
+- 🚀 Visual workflow editor (VueFlow)  
+- 🎨 Modern UI (Tailwind CSS v4 + shadcn/ui)  
+- 🤖 Built-in LangChain.js integration  
+- 🗂 Pluggable storage: default local **SQLite**, optional **MySQL** or **MongoDB**, with one-click migration to remote MongoDB/MySQL  
+- 🔄 **Hot-swap** local ↔ online with zero downtime  
+- 🪝 FeathersJS hook pipeline on every DB operation  
+- 🧠 Supports major LLMs: OpenAI, Anthropic, Google, DeepSeek, Qwen, …  
+- 📦 Connects to MySQL, PostgreSQL, Redis, Elasticsearch, files, URLs, APIs  
+- 🖼 Multimodal data: text · image · audio · video  
+- 🧪 Built-in playground & one-click API publishing  
+- 📊 Usage logging & billing  
+- 🌍 Multi-language UI (English, 中文, 日本語, …)  
+- ☁️ **SaaS-ready**: Cloud edition built on **Parse Platform**
+
+---
+
+## 🧩 Built-in Modules
+
+> **Core parity with Langflow / Dify / Coze** for the foundational nodes you expect — plus an expanding library of advanced plugins.  
+> **Modalities covered:** Text • **Image** • **Audio** • **Video**. **Models:** OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, …
+
+| Category          | Count/Status | Highlights                                                                 |
+| ----------------- | ------------ | -------------------------------------------------------------------------- |
+| Input             | 3            | Chat Input, Text Input, API Input                                          |
+| Output            | 2            | Chat Output, Text Output                                                   |
+| Prompt            | 1            | Prompt Builder                                                             |
+| Image             | 7            | GPT Image, Stable Diffusion, Flux, Runway, Seedream, Qwen, DALL·E 3        |
+| Image Recognition | 5            | OpenAI Vision, Gemini, Qwen, Doubao, Zhipu                                 |
+| Voice             | 6            | OpenAI TTS/STT, ElevenLabs, Minimax, (more engines planned)                |
+| Video             | 9            | Kling, Sora, Pika, Runway, Vidu, Google Veo, Dreamina, Alibaba Wan, Hailuo |
+| Data Sources      | 9+           | API Request/Tool, File(s), Directory, MongoDB, SQL, URL, Webhook           |
+| Processing        | 11+          | Msg↔Data, Filters, Combine, JSON, Structured↔Data, Save to OSS/Cloud       |
+| Models            | 9+           | OpenAI, Anthropic, Google, xAI, DeepSeek, Tongyi, Zhipu, Doubao, Ollama    |
+| Vector Store      | 1            | Milvus                                                                     |
+| Embeddings        | 1            | OpenAI Embedding                                                           |
+| Memory            | 1            | Upstash Redis Memory                                                       |
+| Agent             | 1            | Agent Node                                                                 |
+| Logic             | 5            | If-Else, Loop, Listen, Notify, Pass                                        |
+| Tools             | 3            | Web Search, Tavily AI Search, Timezone                                     |
+| Helpers           | 12+          | IDs, Session/User/Workflow/Trace, Tips, History/Store, Durations, Lists    |
+| MCP               | 3            | HTTP, SSE, stdio                                                           |
+| SubFlow           | 1            | Workflow (Reusable Flow)                                                   |
+| Plugins           | Growing      | Markdown→WeChat, Simple Browser, Page Capture, File Marker — **more coming** |
+
+_We continuously add new modules/providers to keep parity **and** ship extras beyond Langflow / Dify / Coze._
 
 ---
 
-## ✨ Features
+## ☁️ SaaS Edition — Parse-based
 
-- 🚀 Visual workflow editor (VueFlow)
-- 🎨 Modern UI (Tailwind CSS v4 + Shadcn UI)
-- 🤖 Built‑in LangChain.js integration
-- 🗂 Pluggable storage: default local **SQLite**, optional **MySQL** or **MongoDB**, with one-click migration to remote MongoDB or MySQL services.
-- 🔄 **Hot‑swap** local ↔ online with zero downtime
-- 🪝 FeathersJS hook pipeline on every DB operation
-- 🧠 Supports major LLMs: OpenAI, Anthropic, Google, DeepSeek, Qwen, …
-- 📦 Connects to MySQL, PostgreSQL, Redis, Elasticsearch, files, URLs, APIs
-- 🖼 Multimodal data: text · image · audio · video
-- 🧪 Built‑in playground & one‑click API publishing
-- 📊 Usage logging & billing
-- 🌍 Multi‑language UI (English, 中文, 日本語, …)
+**Torra Cloud** is a fully managed **SaaS edition built on Parse Platform**, designed for teams that want instant multi-tenant hosting with enterprise controls:
 
-### 🧩 Built‑in Modules
+- **Multi-tenant org/projects** with per-tenant isolation  
+- **RBAC & SSO** (OAuth/OIDC) and API keys (BYOK supported)  
+- **Plans, quotas, metering** for agents, runs, tokens, storage, and webhooks  
+- **Billing & invoices** (Stripe-ready) with usage-based rate limiting  
+- **Audit logs & compliance**: request/response redaction, export, retention policies  
+- **Webhooks & events** for CI/CD and MLOps; LiveQuery streaming  
+- **Zero-downtime migrations** and rollbacks; blue-green releases  
+- **Observability**: traces, metrics, structured logs across workflows  
 
-| Category          | Count | Highlights                                          |
-| ----------------- | ----- | --------------------------------------------------- |
-| Input             | 3     | Chat Input, Text Input, API Input                   |
-| Output            | 2     | Chat Output, Text Output                            |
-| Prompt            | 1     | Prompt Builder                                      |
-| Image             | 5     | DALL·E 3, GPT Image, Stable Diffusion, OpenArt      |
-| Image Recognition | 1     | OpenAI Vision                                       |
-| Voice             | 5     | OpenAI TTS/STT, ElevenLabs, Minimax                 |
-| Video             | 1     | Replicate Kling Video                               |
-| Data Sources      | 9     | API Request, File, Directory, MongoDB, SQL, Webhook |
-| Processing        | 11+   | Message↔Data, Filters, Combine, JSON, Save to OSS   |
-| Models            | 5     | OpenAI, DeepSeek, Google, Anthropic, Ollama         |
-| Vector Store      | 1     | Milvus                                              |
-| Embeddings        | 1     | OpenAI Embedding                                    |
-| Memory            | 1     | Upstash Redis Memory                                |
-| Agent             | 1     | Agent Node                                          |
-| Logic             | 5     | If‑Else, Loop, Listen, Notify, Pass                 |
-| Tools             | 5     | Google/Baidu Search, Tavily, Calculator, Timezone   |
-| Helpers           | 7     | ID Generator, History, List Output, Duration Tools  |
-| MCP               | 3     | HTTP, SSE, stdio                                    |
-| SubFlow           | 1     | Workflow (Reusable Flow)                            |
-| Plugins           | —     | Plugin support under development                    |
-
+Try Torra Cloud at **https://www.torra.cloud** or join our user group to receive iteration updates and previews.
 
 ---
+
 ## 🧾 Additional Highlights
 
-- 📅 **Complete Runtime**: All features work out-of-the-box from **Day 1**, including database, auth, workflow runtime, logging, billing, and multi-language UI.
-- 🖥 **Fully Functional Backend**: Ships with a complete **FeathersJS backend system**, supporting user auth, role control, data ops, logs, LiveQuery, and plugin hooks.
-- 🧑‍💻 **100% Open Source**: All client + server code is open-sourced under **MIT License** – no vendor lock-in.
-- 🧩 **Fullstack TypeScript**: End-to-end TypeScript (Nuxt 4 + FeathersJS + LangChain.js), enabling **enterprise-grade integration** and easier onboarding for teams.
-- 🧠 **LangChain & LangGraph Native Support**: Out-of-the-box compatibility with **LangChain.js** and progressive integration of **LangGraph**, following the latest agentic architectures and community best practices.
+- 📅 **Complete Runtime**: Day-1 ready — database, auth, workflow runtime, logging, billing, multi-language UI.  
+- 🖥 **Fully-featured Backend**: FeathersJS system with auth, roles, data ops, logs, LiveQuery, and plugin hooks.  
+- 🧑‍💻 **100% Open Source**: Client + server under **MIT License** — no vendor lock-in.  
+- 🧩 **Full-stack TypeScript**: Nuxt 4 + FeathersJS + LangChain.js for enterprise-grade integration and onboarding.  
+- 🧠 **LangChain & LangGraph**: Native **LangChain.js** support and progressive **LangGraph** integration.
 
 ---
-
-
-## 🖼 More Screenshots
-
-| Nodes | Playground | API | Minimal Mode |
-|-------|------------|-----|-----------|
-| ![Nodes](https://file.web.hlingsoft.com/0A0hfGrrTIPm9scihpEaarogPnMAWhbO/%E6%88%AA%E5%B1%8F2025-06-26%2011.18.59.png) | ![Play](https://file.web.hlingsoft.com/DPBatHp8K42r6qc0hWHW5if7FfmEtpHg/%E6%88%AA%E5%B1%8F2025-06-26%2011.16.08.png) | ![API](https://file.web.hlingsoft.com/lKilFV9MR3r6flvFCPVlcquvvHyb0fL7/%E6%88%AA%E5%B1%8F2025-07-26%2014.46.22.png) | ![Minimal](https://file.web.hlingsoft.com/Oos0WK5b76heWyUwH2zTVhOgHBB5BPYf/%E6%88%AA%E5%B1%8F2025-07-26%2014.45.27.png) |
-
----
-
-## 📱  Join our community
-
-Join our community to share ideas, get support, and collaborate with other users:
-
-
-
-<img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="微信群二维码" width="200" />
-
-
-
----
-
-
-## 📱   API Keys
-
-Need free keys for OpenAI, Claude, DeepSeek, Keling, Jimeng, Sora, Flux, Minimax, ElevenLabs, etc.?  
-Scan and add the author on WeChat:
-
-<img src="https://file.web.hlingsoft.com/6hMSdEMQ6cCDCCWmReDNcEL63gW0UAap/WechatIMG1891.jpg" alt="author" width="200" />
-
----
-
-## ⚙️ Requirements
-- **Node.js ≥ 20**
-- **npm ≥ 10**
-- **pnpm ≥ 10** (recommended)
-
-Use [Volta](https://volta.sh) to manage Node versions if needed.
----
-
-
-## ⚡ Getting Started
-
-Clone the repository and run the environment check script:
-
-```bash
-git clone https://github.com/HLingSoft/torra-community.git
-cd torra-community
-chmod +x check_and_setup.sh
-./check_and_setup.sh
-```
-
-- The script will check for and prompt installation of required dependencies (Node.js ≥20, npm >10, pnpm >10, SQLite, MongoDB, MySQL) and then start the development server.
-- Your browser will automatically open at <http://localhost:3000>
-
----
-
-Happy hacking! 🚀
-
-
-
-## 📄 License
-MIT License — please retain attribution.
-
-## 🙌 Acknowledgment
-Created and maintained by the Torra Team.
-Online demo → https://www.torra.cloud — please ⭐ Star us on GitHub!

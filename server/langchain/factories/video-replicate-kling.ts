@@ -1,7 +1,7 @@
 import type { ReplicateKlingVideoData } from '~~/types/node-data/video-replicate-kling'
 import type { BuildContext, LangFlowNode, NodeFactory, OutputPortVariable } from '~~/types/workflow'
 import Replicate from "replicate";
-import { resolveInputVariables, writeLogs, fetchToBase64, streamToBase64 } from '../utils'
+import { resolveInputVariables, writeLogs, financeConsume, financeBalance, fetchToBase64, streamToBase64 } from '../utils'
 
 
 /**
@@ -17,7 +17,7 @@ export const replicateKlingVideoFactory: NodeFactory = async (
     node: LangFlowNode,
     context: BuildContext,
 ) => {
-
+    await financeBalance(context)
     const t0 = performance.now()
     const data = node.data as ReplicateKlingVideoData
     const {
@@ -77,7 +77,11 @@ export const replicateKlingVideoFactory: NodeFactory = async (
 
         base64 = await fetchToBase64(videoUrl)
 
-
+        await financeConsume(
+            context,
+            `通过 Replicate Kling Video 生成视频。模型: ${klingModel}, 模式: ${mode}, 持续时间: ${duration}秒`,
+            mode === 'standard' ? Number((duration * 0.09).toFixed(2)) : Number((duration * 3).toFixed(2)),
+        )
 
         const elapsed = performance.now() - t0
         writeLogs(
