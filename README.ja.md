@@ -1,6 +1,7 @@
-# README.ja.md（日本語）
+ 
+# Torra Community Edition
 
-🌐 [English](./README.md) | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
+🌐 [简体中文](./README.md) | [English](./README.en.md) | [日本語](./README.ja.md)
 
 > **Nuxt 4 ベースの最新アーキテクチャによる AI エージェント／ワークフロー可視化エディタ。**
 
@@ -68,7 +69,7 @@ _今後も Langflow / Dify / Coze と同等の基本機能を維持しつつ、�
 
 ## ☁️ SaaS 版 —— Parse ベース
 
-**Torra Cloud** は **Parse Platform を基盤としたマルチテナント SaaS 版**です。チーム/企業利用に必要な運用機能を標準装備：
+**Torra Cloud** は **Parse Platform** を基盤としたマルチテナント SaaS 版です。チーム/企業利用に必要な運用機能を標準装備：
 
 - **マルチテナント**（組織・プロジェクト）とテナント分離  
 - **RBAC と SSO**（OAuth / OIDC）、API キー（BYOK 対応）  
@@ -88,13 +89,17 @@ _今後も Langflow / Dify / Coze と同等の基本機能を維持しつつ、�
 <img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="WeChat グループ QR" width="200" />
 
 ---
+ 
 
-## 🧾 追加ハイライト
+## 📄 ライセンス
 
-- 📅 **完全なランタイム**：DB・認証・実行基盤・ログ・課金・多言語 UI を **Day 1** から提供。  
-- 🖥 **充実のバックエンド**：**FeathersJS** による認証/権限、データ操作、ログ、LiveQuery、プラグイン Hooks。  
-- 🧑‍💻 **100% オープンソース**：フロント/サーバー共に **MIT** ライセンスでベンダーロックインなし。  
-- 🧩 **フルスタック TypeScript**：Nuxt 4 + FeathersJS + LangChain.js により、エンタープライズ統合が容易。  
-- 🧠 **LangChain & LangGraph サポート**：**LangChain.js** と互換、**LangGraph** を順次統合。
+MIT License — クレジットの保持をお願いします。
 
 ---
+
+## 🙌 メンテナ
+
+Torra チームにより開発・運用。  
+オンラインデモ → [https://www.torra.cloud](https://www.torra.cloud)
+
+GitHub での ⭐ 応援をお願いします！
