@@ -12,7 +12,7 @@
 - Multi-DB: SQLite / MySQL / MongoDB, hot-swap local ↔ cloud
 
 **Heads-up:** A **major release is coming in mid-October**.  
-Want early access? Try it now at **https://www.torra.cloud** or join our user group — we share iteration notes and previews there.
+Want early access? Try it now at [https://www.torra.cloud](https://www.torra.cloud) or join our user group — we share iteration notes and previews there.
 
 ---
 
@@ -46,7 +46,7 @@ Want early access? Try it now at **https://www.torra.cloud** or join our user gr
 | Prompt            | 1            | Prompt Builder                                                             |
 | Image             | 7            | GPT Image, Stable Diffusion, Flux, Runway, Seedream, Qwen, DALL·E 3        |
 | Image Recognition | 5            | OpenAI Vision, Gemini, Qwen, Doubao, Zhipu                                 |
-| Voice             | 6            | OpenAI TTS/STT, ElevenLabs, Minimax, (more engines planned)                |
+| Voice             | 6            | OpenAI TTS/STT, ElevenLabs, Minimax (more engines planned)                 |
 | Video             | 9            | Kling, Sora, Pika, Runway, Vidu, Google Veo, Dreamina, Alibaba Wan, Hailuo |
 | Data Sources      | 9+           | API Request/Tool, File(s), Directory, MongoDB, SQL, URL, Webhook           |
 | Processing        | 11+          | Msg↔Data, Filters, Combine, JSON, Structured↔Data, Save to OSS/Cloud       |
@@ -79,7 +79,15 @@ _We continuously add new modules/providers to keep parity **and** ship extras be
 - **Zero-downtime migrations** and rollbacks; blue-green releases  
 - **Observability**: traces, metrics, structured logs across workflows  
 
-Try Torra Cloud at **https://www.torra.cloud** or join our user group to receive iteration updates and previews.
+Try Torra Cloud at [https://www.torra.cloud](https://www.torra.cloud) or join our user group to receive iteration updates and previews.
+
+---
+
+## 📱  Join our community
+
+Join our community to share ideas, get support, and collaborate with other users:
+
+<img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="WeChat Group QR" width="200" />
 
 ---
 

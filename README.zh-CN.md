@@ -4,7 +4,7 @@
 
 > **基于 Nuxt 4 的现代化 AI 工作流与智能体可视化编辑器。**
 
-**Torra 社区版**是 **除了 n8n 之外的第二种选择**：参考了 **Coze** 与 **Langflow** 的产品形态，但采用 **TypeScript、Vue 3、Nuxt 4** 从前端到后端完整实现。我们提供轻量但可生产的架构：前端 VueFlow + Tailwind v4 + shadcn/ui，后端 FeathersJS，内置 LangChain.js 运行时，默认自托管，方便企业落地与扩展。
+**Torra 社区版**是 **除了 n8n 之外的第二种选择**：参考了 **Coze** 与 **Langflow** 的产品形态，但采用 **TypeScript、Vue 3、Nuxt 4** 从前到后完整实现。我们提供轻量但可生产的架构：前端 VueFlow + Tailwind v4 + shadcn/ui，后端 FeathersJS，内置 LangChain.js 运行时，默认自托管，方便企业落地与扩展。
 
 - **Nuxt 4 + Vue 3 + TypeScript** 技术栈  
 - **VueFlow** 可视化编排，**Tailwind CSS v4 + shadcn/ui** 现代 UI  
@@ -12,7 +12,7 @@
 - 多数据库：SQLite / MySQL / MongoDB，支持本地 ↔ 云端热切换
 
 **预告：**我们将于 **10 月中旬** 发布**大版本更新**。  
-想提前体验？现在就访问 **https://www.torra.cloud**，或加入我们的用户群，我们会在群内第一时间发布迭代信息与预览。
+想提前体验？现在就访问 [https://www.torra.cloud](https://www.torra.cloud)，或加入我们的用户群，我们会在群内第一时间发布迭代信息与预览。
 
 ---
 
@@ -79,7 +79,15 @@ _我们会持续补齐与 Langflow / Dify / Coze 的功能，同时提供更多�
 - **零停机迁移** 与回滚；蓝绿发布  
 - **可观测性**：工作流级 Trace、Metrics、结构化日志  
 
-欢迎在 **https://www.torra.cloud** 直接体验，或加入我们的用户群，我们会在群内发布迭代与预览信息。
+欢迎在 [https://www.torra.cloud](https://www.torra.cloud) 直接体验，或加入我们的用户群，我们会在群内发布迭代与预览信息。
+
+---
+
+## 📱  加入社区
+
+欢迎加入社区，交流想法、获取支持、与更多用户合作：
+
+<img src="https://file.web.hlingsoft.com/HK8AYmIErpERLFQTqJN3LSTe6KEt1T8H/torra.jpg" alt="微信群二维码" width="200" />
 
 ---
 
